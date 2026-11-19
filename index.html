@@ -2,141 +2,196 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TravelAI 2.0 – Hướng dẫn viên AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0b5ed7" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>TravelAI – Hướng dẫn viên AI</title>
+<link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f3f6fb; --card: #ffffff; --ink: #0f1b2d; --muted: #5d6b82; --line: #e3e8f0;
-    --brand: #0b63ce; --brand2: #13b5a6; --soft: #e8f1fd; --danger: #e5383b; --ok: #12a150;
-    --radius: 18px; --shadow: 0 6px 24px rgba(15, 27, 45, .08);
+    --bg: #f2f5fb; --card: #fff; --ink: #0f1b2d; --muted: #61708a; --line: #e4e9f2;
+    --brand: #0b5ed7; --brand2: #12b5a5; --gold: #f5b301; --soft: #e9f1fe; --danger: #e5383b; --ok: #12a150;
+    --r: 22px; --shadow: 0 8px 28px rgba(15, 27, 45, .08);
+    --safe-b: env(safe-area-inset-bottom, 0px); --safe-t: env(safe-area-inset-top, 0px);
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Be Vietnam Pro", system-ui, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.5; }
-  .app { max-width: 480px; margin: 0 auto; min-height: 100vh; padding: 16px 16px 96px; }
-  button { font: inherit; cursor: pointer; border: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--bg); }
+  body { font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif; color: var(--ink); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+  a { color: var(--brand); }
   .hidden { display: none !important; }
+  .app { max-width: 520px; margin: 0 auto; min-height: 100vh; padding: calc(var(--safe-t) + 10px) 16px calc(110px + var(--safe-b)); }
 
   /* Header */
-  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin: 0 -16px 12px; padding: calc(var(--safe-t) + 10px) 16px 10px; background: rgba(242, 245, 251, .86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .brand { display: flex; gap: 10px; align-items: center; }
-  .logo { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--brand), var(--brand2)); display: grid; place-items: center; color: #fff; font-weight: 800; }
-  .brand b { font-size: 20px; letter-spacing: .5px; }
+  .logo { width: 40px; height: 40px; border-radius: 13px; background: linear-gradient(135deg, var(--brand), var(--brand2)); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 19px; box-shadow: 0 6px 14px rgba(11, 94, 215, .3); }
+  .brand b { font-size: 19px; letter-spacing: .4px; display: block; line-height: 1.1; }
   .brand b span { color: var(--brand); }
-  .brand small { display: block; font-size: 10px; letter-spacing: 1.6px; color: var(--muted); font-weight: 600; }
-  .pill { white-space: nowrap; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 99px; background: #e6f7ee; color: var(--ok); display: flex; gap: 6px; align-items: center; }
-  .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); display: inline-block; }
-  .pill.off { background: #fdecec; color: var(--danger); } .pill.off i { background: var(--danger); }
-
-  .focus { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--soft); color: var(--brand); border-radius: 12px; padding: 9px 12px; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
-  .switch { width: 42px; height: 24px; border-radius: 99px; background: #c4cfdf; position: relative; transition: .2s; flex: none; }
-  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: .2s; }
-  .switch.on { background: var(--brand); } .switch.on::after { left: 21px; }
+  .brand small { font-size: 9px; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; }
+  .hdr-r { display: flex; gap: 8px; align-items: center; }
+  .langbtn { display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 99px; padding: 7px 11px; font-size: 13px; font-weight: 700; box-shadow: var(--shadow); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px rgba(18, 161, 80, .15); }
+  .dot.off { background: var(--danger); box-shadow: 0 0 0 4px rgba(229, 56, 59, .15); }
 
   /* Cards */
-  .card { background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); margin-bottom: 14px; }
-  .hero { background: linear-gradient(140deg, #0b63ce 0%, #0a4ea3 55%, #13b5a6 130%); color: #fff; padding: 22px 18px; }
-  .hero h1 { font-size: 24px; line-height: 1.25; margin-bottom: 6px; }
-  .hero p { opacity: .9; font-size: 14px; margin-bottom: 16px; }
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 18px; border-radius: 14px; font-weight: 700; font-size: 15px; }
-  .btn-white { background: #fff; color: var(--brand); }
-  .btn-primary { background: var(--brand); color: #fff; width: 100%; }
-  .btn-ghost { background: var(--soft); color: var(--brand); }
-  .btn:disabled { opacity: .5; cursor: default; }
-  h2 { font-size: 16px; margin-bottom: 10px; }
+  .card { background: var(--card); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); margin-bottom: 14px; }
+  h2 { font-size: 17px; margin: 18px 2px 10px; display: flex; justify-content: space-between; align-items: center; }
+  h2 button { font-size: 13px; color: var(--brand); font-weight: 600; }
   .muted { color: var(--muted); font-size: 13px; }
 
-  .status { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
-  .status div { background: var(--bg); border-radius: 12px; padding: 10px 4px; }
-  .status b { display: block; font-size: 14px; }
-  .status span { font-size: 11px; color: var(--muted); }
+  /* Hero */
+  .hero { position: relative; overflow: hidden; border-radius: 26px; padding: 22px 20px 20px; color: #fff; margin-bottom: 14px;
+    background: radial-gradient(120% 90% at 100% 0%, rgba(18, 181, 165, .9) 0%, rgba(18, 181, 165, 0) 55%), linear-gradient(150deg, #0b5ed7 0%, #0a3f94 100%);
+    box-shadow: 0 16px 34px rgba(11, 64, 148, .28); }
+  .hero::after { content: ""; position: absolute; right: -40px; bottom: -40px; width: 170px; height: 170px; border-radius: 50%; border: 26px solid rgba(255, 255, 255, .07); }
+  .hero h1 { font-size: 25px; line-height: 1.22; margin-bottom: 6px; max-width: 92%; }
+  .hero p { opacity: .9; font-size: 14px; margin-bottom: 18px; max-width: 95%; }
+  .snap { position: relative; display: flex; align-items: center; gap: 14px; background: #fff; color: var(--ink); border-radius: 20px; padding: 12px 14px; cursor: pointer; z-index: 1; }
+  .snap input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+  .snap .cam { width: 52px; height: 52px; flex: none; border-radius: 16px; display: grid; place-items: center; font-size: 26px; background: linear-gradient(135deg, var(--gold), #ff8a00); box-shadow: 0 6px 14px rgba(245, 140, 0, .35); animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.06) } }
+  .snap b { display: block; font-size: 16px; }
+  .snap span { font-size: 12px; color: var(--muted); }
 
-  .utils { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .util { background: var(--card); border-radius: 16px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); font-size: 12px; font-weight: 600; }
-  .util .ico { font-size: 26px; display: block; margin-bottom: 4px; }
-  .util.sos { color: var(--danger); }
-  .new { font-size: 9px; background: var(--brand2); color: #fff; padding: 1px 6px; border-radius: 99px; vertical-align: middle; }
+  .search { display: flex; gap: 8px; background: #fff; border-radius: 18px; padding: 6px; box-shadow: var(--shadow); }
+  .search input { flex: 1; min-width: 0; border: 0; outline: 0; font: inherit; font-size: 15px; padding: 10px 10px; background: transparent; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 16px; border-radius: 14px; font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-ghost { background: var(--soft); color: var(--brand); }
+  .btn:disabled { opacity: .55; }
 
-  /* Scan */
-  .drop { display: block; border: 2px dashed #b9c7dc; border-radius: 16px; padding: 22px 12px; text-align: center; background: #f8fbff; position: relative; overflow: hidden; }
-  .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .drop .ico { font-size: 38px; }
-  .preview { width: 100%; border-radius: 14px; display: block; max-height: 300px; object-fit: cover; }
-  .row { display: flex; gap: 8px; margin-top: 10px; }
-  .row > * { flex: 1; }
-  .seg { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; gap: 4px; margin-top: 10px; }
-  .seg button { flex: 1; padding: 8px; border-radius: 9px; background: transparent; font-size: 13px; font-weight: 600; color: var(--muted); }
-  .seg button.on { background: #fff; color: var(--brand); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
-  input[type=text] { width: 100%; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); font: inherit; font-size: 14px; margin-top: 10px; background: #fff; }
+  .pop { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pop button { display: flex; align-items: center; gap: 10px; text-align: left; background: #fff; border-radius: 16px; padding: 12px; box-shadow: var(--shadow); font-weight: 600; font-size: 13.5px; line-height: 1.3; transition: transform .15s; }
+  .pop button:active { transform: scale(.97); }
+  .pop .e { font-size: 24px; width: 38px; height: 38px; flex: none; border-radius: 12px; background: var(--soft); display: grid; place-items: center; }
 
-  .loading { display: flex; align-items: center; gap: 12px; padding: 14px; }
-  .spin { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--soft); border-top-color: var(--brand); animation: s 0.9s linear infinite; flex: none; }
-  @keyframes s { to { transform: rotate(360deg); } }
+  .recent { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+  .recent::-webkit-scrollbar { display: none; }
+  .rc { flex: none; width: 132px; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow); text-align: left; }
+  .rc .img { height: 88px; background: linear-gradient(135deg, #cfe0fb, #c9f0ea); display: grid; place-items: center; font-size: 30px; background-size: cover; background-position: center; }
+  .rc b { display: block; font-size: 13px; padding: 8px 10px 10px; line-height: 1.3; }
 
-  .result-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
-  .result-head h3 { font-size: 19px; line-height: 1.3; }
-  .badge { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 99px; background: var(--soft); color: var(--brand); white-space: nowrap; }
-  .loc { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-  .narr { font-size: 15px; white-space: pre-line; }
-  #result > p { white-space: pre-line; }
-  .player { display: flex; gap: 8px; margin: 14px 0 4px; }
-  .player .btn { flex: 1; padding: 10px; white-space: nowrap; font-size: 14px; }
-  .player .btn-primary { flex: 2; }
-  .wave { display: inline-flex; gap: 2px; align-items: end; height: 14px; }
+  /* Place view */
+  .ph { position: relative; height: 240px; margin: 0 -16px 0; overflow: hidden; background: linear-gradient(140deg, #0b5ed7, #12b5a5); background-size: cover; background-position: center; }
+  .ph .emoji { position: absolute; inset: 0; display: grid; place-items: center; font-size: 70px; opacity: .9; }
+  .ph::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,.55) 100%); }
+  .ph .backb { position: absolute; z-index: 3; top: 12px; left: 12px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.9); font-size: 20px; display: grid; place-items: center; box-shadow: var(--shadow); }
+  .ph .scanline { position: absolute; z-index: 2; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #7ff7e9, transparent); box-shadow: 0 0 18px 4px rgba(127, 247, 233, .7); animation: scan 1.6s ease-in-out infinite; }
+  .ph .corners { position: absolute; z-index: 2; inset: 26px; border-radius: 18px;
+    background: linear-gradient(#fff,#fff) top left/28px 3px, linear-gradient(#fff,#fff) top left/3px 28px, linear-gradient(#fff,#fff) top right/28px 3px, linear-gradient(#fff,#fff) top right/3px 28px,
+      linear-gradient(#fff,#fff) bottom left/28px 3px, linear-gradient(#fff,#fff) bottom left/3px 28px, linear-gradient(#fff,#fff) bottom right/28px 3px, linear-gradient(#fff,#fff) bottom right/3px 28px;
+    background-repeat: no-repeat; opacity: .9; }
+  @keyframes scan { 0% { top: 12% } 50% { top: 86% } 100% { top: 12% } }
+  .pcard { position: relative; z-index: 4; margin-top: -34px; }
+  .ptitle { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .ptitle h3 { font-size: 22px; line-height: 1.25; }
+  .badge { font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 99px; background: #e6f7ee; color: var(--ok); white-space: nowrap; margin-top: 4px; }
+  .loc { font-size: 13px; color: var(--muted); margin: 4px 0 2px; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--brand); font-weight: 600; margin-top: 8px; }
+
+  /* Player */
+  .player { display: flex; align-items: center; gap: 12px; margin: 14px 0 6px; padding: 10px; border-radius: 18px; background: linear-gradient(135deg, var(--soft), #e8f8f5); }
+  .pbtn { width: 50px; height: 50px; flex: none; border-radius: 50%; background: var(--brand); color: #fff; font-size: 20px; display: grid; place-items: center; box-shadow: 0 6px 14px rgba(11, 94, 215, .35); }
+  .pinfo { flex: 1; min-width: 0; }
+  .pinfo b { font-size: 14px; display: block; }
+  .pinfo span { font-size: 12px; color: var(--muted); }
+  .bar { height: 5px; border-radius: 9px; background: rgba(11, 94, 215, .15); margin-top: 6px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--brand), var(--brand2)); border-radius: 9px; transition: width .4s; }
+  .pstop { width: 38px; height: 38px; flex: none; border-radius: 50%; background: #fff; color: var(--brand); font-size: 14px; display: grid; place-items: center; }
+  .wave { display: inline-flex; gap: 2px; align-items: flex-end; height: 14px; }
   .wave i { width: 3px; background: currentColor; border-radius: 2px; animation: w 1s ease-in-out infinite; }
   .wave i:nth-child(2) { animation-delay: .15s } .wave i:nth-child(3) { animation-delay: .3s }
-  @keyframes w { 0%,100% { height: 4px } 50% { height: 14px } }
-  .sec { margin-top: 14px; }
-  .sec h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+  @keyframes w { 0%, 100% { height: 4px } 50% { height: 14px } }
+
+  .narr { font-size: 16px; line-height: 1.7; margin-top: 10px; }
+  .narr .s { transition: background .25s, color .25s; border-radius: 6px; padding: 1px 0; }
+  .narr .s.on { background: rgba(245, 179, 1, .25); color: #000; box-shadow: 0 0 0 3px rgba(245, 179, 1, .25); }
+  .narr.typing::after { content: "▍"; color: var(--brand); animation: blink 1s steps(2) infinite; margin-left: 2px; }
+  @keyframes blink { 50% { opacity: 0 } }
+  .skel { height: 13px; border-radius: 8px; margin: 10px 0; background: linear-gradient(90deg, #edf1f7 25%, #e1e7f0 37%, #edf1f7 63%); background-size: 400% 100%; animation: sk 1.3s ease infinite; }
+  @keyframes sk { 0% { background-position: 100% 50% } 100% { background-position: 0 50% } }
+
+  .sec { margin-top: 16px; }
+  .sec h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+  .facts { display: grid; gap: 8px; }
+  .facts div { background: var(--bg); border-radius: 12px; padding: 9px 12px; font-size: 14px; }
   .sec ul { padding-left: 18px; font-size: 14px; }
-  .sec li { margin-bottom: 3px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { background: var(--bg); border: 1px solid var(--line); border-radius: 99px; padding: 6px 11px; font-size: 13px; font-weight: 500; color: var(--ink); }
-  .disclaimer { font-size: 11px; color: var(--muted); margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+  .sec li { margin-bottom: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip { background: #fff; border: 1px solid var(--line); border-radius: 99px; padding: 7px 12px; font-size: 13px; font-weight: 600; }
+  .chip.go { color: var(--brand); border-color: #cddcf7; background: var(--soft); }
+  .disc { font-size: 11.5px; color: var(--muted); margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
 
-  .chat { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-  .msg { padding: 9px 12px; border-radius: 14px; font-size: 14px; max-width: 88%; white-space: pre-line; }
-  .msg.me { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
-  .msg.ai { align-self: flex-start; background: var(--bg); border-bottom-left-radius: 4px; }
-  .ask { display: flex; gap: 8px; margin-top: 8px; }
-  .ask input { margin-top: 0; flex: 1; min-width: 0; }
-  .ask .btn { flex: none; width: auto; padding: 0 18px; }
+  /* Chat */
+  .chat { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .msg { padding: 9px 13px; border-radius: 16px; font-size: 14.5px; max-width: 88%; white-space: pre-line; }
+  .msg.me { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 5px; }
+  .msg.ai { align-self: flex-start; background: var(--bg); border-bottom-left-radius: 5px; }
+  .askf { display: flex; gap: 8px; margin-top: 10px; }
+  .askf input { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 14px; padding: 11px 12px; font: inherit; font-size: 15px; outline: 0; }
+  .askf input:focus { border-color: var(--brand); }
 
-  .hist { display: flex; flex-direction: column; gap: 8px; }
-  .hist button { display: flex; gap: 10px; align-items: center; text-align: left; background: var(--bg); border-radius: 12px; padding: 8px; }
-  .hist > button > span { width: 48px; height: 48px; border-radius: 10px; background: #fff; display: grid; place-items: center; font-size: 22px; flex: none; }
-  .hist img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; flex: none; }
-  .hist b { font-size: 14px; display: block; }
-
-  .langs { display: grid; gap: 8px; }
-  .lang { display: flex; align-items: center; justify-content: space-between; padding: 13px 14px; border-radius: 14px; background: var(--bg); font-weight: 600; font-size: 15px; border: 2px solid transparent; text-align: left; }
-  .lang.on { border-color: var(--brand); background: var(--soft); color: var(--brand); }
+  /* History */
+  .hist { display: flex; flex-direction: column; gap: 10px; }
+  .hi { display: flex; gap: 12px; align-items: center; text-align: left; background: #fff; border-radius: 16px; padding: 10px; box-shadow: var(--shadow); }
+  .hi .img { width: 58px; height: 58px; flex: none; border-radius: 12px; background: linear-gradient(135deg, #cfe0fb, #c9f0ea); background-size: cover; background-position: center; display: grid; place-items: center; font-size: 24px; }
+  .hi b { display: block; font-size: 15px; }
 
   /* SOS */
-  .sos-big { width: 170px; height: 170px; border-radius: 50%; margin: 10px auto 16px; display: grid; place-items: center; background: radial-gradient(circle, #ff5a5f, var(--danger)); color: #fff; font-size: 36px; font-weight: 800; box-shadow: 0 0 0 14px #fde3e3, 0 0 0 28px #fff0f0; }
-  .numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
-  .numbers a { background: var(--bg); border-radius: 12px; padding: 10px 4px; color: var(--ink); text-decoration: none; }
-  .numbers b { display: block; font-size: 20px; color: var(--danger); }
-  .numbers span { font-size: 11px; color: var(--muted); }
-  .overlay { position: fixed; inset: 0; background: rgba(150, 10, 14, .94); color: #fff; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; }
-  .overlay .count { font-size: 110px; font-weight: 800; line-height: 1; margin: 14px 0; }
-  .overlay p { opacity: .9; max-width: 320px; font-size: 14px; }
-  .overlay .btn { margin-top: 22px; background: #fff; color: var(--danger); min-width: 200px; }
+  .sosv { text-align: center; padding: 22px 16px; }
+  .sosbig { width: 180px; height: 180px; border-radius: 50%; margin: 18px auto; display: grid; place-items: center; color: #fff; font-size: 40px; font-weight: 800; letter-spacing: 2px;
+    background: radial-gradient(circle at 35% 30%, #ff6b6e, var(--danger)); box-shadow: 0 0 0 14px #fde3e3, 0 0 0 28px #fff1f1, 0 16px 30px rgba(229, 56, 59, .35); animation: sp 2s ease-in-out infinite; }
+  @keyframes sp { 0%, 100% { box-shadow: 0 0 0 14px #fde3e3, 0 0 0 28px #fff1f1, 0 16px 30px rgba(229, 56, 59, .35) } 50% { box-shadow: 0 0 0 18px #fde3e3, 0 0 0 36px #fff5f5, 0 16px 30px rgba(229, 56, 59, .35) } }
+  .locbox { text-align: left; }
+  .coords { font-size: 18px; font-weight: 700; margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .callrow { display: flex; align-items: center; gap: 14px; padding: 13px 14px; border-radius: 16px; background: var(--bg); text-decoration: none; color: var(--ink); margin-bottom: 9px; }
+  .callrow .ic { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 24px; background: #fff; flex: none; }
+  .callrow b { font-size: 26px; color: var(--danger); min-width: 54px; font-variant-numeric: tabular-nums; }
+  .callrow span { font-weight: 600; flex: 1; }
+  .callrow .ph-ic { color: #fff; background: var(--ok); width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; }
 
-  .modal { position: fixed; inset: 0; background: rgba(15,27,45,.5); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
-  .sheet { background: #fff; width: 100%; max-width: 480px; border-radius: 22px 22px 0 0; padding: 22px 18px 28px; }
-  .sheet h3 { margin-bottom: 6px; }
+  /* Sheets */
+  .sheetbg { position: fixed; inset: 0; z-index: 50; background: rgba(15, 27, 45, .45); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+  .sheet { background: #fff; width: 100%; max-width: 520px; border-radius: 24px 24px 0 0; padding: 10px 18px calc(20px + var(--safe-b)); max-height: 88vh; overflow-y: auto; animation: up .25s ease-out; }
+  .sheet .grab { width: 40px; height: 5px; border-radius: 9px; background: var(--line); margin: 0 auto 12px; }
+  .sheet h3 { font-size: 19px; margin-bottom: 4px; }
+  @keyframes up { from { transform: translateY(40px); opacity: .4 } to { transform: none; opacity: 1 } }
+  @keyframes fade { from { opacity: 0 } }
+  .langs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 6px; }
+  .lang { display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 14px; background: var(--bg); font-weight: 600; border: 2px solid transparent; }
+  .lang.on { border-color: var(--brand); background: var(--soft); color: var(--brand); }
+  .setrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-top: 1px solid var(--line); }
+  .setrow b { font-size: 15px; display: block; }
+  .switch { width: 46px; height: 28px; border-radius: 99px; background: #c4cfdf; position: relative; transition: .2s; flex: none; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .switch.on { background: var(--brand); } .switch.on::after { left: 21px; }
+  .seg { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+  .seg button { flex: 1 1 45%; padding: 9px 6px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .seg button.on { background: #fff; color: var(--brand); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .sheet input[type=text] { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--line); font: inherit; margin: 12px 0 6px; }
   .sheet .btn { width: 100%; margin-top: 8px; }
 
   /* Bottom nav */
-  nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--line); display: flex; justify-content: center; z-index: 30; padding-bottom: env(safe-area-inset-bottom); }
-  nav .inner { display: flex; width: 100%; max-width: 480px; }
-  nav button { flex: 1; background: none; padding: 10px 0 12px; font-size: 11px; font-weight: 600; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  nav button .ico { font-size: 21px; }
-  nav button.on { color: var(--brand); }
-  nav button.sosn { color: var(--danger); }
-  .toast { position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 13px; z-index: 60; max-width: 90%; }
+  nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; display: flex; justify-content: center; padding-bottom: var(--safe-b);
+    background: rgba(255, 255, 255, .92); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-top: 1px solid var(--line); }
+  nav .in { display: flex; width: 100%; max-width: 520px; align-items: flex-end; }
+  nav button, nav label { flex: 1; padding: 9px 0 11px; font-size: 11px; font-weight: 600; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+  nav .ic { font-size: 21px; line-height: 1.2; }
+  nav .on { color: var(--brand); }
+  nav .sosn { color: var(--danger); }
+  nav .fab { position: relative; }
+  nav .fab .ic { width: 58px; height: 58px; border-radius: 50%; margin-top: -26px; display: grid; place-items: center; font-size: 26px; color: #fff;
+    background: linear-gradient(135deg, var(--brand), var(--brand2)); box-shadow: 0 8px 20px rgba(11, 94, 215, .4); border: 4px solid #fff; }
+  nav .fab input { position: absolute; inset: 0; opacity: 0; width: 100%; }
+  .toast { position: fixed; bottom: calc(96px + var(--safe-b)); left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 14px; font-size: 13px; z-index: 70; max-width: 90%; text-align: center; animation: fade .2s; }
+  .fadein { animation: fade .3s; }
 </style>
 </head>
 <body>
@@ -146,356 +201,497 @@
       <div class="logo">T</div>
       <div><b>TRAVEL<span>AI</span></b><small>YOUR SMART TRAVEL COMPANION</small></div>
     </div>
-    <div class="pill" id="aiPill"><i></i><span>ĐANG KẾT NỐI</span></div>
+    <div class="hdr-r">
+      <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
+    </div>
   </header>
 
-  <div class="focus">
-    <span>🎧 Chế độ tập trung khi nghe thuyết minh</span>
-    <button class="switch" id="focusSw" aria-label="Bật tắt chế độ tập trung"></button>
-  </div>
-
   <!-- HOME -->
-  <section id="v-home">
-    <div class="card hero">
-      <h1>Khám phá thế giới theo cách của bạn</h1>
-      <p>Chụp một địa điểm, AI sẽ nhận diện và thuyết minh cho bạn như một hướng dẫn viên riêng.</p>
-      <button class="btn btn-white" data-go="scan">📸 Bắt đầu Khám phá</button>
+  <section id="v-home" class="fadein">
+    <div class="hero">
+      <h1 data-i="hero_t"></h1>
+      <p data-i="hero_s"></p>
+      <label class="snap">
+        <input type="file" accept="image/*" class="fileIn" />
+        <div class="cam">📷</div>
+        <div><b data-i="scan"></b><span data-i="scan_s"></span></div>
+      </label>
     </div>
-
-    <div class="card">
-      <h2>Trạng thái thiết bị</h2>
-      <div class="status">
-        <div><b id="batt">--</b><span>Pin</span></div>
-        <div><b id="net">Online</b><span>Kết nối</span></div>
-        <div><b id="langLbl">Tiếng Việt</b><span>Ngôn ngữ</span></div>
-      </div>
+    <form class="search" id="searchForm">
+      <input type="text" id="searchIn" data-ph="search_ph" autocomplete="off" enterkeyhint="search" />
+      <button class="btn btn-primary" data-i="search"></button>
+    </form>
+    <div id="recentWrap" class="hidden">
+      <h2><span data-i="recent"></span><button data-go="hist" data-i="see_all"></button></h2>
+      <div class="recent" id="recent"></div>
     </div>
-
-    <h2 style="margin:4px 2px 10px">Tiện ích thông minh</h2>
-    <div class="utils" style="margin-bottom:14px">
-      <button class="util" data-go="scan"><span class="ico">📷</span>AI Camera Scan</button>
-      <button class="util" data-go="lang"><span class="ico">🌐</span>AI Ngôn ngữ</button>
-      <button class="util sos" data-go="sos"><span class="ico">🆘</span>SOS</button>
-    </div>
-
-    <div class="card">
-      <h2>Có gì mới trong 2.0 <span class="new">NEW</span></h2>
-      <ul class="muted" style="padding-left:18px">
-        <li>AI nhận diện địa điểm thật từ ảnh</li>
-        <li>Thuyết minh bằng giọng đọc, 5 ngôn ngữ</li>
-        <li>Hỏi thêm hướng dẫn viên AI về địa điểm</li>
-        <li>Mẹo tham quan, điểm lân cận, lịch sử khám phá</li>
-        <li>SOS kèm số khẩn cấp Việt Nam</li>
-      </ul>
-    </div>
+    <h2><span data-i="popular"></span></h2>
+    <div class="pop" id="pop"></div>
   </section>
 
-  <!-- SCAN -->
-  <section id="v-scan" class="hidden">
-    <div class="card">
-      <h2>📷 AI Camera Scan</h2>
-      <div id="pickWrap">
-        <label class="drop">
-          <input type="file" id="file" accept="image/*" capture="environment" />
-          <div class="ico">🏛️</div>
-          <b>Chụp hoặc chọn ảnh địa điểm</b>
-          <div class="muted">Chụp rõ toàn cảnh công trình để AI nhận diện tốt nhất</div>
-        </label>
+  <!-- PLACE -->
+  <section id="v-place" class="hidden">
+    <div class="ph" id="pHero">
+      <div class="emoji" id="pEmoji">🏛️</div>
+      <div class="corners hidden" id="pCorners"></div>
+      <div class="scanline hidden" id="pScan"></div>
+      <button class="backb" id="pBack" aria-label="Back">←</button>
+    </div>
+    <div class="card pcard">
+      <div class="ptitle"><h3 id="pTitle"></h3><span class="badge hidden" id="pBadge"></span></div>
+      <div class="loc" id="pLoc"></div>
+      <div class="status hidden" id="pStatus"><span class="wave"><i></i><i></i><i></i></span><span id="pStatusT"></span></div>
+      <div class="player hidden" id="player">
+        <button class="pbtn" id="pPlay">▶</button>
+        <div class="pinfo"><b id="pState"></b><span id="pVoice"></span><div class="bar"><i id="pBar"></i></div></div>
+        <button class="pstop" id="pStop" aria-label="Stop">■</button>
       </div>
-      <div id="previewWrap" class="hidden">
-        <img id="preview" class="preview" alt="Ảnh đã chọn" />
-        <input type="text" id="hint" placeholder="Gợi ý vị trí (tuỳ chọn), ví dụ: Huế, Hội An…" />
-        <div class="seg" id="lenSeg">
-          <button data-len="short">Ngắn (~30s)</button>
-          <button data-len="standard" class="on">Đầy đủ (~1,5 phút)</button>
-        </div>
-        <div class="row">
-          <button class="btn btn-ghost" id="retake">↺ Chụp lại</button>
-          <button class="btn btn-primary" id="analyze">✨ Chụp &amp; Phân tích AI</button>
-        </div>
-      </div>
+      <div class="narr" id="pNarr"></div>
+      <div id="pNF" class="hidden"></div>
+      <div id="pMore"></div>
     </div>
-
-    <div class="card">
-      <h2>🔎 Hoặc nhập tên địa điểm</h2>
-      <form class="ask" id="nameForm" style="margin-top:0">
-        <input type="text" id="nameIn" placeholder="Ví dụ: Chùa Một Cột, Phố cổ Hội An…" />
-        <button class="btn btn-primary" id="nameBtn">Tìm</button>
-      </form>
-    </div>
-
-    <div id="loading" class="card loading hidden">
-      <div class="spin"></div>
-      <div><b id="loadTitle">Đang nhận diện địa điểm…</b><div class="muted" id="loadSub">AI đang phân tích kiến trúc và chi tiết trong ảnh</div></div>
-    </div>
-
-    <div id="result" class="card hidden"></div>
-
-    <div id="askCard" class="card hidden">
-      <h2>💬 Hỏi hướng dẫn viên AI</h2>
+    <div class="card hidden" id="askCard">
+      <h2 style="margin:0 0 6px" data-i="ask_t"></h2>
       <div class="chips" id="suggest"></div>
       <div class="chat" id="chat"></div>
-      <form class="ask" id="askForm">
-        <input type="text" id="askIn" placeholder="Ví dụ: Nên đi lúc mấy giờ?" />
-        <button class="btn btn-primary" id="askBtn">Gửi</button>
+      <form class="askf" id="askForm">
+        <input type="text" id="askIn" data-ph="ask_ph" autocomplete="off" enterkeyhint="send" />
+        <button class="btn btn-primary" id="askBtn">➤</button>
       </form>
-    </div>
-
-    <div class="card" id="histCard">
-      <h2>🗺️ Đã khám phá</h2>
-      <div class="hist" id="hist"><p class="muted">Chưa có địa điểm nào. Hãy chụp địa điểm đầu tiên.</p></div>
     </div>
   </section>
 
-  <!-- LANGUAGE -->
-  <section id="v-lang" class="hidden">
-    <div class="card">
-      <h2>🌐 Ngôn ngữ thuyết minh</h2>
-      <p class="muted" style="margin-bottom:12px">AI sẽ thuyết minh và trả lời bằng ngôn ngữ bạn chọn.</p>
-      <div class="langs" id="langs"></div>
-    </div>
-    <div class="card" id="keyCard">
-      <div class="focus" style="margin:0;background:none;color:var(--ink);padding:0">
-        <div><b>🔑 API key Gemini</b><div class="muted">Cần để dùng AI trên máy này.</div></div>
-        <button class="btn btn-ghost" id="keyBtn" style="flex:none;padding:8px 14px">Nhập</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="focus" style="margin:0;background:none;color:var(--ink);padding:0">
-        <div><b>🎙️ Giọng AI tự nhiên</b><div class="muted">Dùng giọng đọc Gemini thay cho giọng của máy. Chậm hơn vài giây.</div></div>
-        <button class="switch" id="voiceSw" aria-label="Bật tắt giọng AI"></button>
-      </div>
-    </div>
+  <!-- HISTORY -->
+  <section id="v-hist" class="hidden fadein">
+    <h2 style="margin-top:4px"><span data-i="history"></span></h2>
+    <div class="hist" id="hist"></div>
   </section>
 
   <!-- SOS -->
-  <section id="v-sos" class="hidden">
-    <div class="card" style="text-align:center">
-      <h2>🆘 Hỗ trợ khẩn cấp</h2>
-      <p class="muted">Bấm nút để mô phỏng gửi tín hiệu SOS</p>
-      <button class="sos-big" id="sosBtn">SOS</button>
-      <p class="muted" style="font-size:12px">Đây là bản mô phỏng. Không có tín hiệu nào được gửi tới cơ quan cứu hộ.</p>
+  <section id="v-sos" class="hidden fadein">
+    <div class="card sosv">
+      <h2 style="justify-content:center;margin:0" data-i="sos_t"></h2>
+      <p class="muted" data-i="sos_s"></p>
+      <button class="sosbig" id="sosBig">SOS</button>
+      <p class="muted" data-i="sos_note"></p>
     </div>
-    <div class="card">
-      <h2>Số khẩn cấp tại Việt Nam</h2>
-      <div class="numbers">
-        <a href="tel:113"><b>113</b><span>Công an</span></a>
-        <a href="tel:114"><b>114</b><span>Cứu hoả</span></a>
-        <a href="tel:115"><b>115</b><span>Cấp cứu</span></a>
+    <div class="card locbox">
+      <h2 style="margin:0 0 2px" data-i="my_loc"></h2>
+      <div class="coords" id="coords"></div>
+      <div class="row">
+        <a class="btn btn-ghost hidden" id="mapLink" target="_blank" rel="noopener" data-i="open_map"></a>
+        <button class="btn btn-ghost hidden" id="copyLoc" data-i="copy_loc"></button>
       </div>
-      <p class="muted" style="margin-top:10px;font-size:12px">Nếu nút không gọi được, hãy bấm số trực tiếp trên điện thoại.</p>
+      <p class="muted" style="margin-top:8px" data-i="loc_tip"></p>
     </div>
   </section>
 </div>
 
-<nav><div class="inner">
-  <button data-go="home" class="on"><span class="ico">🏠</span>Trang chủ</button>
-  <button data-go="scan"><span class="ico">🧭</span>Khám phá</button>
-  <button data-go="lang"><span class="ico">🌐</span>Ngôn ngữ</button>
-  <button data-go="sos" class="sosn"><span class="ico">🆘</span>SOS</button>
+<nav><div class="in">
+  <button data-go="home" class="on"><span class="ic">🏠</span><span data-i="nav_home"></span></button>
+  <button data-go="hist"><span class="ic">🗺️</span><span data-i="nav_hist"></span></button>
+  <label class="fab"><input type="file" accept="image/*" class="fileIn" /><span class="ic">📷</span></label>
+  <button id="navLang"><span class="ic">🌐</span><span data-i="nav_lang"></span></button>
+  <button data-go="sos" class="sosn"><span class="ic">🆘</span><span data-i="nav_sos"></span></button>
 </div></nav>
 
-<div class="overlay hidden" id="sosOverlay">
-  <div style="font-size:15px;font-weight:700;letter-spacing:2px">ĐANG GỬI TÍN HIỆU SOS</div>
-  <div class="count" id="sosCount">5</div>
-  <p id="sosMsg">Tín hiệu mô phỏng sẽ được gửi sau khi đếm ngược kết thúc.</p>
-  <button class="btn" id="sosCancel">Huỷ</button>
-</div>
+<!-- Language & settings -->
+<div class="sheetbg hidden" id="langSheet"><div class="sheet">
+  <div class="grab"></div>
+  <h3 data-i="lang_t"></h3>
+  <p class="muted" data-i="lang_s"></p>
+  <div class="langs" id="langs"></div>
+  <div class="setrow"><div><b data-i="voice_ai"></b><span class="muted" data-i="voice_ai_s"></span></div><button class="switch" id="swVoice"></button></div>
+  <div style="padding-bottom:12px" id="voiceWrap"><b style="font-size:15px" data-i="voice_style"></b><div class="seg" id="voiceSeg"></div></div>
+  <div class="setrow" style="display:block"><b data-i="len"></b><div class="seg" id="lenSeg"><button data-len="short" data-i="len_short"></button><button data-len="standard" data-i="len_full"></button></div></div>
+  <div class="setrow"><div><b data-i="focus"></b><span class="muted" data-i="focus_s"></span></div><button class="switch" id="swFocus"></button></div>
+  <button class="btn btn-primary" id="langDone" data-i="done"></button>
+</div></div>
 
-<div class="modal hidden" id="keyModal">
-  <div class="sheet">
-    <h3>🔑 Nhập API key Gemini</h3>
-    <p class="muted">Lấy key miễn phí tại aistudio.google.com/apikey. Key chỉ lưu trên trình duyệt của máy này.</p>
-    <input type="text" id="keyIn" placeholder="AIza..." autocomplete="off" />
-    <button class="btn btn-primary" id="keySave">Lưu key</button>
-    <button class="btn btn-ghost" id="keyLater">Để sau</button>
-  </div>
-</div>
+<!-- SOS chooser -->
+<div class="sheetbg hidden" id="sosSheet"><div class="sheet">
+  <div class="grab"></div>
+  <h3 data-i="sos_choose"></h3>
+  <p class="muted" style="margin-bottom:12px" data-i="sos_note"></p>
+  <a class="callrow" href="tel:113"><div class="ic">👮</div><b>113</b><span data-i="police"></span><i class="ph-ic">📞</i></a>
+  <a class="callrow" href="tel:114"><div class="ic">🚒</div><b>114</b><span data-i="fire"></span><i class="ph-ic">📞</i></a>
+  <a class="callrow" href="tel:115"><div class="ic">🚑</div><b>115</b><span data-i="amb"></span><i class="ph-ic">📞</i></a>
+  <a class="callrow" href="tel:112"><div class="ic">🆘</div><b>112</b><span data-i="rescue"></span><i class="ph-ic">📞</i></a>
+  <button class="btn btn-ghost" id="sosCancel" data-i="cancel"></button>
+</div></div>
 
-<div class="modal hidden" id="focusModal">
-  <div class="sheet">
-    <h3>Bật chế độ tập trung?</h3>
-    <p class="muted">Khi nghe thuyết minh, bạn nên bật chế độ Không làm phiền trên điện thoại để tắt thông báo. Trang sẽ nhắc bạn mỗi lần bắt đầu nghe.</p>
-    <button class="btn btn-primary" id="fAllow">Cho phép</button>
-    <button class="btn btn-ghost" id="fLater">Để sau</button>
-  </div>
-</div>
+<!-- API key (chỉ hiện khi file chưa gắn key) -->
+<div class="sheetbg hidden" id="keySheet"><div class="sheet">
+  <div class="grab"></div>
+  <h3 data-i="key_t"></h3>
+  <p class="muted" data-i="key_s"></p>
+  <input type="text" id="keyIn" placeholder="AQ... / AIza..." autocomplete="off" />
+  <button class="btn btn-primary" id="keySave" data-i="key_save"></button>
+  <button class="btn btn-ghost" id="keyLater" data-i="key_later"></button>
+</div></div>
 
 <script>
 (() => {
-  /* TravelAI 2.0 – bản 1 file: gọi thẳng Google Gemini từ trình duyệt, không cần server */
-  // Key gắn sẵn (đã mã hoá nhẹ để không bị quét tự động trên GitHub). Để trống thì trang sẽ hỏi key.
+  "use strict";
+  /* TravelAI 3.0 – 1 file, gọi thẳng Google Gemini từ trình duyệt */
+  // Key gắn sẵn (mã hoá nhẹ). Để trống thì trang sẽ hỏi key.
   const KEY_BLOB = "QS1LVC0wdjVuV19ycFBvdmh0U1RsNkN5eGRfWUlzeXhVWklaR3dfd0VPWEw2TlI4YkEuUUE=";
   const GEMINI_KEY = (() => { try { return KEY_BLOB && !KEY_BLOB.startsWith("__") ? atob(KEY_BLOB).split("").reverse().join("") : ""; } catch { return ""; } })();
+
   const $ = (id) => document.getElementById(id);
-  const LANGS = {
-    vi: { label: "Tiếng Việt", flag: "🇻🇳", code: "vi-VN" },
-    en: { label: "English", flag: "🇬🇧", code: "en-US" },
-    ja: { label: "日本語", flag: "🇯🇵", code: "ja-JP" },
-    ko: { label: "한국어", flag: "🇰🇷", code: "ko-KR" },
-    fr: { label: "Français", flag: "🇫🇷", code: "fr-FR" },
-  };
   const store = {
     get(k, d) { try { const v = localStorage.getItem("tai_" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
     set(k, v) { try { localStorage.setItem("tai_" + k, JSON.stringify(v)); } catch {} },
   };
-
-  let lang = store.get("lang", "vi");
-  let aiVoice = store.get("aiVoice", false);
-  let focus = store.get("focus", false);
-  let len = "standard";
-  let imgBlob = null, thumb = null;
-  let current = null;
-  let chatLog = [];
-  let serverOk = false;
-
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
-  function toast(t) {
-    const e = el("div", "toast", t);
-    document.body.appendChild(e); setTimeout(() => e.remove(), 2800);
-  }
+  function toast(msg) { const e = el("div", "toast", msg); document.body.appendChild(e); setTimeout(() => e.remove(), 2800); }
 
-  /* ---------- AI: gọi thẳng Google Gemini từ trình duyệt ---------- */
-  // Mô hình được chọn tự động theo danh sách Google cho phép với key của bạn
-  let MODEL = "gemini-3.8-flash";
-  let MODEL_TTS = "";
-  let TEXT_ALTS = ["gemini-3.8-flash-lite", "gemini-3-flash", "gemini-2.5-flash-lite"];
-  let modelsReady = null;
+  const T = {
+    vi: {
+      ai_on: "AI sẵn sàng", ai_off: "Chưa có key",
+      hero_t: "Chụp một tấm, nghe cả câu chuyện",
+      hero_s: "Hướng dẫn viên AI nhận diện địa danh và thuyết minh bằng giọng đọc cho bạn.",
+      scan: "Chụp để khám phá", scan_s: "Chụp ảnh hoặc chọn từ thư viện",
+      search_ph: "Nhập tên địa điểm, ví dụ: Phố cổ Hội An", search: "Tìm",
+      popular: "Địa danh nổi bật Việt Nam", recent: "Đã khám phá gần đây", see_all: "Xem tất cả",
+      history: "Đã khám phá", hist_empty: "Chưa có địa điểm nào. Hãy chụp địa điểm đầu tiên!",
+      nav_home: "Trang chủ", nav_hist: "Lịch sử", nav_lang: "Ngôn ngữ", nav_sos: "SOS",
+      lang_t: "Ngôn ngữ & giọng đọc",
+      lang_s: "Toàn bộ ứng dụng, lời thuyết minh và hướng dẫn viên AI sẽ dùng ngôn ngữ này.",
+      voice_ai: "Giọng đọc AI tự nhiên", voice_ai_s: "Truyền cảm như hướng dẫn viên thật",
+      voice_style: "Chọn giọng", v_warm_f: "Nữ · ấm áp", v_bright_f: "Nữ · tươi vui", v_warm_m: "Nam · trầm ấm", v_lively_m: "Nam · sôi nổi",
+      len: "Độ dài thuyết minh", len_short: "Ngắn ~30 giây", len_full: "Đầy đủ ~1,5 phút",
+      focus: "Nhắc bật Không làm phiền", focus_s: "Nhắc tắt thông báo khi nghe thuyết minh", done: "Xong",
+      identifying: "Đang nhận diện…", scanning: "AI đang xem ảnh của bạn", writing: "Đang viết thuyết minh…",
+      nf_t: "Chưa nhận ra địa điểm", nf_land: "AI chưa chắc chắn. Hãy chụp rõ toàn cảnh hơn hoặc nhập tên địa điểm.",
+      nf_obj: "Ảnh này có vẻ không phải địa điểm du lịch. Hãy chụp công trình, danh lam hoặc cảnh quan.",
+      maybe: "Có thể là", match: "khớp",
+      facts: "Thông tin nhanh", tips: "Mẹo tham quan", nearby: "Gần đây · chạm để nghe",
+      live_btn: "Cập nhật giờ mở cửa, giá vé", live_load: "Đang tra Google…", live_t: "Mới nhất từ Google", live_nosearch: "Thông tin tham khảo",
+      sources: "Nguồn", disc: "Thuyết minh do AI tạo. Giờ mở cửa và giá vé có thể thay đổi.",
+      ask_t: "Hỏi hướng dẫn viên AI", ask_ph: "Hỏi bất cứ điều gì về nơi này…",
+      listen: "Nghe thuyết minh", resume: "Nghe tiếp", voice_load: "Đang chuẩn bị giọng đọc…", reading: "Đang thuyết minh", paused: "Đã tạm dừng",
+      voice_device: "Giọng của máy",
+      err_net: "Không kết nối được AI. Kiểm tra mạng rồi thử lại.",
+      err_rate: "AI miễn phí tạm hết lượt. Đợi khoảng 1 phút rồi thử lại.",
+      err_key: "API key không hợp lệ.", err_gen: "Có lỗi xảy ra, thử lại nhé.", retry: "Thử lại", back: "Quay lại",
+      sos_t: "Hỗ trợ khẩn cấp", sos_s: "Chạm nút SOS để chọn số khẩn cấp cần gọi",
+      sos_choose: "Bạn cần gọi ai?", police: "Công an", fire: "Cứu hoả", amb: "Cấp cứu", rescue: "Tìm kiếm cứu nạn",
+      sos_note: "Gọi miễn phí 24/7 trên toàn quốc.", cancel: "Huỷ",
+      my_loc: "Vị trí của bạn", loc_wait: "Đang lấy vị trí…", loc_na: "Chưa lấy được vị trí. Hãy cho phép truy cập vị trí.",
+      open_map: "Mở bản đồ", copy_loc: "Sao chép vị trí", copied: "Đã sao chép",
+      loc_tip: "Đọc toạ độ này cho tổng đài viên để được hỗ trợ nhanh hơn.",
+      dnd: "🎧 Nhớ bật Không làm phiền nhé", no_vi_voice: "Máy chưa có giọng tiếng Việt, hãy bật Giọng đọc AI.",
+      key_t: "Nhập API key Gemini", key_s: "Key chỉ lưu trên trình duyệt của máy này.", key_save: "Lưu key", key_later: "Để sau",
+      thinking: "Đang trả lời…",
+    },
+    en: {
+      ai_on: "AI ready", ai_off: "No API key",
+      hero_t: "Snap a photo, hear the whole story",
+      hero_s: "Your AI guide recognises landmarks and narrates them aloud for you.",
+      scan: "Snap to explore", scan_s: "Take a photo or pick one from your library",
+      search_ph: "Type a place, e.g. Hoi An Ancient Town", search: "Go",
+      popular: "Top places in Vietnam", recent: "Recently explored", see_all: "See all",
+      history: "Explored places", hist_empty: "Nothing yet. Snap your first place!",
+      nav_home: "Home", nav_hist: "History", nav_lang: "Language", nav_sos: "SOS",
+      lang_t: "Language & voice",
+      lang_s: "The whole app, the narration and your AI guide will use this language.",
+      voice_ai: "Natural AI voice", voice_ai_s: "Expressive, like a real tour guide",
+      voice_style: "Voice", v_warm_f: "Female · warm", v_bright_f: "Female · cheerful", v_warm_m: "Male · smooth", v_lively_m: "Male · lively",
+      len: "Narration length", len_short: "Short ~30s", len_full: "Full ~1.5 min",
+      focus: "Do Not Disturb reminder", focus_s: "Remind me to silence notifications while listening", done: "Done",
+      identifying: "Identifying…", scanning: "AI is looking at your photo", writing: "Writing the narration…",
+      nf_t: "Couldn't recognise this place", nf_land: "The AI isn't sure. Try a clearer, wider shot or type the place name.",
+      nf_obj: "This doesn't look like a tourist place. Try a building, landmark or landscape.",
+      maybe: "Could it be", match: "match",
+      facts: "Quick facts", tips: "Visitor tips", nearby: "Nearby · tap to listen",
+      live_btn: "Get latest opening hours & tickets", live_load: "Searching Google…", live_t: "Latest from Google", live_nosearch: "For reference",
+      sources: "Sources", disc: "Narration generated by AI. Opening hours and prices may change.",
+      ask_t: "Ask your AI guide", ask_ph: "Ask anything about this place…",
+      listen: "Listen", resume: "Resume", voice_load: "Preparing the voice…", reading: "Narrating", paused: "Paused",
+      voice_device: "Device voice",
+      err_net: "Can't reach the AI. Check your connection and try again.",
+      err_rate: "The free AI quota is used up for now. Wait about a minute and try again.",
+      err_key: "Invalid API key.", err_gen: "Something went wrong, please try again.", retry: "Try again", back: "Back",
+      sos_t: "Emergency help", sos_s: "Tap SOS to choose which emergency number to call",
+      sos_choose: "Who do you need to call?", police: "Police", fire: "Fire", amb: "Ambulance", rescue: "Search & rescue",
+      sos_note: "Free to call 24/7 anywhere in Vietnam.", cancel: "Cancel",
+      my_loc: "Your location", loc_wait: "Getting your location…", loc_na: "Location unavailable. Please allow location access.",
+      open_map: "Open map", copy_loc: "Copy location", copied: "Copied",
+      loc_tip: "Read these coordinates to the operator for faster help.",
+      dnd: "🎧 Turn on Do Not Disturb", no_vi_voice: "No voice for this language on your device. Turn on the AI voice.",
+      key_t: "Enter your Gemini API key", key_s: "The key is stored only in this browser.", key_save: "Save key", key_later: "Later",
+      thinking: "Answering…",
+    },
+    ja: {
+      ai_on: "AI準備完了", ai_off: "APIキー未設定",
+      hero_t: "1枚撮れば、物語が聞こえる",
+      hero_s: "AIガイドが名所を認識し、音声で解説します。",
+      scan: "撮影して探索", scan_s: "写真を撮るか、ライブラリから選択",
+      search_ph: "場所を入力（例：ホイアン旧市街）", search: "検索",
+      popular: "ベトナムの人気スポット", recent: "最近見た場所", see_all: "すべて表示",
+      history: "訪れた場所", hist_empty: "まだありません。最初の場所を撮影しましょう！",
+      nav_home: "ホーム", nav_hist: "履歴", nav_lang: "言語", nav_sos: "SOS",
+      lang_t: "言語と音声",
+      lang_s: "アプリ全体、解説、AIガイドがこの言語になります。",
+      voice_ai: "自然なAI音声", voice_ai_s: "本物のガイドのような表現力",
+      voice_style: "声の種類", v_warm_f: "女性・あたたかい", v_bright_f: "女性・明るい", v_warm_m: "男性・落ち着いた", v_lively_m: "男性・元気",
+      len: "解説の長さ", len_short: "短め 約30秒", len_full: "詳しく 約1分半",
+      focus: "おやすみモードの通知", focus_s: "解説中は通知をオフにするよう知らせます", done: "完了",
+      identifying: "認識中…", scanning: "AIが写真を確認しています", writing: "解説を作成中…",
+      nf_t: "場所を認識できませんでした", nf_land: "AIが確信できません。もっと全体が写るように撮るか、名前を入力してください。",
+      nf_obj: "観光地ではないようです。建物や名所、景色を撮影してください。",
+      maybe: "もしかして", match: "一致",
+      facts: "基本情報", tips: "観光のヒント", nearby: "周辺・タップで解説",
+      live_btn: "最新の営業時間・料金を確認", live_load: "Googleで検索中…", live_t: "Googleの最新情報", live_nosearch: "参考情報",
+      sources: "出典", disc: "解説はAIが作成。営業時間や料金は変更される場合があります。",
+      ask_t: "AIガイドに質問", ask_ph: "この場所について何でも聞いてください…",
+      listen: "解説を聞く", resume: "続きを聞く", voice_load: "音声を準備中…", reading: "解説中", paused: "一時停止中",
+      voice_device: "端末の音声",
+      err_net: "AIに接続できません。通信環境を確認してください。",
+      err_rate: "無料枠の上限に達しました。1分ほど待ってから再試行してください。",
+      err_key: "APIキーが無効です。", err_gen: "エラーが発生しました。もう一度お試しください。", retry: "再試行", back: "戻る",
+      sos_t: "緊急サポート", sos_s: "SOSをタップして電話する番号を選択",
+      sos_choose: "どこに電話しますか？", police: "警察", fire: "消防", amb: "救急", rescue: "捜索救助",
+      sos_note: "ベトナム全国で24時間無料。", cancel: "キャンセル",
+      my_loc: "現在地", loc_wait: "位置情報を取得中…", loc_na: "位置情報を取得できません。アクセスを許可してください。",
+      open_map: "地図を開く", copy_loc: "位置をコピー", copied: "コピーしました",
+      loc_tip: "この座標をオペレーターに伝えると早く対応してもらえます。",
+      dnd: "🎧 おやすみモードをオンにしましょう", no_vi_voice: "この言語の音声が端末にありません。AI音声をオンにしてください。",
+      key_t: "Gemini APIキーを入力", key_s: "キーはこのブラウザにのみ保存されます。", key_save: "保存", key_later: "後で",
+      thinking: "回答中…",
+    },
+    ko: {
+      ai_on: "AI 준비됨", ai_off: "API 키 없음",
+      hero_t: "사진 한 장으로 이야기를 듣다",
+      hero_s: "AI 가이드가 명소를 인식하고 음성으로 해설해 드립니다.",
+      scan: "찍어서 탐험하기", scan_s: "사진을 찍거나 앨범에서 선택",
+      search_ph: "장소 입력 (예: 호이안 구시가지)", search: "검색",
+      popular: "베트남 인기 명소", recent: "최근 둘러본 곳", see_all: "전체 보기",
+      history: "둘러본 곳", hist_empty: "아직 없습니다. 첫 장소를 찍어 보세요!",
+      nav_home: "홈", nav_hist: "기록", nav_lang: "언어", nav_sos: "SOS",
+      lang_t: "언어 및 음성",
+      lang_s: "앱 전체, 해설, AI 가이드가 이 언어를 사용합니다.",
+      voice_ai: "자연스러운 AI 음성", voice_ai_s: "실제 가이드처럼 생생하게",
+      voice_style: "목소리", v_warm_f: "여성 · 따뜻한", v_bright_f: "여성 · 밝은", v_warm_m: "남성 · 차분한", v_lively_m: "남성 · 활기찬",
+      len: "해설 길이", len_short: "짧게 약 30초", len_full: "자세히 약 1분 30초",
+      focus: "방해 금지 알림", focus_s: "해설을 들을 때 알림을 끄도록 알려 드립니다", done: "완료",
+      identifying: "인식 중…", scanning: "AI가 사진을 보고 있습니다", writing: "해설 작성 중…",
+      nf_t: "장소를 인식하지 못했습니다", nf_land: "AI가 확신하지 못합니다. 더 넓고 선명하게 찍거나 장소 이름을 입력하세요.",
+      nf_obj: "관광지가 아닌 것 같습니다. 건물, 명소 또는 풍경을 찍어 주세요.",
+      maybe: "혹시 이곳인가요", match: "일치",
+      facts: "핵심 정보", tips: "관광 팁", nearby: "주변 · 탭하여 듣기",
+      live_btn: "최신 운영 시간·입장료 확인", live_load: "Google 검색 중…", live_t: "Google 최신 정보", live_nosearch: "참고 정보",
+      sources: "출처", disc: "해설은 AI가 생성했습니다. 운영 시간과 요금은 변경될 수 있습니다.",
+      ask_t: "AI 가이드에게 질문", ask_ph: "이곳에 대해 무엇이든 물어보세요…",
+      listen: "해설 듣기", resume: "이어 듣기", voice_load: "음성 준비 중…", reading: "해설 중", paused: "일시 정지됨",
+      voice_device: "기기 음성",
+      err_net: "AI에 연결할 수 없습니다. 네트워크를 확인하세요.",
+      err_rate: "무료 사용량을 잠시 초과했습니다. 1분 후 다시 시도하세요.",
+      err_key: "API 키가 올바르지 않습니다.", err_gen: "오류가 발생했습니다. 다시 시도해 주세요.", retry: "다시 시도", back: "뒤로",
+      sos_t: "긴급 지원", sos_s: "SOS를 눌러 전화할 번호를 선택하세요",
+      sos_choose: "어디에 전화하시겠어요?", police: "경찰", fire: "소방", amb: "구급", rescue: "수색 구조",
+      sos_note: "베트남 전역 24시간 무료.", cancel: "취소",
+      my_loc: "내 위치", loc_wait: "위치 확인 중…", loc_na: "위치를 가져올 수 없습니다. 위치 접근을 허용해 주세요.",
+      open_map: "지도 열기", copy_loc: "위치 복사", copied: "복사됨",
+      loc_tip: "상담원에게 이 좌표를 알려 주면 더 빨리 도움을 받을 수 있습니다.",
+      dnd: "🎧 방해 금지 모드를 켜 주세요", no_vi_voice: "기기에 이 언어 음성이 없습니다. AI 음성을 켜 주세요.",
+      key_t: "Gemini API 키 입력", key_s: "키는 이 브라우저에만 저장됩니다.", key_save: "저장", key_later: "나중에",
+      thinking: "답변 중…",
+    },
+    fr: {
+      ai_on: "IA prête", ai_off: "Pas de clé API",
+      hero_t: "Une photo, toute une histoire",
+      hero_s: "Votre guide IA reconnaît les lieux et vous les raconte à voix haute.",
+      scan: "Photographier pour explorer", scan_s: "Prenez une photo ou choisissez-en une",
+      search_ph: "Saisissez un lieu, ex. vieille ville de Hoi An", search: "OK",
+      popular: "Incontournables du Vietnam", recent: "Explorés récemment", see_all: "Tout voir",
+      history: "Lieux explorés", hist_empty: "Rien pour l'instant. Photographiez votre premier lieu !",
+      nav_home: "Accueil", nav_hist: "Historique", nav_lang: "Langue", nav_sos: "SOS",
+      lang_t: "Langue et voix",
+      lang_s: "Toute l'application, la narration et le guide IA utiliseront cette langue.",
+      voice_ai: "Voix IA naturelle", voice_ai_s: "Expressive, comme un vrai guide",
+      voice_style: "Voix", v_warm_f: "Femme · chaleureuse", v_bright_f: "Femme · enjouée", v_warm_m: "Homme · posé", v_lively_m: "Homme · dynamique",
+      len: "Durée de la narration", len_short: "Courte ~30 s", len_full: "Complète ~1 min 30",
+      focus: "Rappel Ne pas déranger", focus_s: "Me rappeler de couper les notifications pendant l'écoute", done: "OK",
+      identifying: "Identification…", scanning: "L'IA analyse votre photo", writing: "Rédaction de la narration…",
+      nf_t: "Lieu non reconnu", nf_land: "L'IA n'est pas sûre. Prenez une photo plus large et nette ou saisissez le nom du lieu.",
+      nf_obj: "Cela ne ressemble pas à un lieu touristique. Photographiez un monument, un site ou un paysage.",
+      maybe: "Serait-ce", match: "de correspondance",
+      facts: "En bref", tips: "Conseils de visite", nearby: "À proximité · touchez pour écouter",
+      live_btn: "Horaires et tarifs à jour", live_load: "Recherche Google…", live_t: "Dernières infos Google", live_nosearch: "À titre indicatif",
+      sources: "Sources", disc: "Narration générée par l'IA. Horaires et tarifs susceptibles de changer.",
+      ask_t: "Demandez à votre guide IA", ask_ph: "Posez une question sur ce lieu…",
+      listen: "Écouter", resume: "Reprendre", voice_load: "Préparation de la voix…", reading: "Narration en cours", paused: "En pause",
+      voice_device: "Voix de l'appareil",
+      err_net: "Impossible de joindre l'IA. Vérifiez votre connexion.",
+      err_rate: "Quota gratuit atteint pour le moment. Réessayez dans une minute.",
+      err_key: "Clé API invalide.", err_gen: "Une erreur est survenue, réessayez.", retry: "Réessayer", back: "Retour",
+      sos_t: "Aide d'urgence", sos_s: "Touchez SOS pour choisir le numéro d'urgence",
+      sos_choose: "Qui devez-vous appeler ?", police: "Police", fire: "Pompiers", amb: "Ambulance", rescue: "Recherche et sauvetage",
+      sos_note: "Appel gratuit 24h/24 dans tout le Vietnam.", cancel: "Annuler",
+      my_loc: "Votre position", loc_wait: "Localisation…", loc_na: "Position indisponible. Autorisez l'accès à la localisation.",
+      open_map: "Ouvrir la carte", copy_loc: "Copier la position", copied: "Copié",
+      loc_tip: "Lisez ces coordonnées à l'opérateur pour une aide plus rapide.",
+      dnd: "🎧 Activez Ne pas déranger", no_vi_voice: "Pas de voix pour cette langue sur l'appareil. Activez la voix IA.",
+      key_t: "Saisissez votre clé API Gemini", key_s: "La clé est enregistrée uniquement dans ce navigateur.", key_save: "Enregistrer", key_later: "Plus tard",
+      thinking: "Réponse en cours…",
+    },
+  };
+
+
+  const LANGS = {
+    vi: { label: "Tiếng Việt", flag: "🇻🇳", code: "vi-VN", name: "Vietnamese (Tiếng Việt)" },
+    en: { label: "English", flag: "🇬🇧", code: "en-US", name: "English" },
+    ja: { label: "日本語", flag: "🇯🇵", code: "ja-JP", name: "Japanese (日本語)" },
+    ko: { label: "한국어", flag: "🇰🇷", code: "ko-KR", name: "Korean (한국어)" },
+    fr: { label: "Français", flag: "🇫🇷", code: "fr-FR", name: "French (Français)" },
+  };
+  const VOICES = { warm_f: "Sulafat", bright_f: "Laomedeia", warm_m: "Algieba", lively_m: "Sadachbia" };
+  const POPULAR = [
+    ["⛰️", "Vịnh Hạ Long", "Ha Long Bay"], ["🏮", "Phố cổ Hội An", "Hoi An Ancient Town"],
+    ["🛕", "Chùa Một Cột", "One Pillar Pagoda"], ["🏯", "Đại Nội Huế", "Hue Imperial City"],
+    ["⛪", "Nhà thờ Đức Bà Sài Gòn", "Saigon Notre-Dame Cathedral"], ["🐉", "Cầu Rồng Đà Nẵng", "Dragon Bridge, Da Nang"],
+    ["🏞️", "Tràng An, Ninh Bình", "Trang An, Ninh Binh"], ["🗻", "Đỉnh Fansipan", "Fansipan Peak"],
+  ];
+
+  let lang = store.get("lang", "vi"); if (!LANGS[lang]) lang = "vi";
+  let aiVoice = store.get("aiVoice", true);
+  let voiceStyle = store.get("voice", "warm_f"); if (!VOICES[voiceStyle]) voiceStyle = "warm_f";
+  let len = store.get("len", "standard");
+  let focus = store.get("focus", false);
+  const t = (k) => (T[lang] && T[lang][k]) || T.en[k] || T.vi[k] || k;
+
+  /* ================= AI: Google Gemini ================= */
+  const API = "https://generativelanguage.googleapis.com/v1beta/models";
+  const getKey = () => GEMINI_KEY || store.get("key", "");
   const verNum = (n) => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
+  // Mô hình: MODEL cho nhận diện ảnh (chính xác), FAST cho chữ & hỏi đáp (nhanh nhất), có cache 24 giờ
+  let M = Object.assign({ MODEL: "gemini-3.8-flash", FAST: "gemini-3.8-flash-lite", TTS: "", ALTS: ["gemini-3.8-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash-lite"] }, (store.get("models", {}).d) || {});
+  let modelsReady = null;
   function resolveModels() {
+    const c = store.get("models", null);
+    if (c && Date.now() - c.t < 864e5) return Promise.resolve();
     if (modelsReady) return modelsReady;
     modelsReady = (async () => {
       try {
-        const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", { headers: { "x-goog-api-key": getKey() } });
+        const r = await fetch(API + "?pageSize=1000", { headers: { "x-goog-api-key": getKey() } });
         if (!r.ok) return;
         const j = await r.json();
-        const ms = (j.models || [])
-          .filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
-          .map((m) => m.name.replace("models/", ""));
-        const flash = ms.filter((n) => /^gemini-[\d.]+-flash$/.test(n)).sort((a, b) => verNum(b) - verNum(a));
-        if (flash.length) MODEL = flash[0];
-        // Mô hình dự phòng khi hết lượt: các bản flash / flash-lite khác
-        const alts = ms.filter((n) => /^gemini-[\d.]+-flash(-lite)?$/.test(n) && n !== MODEL).sort((a, b) => verNum(b) - verNum(a));
-        if (alts.length) TEXT_ALTS = alts;
-        const tts = ms.filter((n) => /tts/.test(n) && /flash/.test(n)).sort((a, b) => verNum(b) - verNum(a));
-        if (tts.length) MODEL_TTS = tts[0];
+        const ms = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent")).map((m) => m.name.replace("models/", ""));
+        const by = (re) => ms.filter((n) => re.test(n)).sort((a, b) => verNum(b) - verNum(a));
+        const flash = by(/^gemini-[\d.]+-flash$/), lite = by(/^gemini-[\d.]+-flash-lite$/), tts = by(/tts/);
+        if (flash.length) M.MODEL = flash[0];
+        M.FAST = lite.length && verNum(lite[0]) >= verNum(M.MODEL) - 0.5 ? lite[0] : M.MODEL;
+        if (tts.length) M.TTS = tts.find((n) => /flash/.test(n)) || tts[0];
+        M.ALTS = [...lite, ...flash].filter((x, i, a) => a.indexOf(x) === i);
+        store.set("models", { t: Date.now(), d: M });
       } catch {}
     })();
     return modelsReady;
   }
-  const LNAME = { vi: "Tiếng Việt", en: "English", ja: "日本語 (Japanese)", ko: "한국어 (Korean)", fr: "Français (French)" };
-  const VOICE = { vi: "Kore", en: "Puck", ja: "Kore", ko: "Kore", fr: "Puck" };
-  const getKey = () => GEMINI_KEY || store.get("key", "");
-  const cache = new Map();
-
-  async function rawCall(model, body, key) {
-    let r;
-    try {
-      r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-        body: JSON.stringify(body),
-      });
-    } catch { throw { code: "network", message: "Không kết nối được AI" }; }
-    const j = await r.json().catch(() => ({}));
-    return { ok: r.ok, status: r.status, j, m: (j.error && j.error.message) || "Lỗi AI " + r.status };
-  }
-
-  const textOf = (r) => ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).map((p) => p.text || "").join("").trim();
-  function parseJSON(t) {
-    const x = String(t).replace(/```(?:json)?/gi, "");
-    return JSON.parse(x.slice(x.indexOf("{"), x.lastIndexOf("}") + 1));
-  }
-  const sourcesOf = (r) => ((r.candidates && r.candidates[0] && r.candidates[0].groundingMetadata && r.candidates[0].groundingMetadata.groundingChunks) || [])
-    .map((c) => c.web && { title: c.web.title, url: c.web.uri }).filter(Boolean).slice(0, 6);
-
-  /* ---------- Tăng tốc: tắt "suy nghĩ", stream chữ, 1 lần gọi, cache ---------- */
+  // Tắt chế độ "suy nghĩ" để trả lời ngay; tự lùi nếu mô hình không hỗ trợ
   const THINK = [{ thinkingLevel: "minimal" }, { thinkingBudget: 0 }, null];
   let thinkIdx = store.get("thinkIdx", 0);
-  const withThink = (b) => {
-    const t = THINK[thinkIdx]; if (!t) return b;
-    return { ...b, generationConfig: { ...(b.generationConfig || {}), thinkingConfig: t } };
-  };
-  // Quyết định thử lại: mô hình bị ngừng / không hỗ trợ tắt suy nghĩ / hết lượt
+  const withThink = (b) => { const x = THINK[thinkIdx]; return x ? { ...b, generationConfig: { ...(b.generationConfig || {}), thinkingConfig: x } } : b; };
+
   function decideRetry(res, st) {
     const sug = res.m.match(/use (?:models\/)?(gemini-[\w.-]+)/i);
     if (sug && /no longer|deprecated|not available/i.test(res.m)) {
       const next = sug[1].replace(/[.-]+$/, "");
-      if (!st.tried.has(next)) { if (st.kind === "tts") MODEL_TTS = next; else MODEL = next; st.model = next; return true; }
+      if (!st.tried.has(next)) { st.model = next; if (st.kind === "tts") M.TTS = next; return true; }
     }
-    if (st.kind !== "tts" && res.status === 400 && /think/i.test(res.m) && thinkIdx < THINK.length - 1) {
-      thinkIdx++; store.set("thinkIdx", thinkIdx); return true;
-    }
-    if (st.kind === "text" && [429, 503, 404].includes(res.status)) {
+    if (st.kind !== "tts" && res.status === 400 && /think/i.test(res.m) && thinkIdx < THINK.length - 1) { thinkIdx++; store.set("thinkIdx", thinkIdx); return true; }
+    if (st.kind === "text" && [429, 500, 503, 404].includes(res.status)) {
       if (st.b.tools && res.status !== 404) { st.b = { ...st.b }; delete st.b.tools; return true; }
-      const alt = TEXT_ALTS.find((x) => !st.tried.has(x));
+      const alt = M.ALTS.find((x) => !st.tried.has(x));
       if (alt) { st.model = alt; return true; }
     }
     return false;
   }
-  const failErr = (res) => ({ code: res.status === 429 ? "rate_limited" : (res.status === 400 || res.status === 403) && /key/i.test(res.m) ? "badkey" : "server", message: res.m });
+  const failErr = (r) => ({ code: !r ? "server" : r.status === 429 ? "rate_limited" : (r.status === 400 || r.status === 403) && /key/i.test(r.m) ? "badkey" : "server", message: r ? r.m : "" });
 
-  async function callGemini(kind, body) {
+  async function gem(kind, model, body, onText) {
     const key = getKey();
-    if (!key) throw { code: "nokey", message: "Chưa có API key" };
+    if (!key) { openKey(); throw { code: "nokey" }; }
     await resolveModels();
-    const st = { kind, b: body, tried: new Set(), model: kind === "tts" ? (MODEL_TTS || "gemini-2.5-flash-preview-tts") : MODEL };
+    const st = { kind, b: body, model: model || M.MODEL, tried: new Set() };
     let last = null;
     for (let i = 0; i < 8; i++) {
       st.tried.add(st.model);
-      const res = await rawCall(st.model, kind === "tts" ? st.b : withThink(st.b), key);
-      if (res.ok) { res.j._searched = !!st.b.tools; return res.j; }
-      last = res;
-      if (!decideRetry(res, st)) break;
-    }
-    throw failErr(last);
-  }
-
-  // Stream: chữ hiện dần ngay khi AI đang viết
-  async function streamGemini(body, onText) {
-    const key = getKey();
-    if (!key) throw { code: "nokey", message: "Chưa có API key" };
-    await resolveModels();
-    const st = { kind: "text", b: body, tried: new Set(), model: MODEL };
-    let last = null;
-    for (let i = 0; i < 8; i++) {
-      st.tried.add(st.model);
+      const stream = !!onText;
       let r;
       try {
-        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${st.model}:streamGenerateContent?alt=sse`, {
+        r = await fetch(`${API}/${st.model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`, {
           method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-          body: JSON.stringify(withThink(st.b)),
+          body: JSON.stringify(kind === "tts" ? st.b : withThink(st.b)),
         });
-      } catch { throw { code: "network", message: "Không kết nối được AI" }; }
-      if (r.ok && r.body) {
-        const reader = r.body.getReader(); const dec = new TextDecoder();
-        let buf = "", text = "";
+      } catch { throw { code: "network" }; }
+      if (r.ok) {
+        if (!stream) { const j = await r.json(); j._searched = !!st.b.tools; return j; }
+        const reader = r.body.getReader(), dec = new TextDecoder();
+        let buf = "", text = "", meta = null;
         for (;;) {
           const { value, done } = await reader.read();
           if (done) break;
           buf += dec.decode(value, { stream: true });
-          let idx;
-          while ((idx = buf.indexOf("\n")) >= 0) {
-            const line = buf.slice(0, idx).trim(); buf = buf.slice(idx + 1);
+          let i2;
+          while ((i2 = buf.indexOf("\n")) >= 0) {
+            const line = buf.slice(0, i2).trim(); buf = buf.slice(i2 + 1);
             if (!line.startsWith("data:")) continue;
             try {
-              const j = JSON.parse(line.slice(5));
-              const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-              const add = parts.filter((p) => !p.thought).map((p) => p.text || "").join("");
+              const j = JSON.parse(line.slice(5)); const c = j.candidates && j.candidates[0];
+              if (c && c.groundingMetadata) meta = c.groundingMetadata;
+              const add = ((c && c.content && c.content.parts) || []).filter((p) => !p.thought).map((p) => p.text || "").join("");
               if (add) { text += add; onText(text); }
             } catch {}
           }
         }
-        return text;
+        return { text, meta, searched: !!st.b.tools };
       }
       const j = await r.json().catch(() => ({}));
-      last = { status: r.status, m: (j.error && j.error.message) || "Lỗi AI " + r.status };
+      last = { status: r.status, m: (j.error && j.error.message) || "HTTP " + r.status };
       if (!decideRetry(last, st)) break;
     }
     throw failErr(last);
   }
+  const textOf = (r) => ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).filter((p) => !p.thought).map((p) => p.text || "").join("").trim();
+  const srcOf = (meta) => ((meta && meta.groundingChunks) || []).map((c) => c.web && { title: c.web.title, url: c.web.uri }).filter(Boolean).slice(0, 5);
+  function parseJSON(s) { const x = String(s).replace(/```(?:json)?/gi, ""); return JSON.parse(x.slice(x.indexOf("{"), x.lastIndexOf("}") + 1)); }
+  function errText(e) {
+    if (e && e.code === "rate_limited") return t("err_rate");
+    if (e && e.code === "network") return t("err_net");
+    if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "");
+  }
 
-  // Cache lâu dài trên máy (7 ngày, tối đa 40 địa điểm) -> mở lại là hiện ngay
+  /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
+  function guidePrompt({ name, hasImage, ctx, lg, style }) {
+    const L = LANGS[lg].name;
+    const words = style === "short" ? "70-90 words" : "160-190 words";
+    return `You are a charismatic, highly knowledgeable Vietnamese tour guide. This app is used by tourists in VIETNAM, so strongly prefer Vietnamese landmarks.
+${hasImage ? `Identify the tourist place in the photo. ${ctx}` : `The tourist wants to hear about: "${name}".`}
+Reply IMMEDIATELY in exactly this format, no preamble, no markdown:
+@@NAME: <official name of the place, in its original language>
+@@PLACE: <city/province>, <country>
+@@CONF: <recognition confidence 0-1>
+@@TITLE: <place name written in ${L}>
+@@NARRATION
+<narration in ${L}, ${words}, written to be spoken aloud by a lively guide: a captivating hook, history, cultural meaning, one surprising detail, a warm closing line. Short sentences. No lists.>
+@@EXTRA
+{"category":"","facts":["3-4 short facts"],"tips":["3 short visitor tips; say ticket prices/hours may change"],"nearby":["2-3 nearby attraction names"],"questions":["3 short questions a tourist would ask"]}
+${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, reply only:
+@@NONE
+{"is_landmark":false,"alternatives":["possible places, if any"]}
+` : ""}Everything except @@NAME must be in ${L}. State only facts you are sure of; never invent numbers.`;
+  }
+  function parseStream(s) {
+    const g = (k) => { const m = s.match(new RegExp("@@" + k + ":[ \\t]*(.*)")); return m ? m[1].trim() : ""; };
+    const ni = s.indexOf("@@NARRATION"), ei = s.indexOf("@@EXTRA");
+    let narration = ni >= 0 ? s.slice(ni + 11, ei >= 0 ? ei : undefined) : "";
+    narration = narration.replace(/@+[A-Z]*\s*$/, "").trim();
+    return { none: s.includes("@@NONE"), name: g("NAME"), place: g("PLACE"), conf: parseFloat(g("CONF")), title: g("TITLE"), narration, extra: ei >= 0 ? s.slice(ei + 7) : "" };
+  }
   function pcGet(k) { const c = store.get("gc", {}); const v = c[k]; return v && Date.now() - v.t < 7 * 864e5 ? v.d : null; }
   function pcSet(k, d) {
     const c = store.get("gc", {}); c[k] = { t: Date.now(), d };
@@ -503,573 +699,492 @@
     if (ks.length > 40) ks.sort((a, b) => c[a].t - c[b].t).slice(0, ks.length - 40).forEach((x) => delete c[x]);
     store.set("gc", c);
   }
-  const gKey = (name, lg, style) => ["g", String(name).toLowerCase().trim(), lg, style].join("|");
-
-  const VN_HINT = "Ứng dụng dành cho du khách tại Việt Nam: ưu tiên nhận diện các địa danh ở Việt Nam (đền, chùa, phố cổ, cầu, nhà thờ, lăng, bảo tàng, cảnh quan thiên nhiên).";
-  function guidePrompt({ name, hasImage, ctx, lg, style }) {
-    const L = LNAME[lg] || LNAME.vi;
-    const words = style === "short" ? "70-90 từ" : "170-200 từ";
-    return `Bạn là hướng dẫn viên du lịch Việt Nam giàu kinh nghiệm.
-${hasImage ? `Xác định địa điểm du lịch trong ảnh. ${VN_HINT} ${ctx}` : `Địa điểm du khách muốn nghe thuyết minh: "${name}". ${VN_HINT}`}
-Trả lời NGAY theo đúng định dạng sau, không lời dẫn, không markdown:
-@@NAME: <tên chính thức của địa điểm>
-@@PLACE: <tỉnh/thành phố>, <quốc gia>
-@@CONF: <độ chắc chắn nhận diện, số từ 0 đến 1>
-@@TITLE: <tên địa điểm viết bằng ${L}>
-@@NARRATION
-<lời thuyết minh bằng ${L}, ${words}, văn nói tự nhiên để đọc to: mở đầu hấp dẫn, lịch sử, ý nghĩa văn hoá, 1 chi tiết thú vị. Không gạch đầu dòng.>
-@@EXTRA
-{"summary":"1 câu","category":"loại địa điểm","facts":["3-4 ý ngắn"],"visitor_tips":["3 mẹo ngắn; giá vé, giờ mở cửa ghi 'có thể thay đổi'"],"nearby":["2-3 tên điểm gần"],"questions":["3 câu hỏi ngắn du khách hay hỏi"]}
-${hasImage ? `Nếu ảnh KHÔNG phải địa điểm du lịch hoặc không nhận ra, chỉ trả về:
-@@NONE
-{"is_landmark":false,"alternatives":["các địa điểm có thể là, nếu có"]}
-` : ""}Mọi nội dung (trừ @@NAME) viết bằng ${L}. Chỉ nêu điều chắc chắn, không bịa số liệu.`;
-  }
-  function parseStream(t) {
-    const g = (k) => { const m = t.match(new RegExp("@@" + k + ":[ \\t]*(.*)")); return m ? m[1].trim() : ""; };
-    const ni = t.indexOf("@@NARRATION"), ei = t.indexOf("@@EXTRA");
-    let narration = ni >= 0 ? t.slice(ni + 11, ei >= 0 ? ei : undefined) : "";
-    narration = narration.replace(/@+[A-Z]*\s*$/, "").trim();
-    return { none: t.includes("@@NONE"), name: g("NAME"), place: g("PLACE"), conf: parseFloat(g("CONF")), title: g("TITLE"), narration, extra: ei >= 0 ? t.slice(ei + 7) : "" };
-  }
+  const gKey = (n, lg, st) => ["g", String(n).toLowerCase().trim(), lg, st].join("|");
 
   async function fastGuide(o, onUpdate) {
     const hasImage = !!o.imageBase64;
-    if (!hasImage) { const hit = pcGet(gKey(o.name, o.lang, o.style)); if (hit) return { ok: true, place: hit, cached: true }; }
-    let ctx = o.lat && o.lng ? `Ảnh chụp gần toạ độ GPS ${o.lat}, ${o.lng}.` : "";
-    if (o.hint) ctx += ` Du khách cho biết ảnh chụp gần: "${o.hint.slice(0, 120)}".`;
+    if (!hasImage) { const hit = pcGet(gKey(o.name, o.lang, o.style)); if (hit) return { ok: true, place: hit }; }
+    let ctx = o.lat ? `GPS near ${o.lat}, ${o.lng}.` : "";
     const parts = [];
     if (hasImage) parts.push({ inline_data: { mime_type: "image/jpeg", data: o.imageBase64 } });
     parts.push({ text: guidePrompt({ name: o.name, hasImage, ctx, lg: o.lang, style: o.style }) });
-    const text = await streamGemini({ contents: [{ role: "user", parts }], generationConfig: { temperature: 0.5 } },
-      (t) => { const p = parseStream(t); if (!p.none) onUpdate(p); });
+    const { text } = await gem("text", hasImage ? M.MODEL : M.FAST, { contents: [{ role: "user", parts }], generationConfig: { temperature: 0.6 } },
+      (s) => { const p = parseStream(s); if (!p.none) onUpdate(p); });
     const p = parseStream(text);
     if (p.none || (!p.name && !p.narration)) {
-      let alt = {}; try { alt = parseJSON(text.slice(Math.max(0, text.indexOf("@@NONE")))); } catch {}
-      return { ok: false, landmark: { is_landmark: !!alt.is_landmark, alternatives: alt.alternatives || [] } };
+      let a = {}; try { a = parseJSON(text.slice(Math.max(0, text.indexOf("@@NONE")))); } catch {}
+      return { ok: false, landmark: { is_landmark: !!a.is_landmark, alternatives: a.alternatives || [] } };
     }
     const conf = isNaN(p.conf) ? (hasImage ? 0.7 : 1) : p.conf;
-    if (hasImage && conf < 0.35) return { ok: false, landmark: { is_landmark: true, confidence: conf, alternatives: [p.name].filter(Boolean) } };
+    if (hasImage && conf < 0.35) return { ok: false, landmark: { is_landmark: true, alternatives: [p.name].filter(Boolean) } };
     let ex = {}; try { ex = parseJSON(p.extra); } catch {}
     const [city, ...rest] = (p.place || "").split(",");
     const place = {
-      name: p.name || o.name, city: (city || "").trim(), country: rest.join(",").trim(), category: ex.category,
-      confidence: hasImage ? conf : 1, title: p.title || p.name || o.name, summary: ex.summary, narration: p.narration,
-      facts: ex.facts, tips: ex.visitor_tips, nearby: ex.nearby, questions: ex.questions, sources: [], lang: o.lang,
+      name: p.name || o.name, city: (city || "").trim(), country: rest.join(",").trim(), category: ex.category || "",
+      confidence: hasImage ? conf : 1, title: p.title || p.name || o.name, narration: p.narration,
+      facts: ex.facts || [], tips: ex.tips || ex.visitor_tips || [], nearby: ex.nearby || [], questions: ex.questions || [], lang: o.lang, style: o.style,
     };
     pcSet(gKey(place.name, o.lang, o.style), place);
     if (!hasImage) pcSet(gKey(o.name, o.lang, o.style), place);
     return { ok: true, place };
   }
 
-  // Tra Google khi khách cần: giờ mở cửa, giá vé, lưu ý hiện tại
-  async function liveInfo(place, lg) {
-    const r = await callGemini("text", {
-      contents: [{ role: "user", parts: [{ text: `Tìm trên Google thông tin MỚI NHẤT cho du khách về "${place.name}"${place.city ? ", " + place.city : ""}${place.country ? ", " + place.country : ""}: giờ mở cửa, giá vé, lưu ý hiện tại (đang tu sửa, sự kiện, quy định trang phục). Trả lời bằng ${LNAME[lg] || LNAME.vi}, 3-5 ý ngắn, mỗi ý một dòng bắt đầu bằng "- ". Nếu không tìm thấy thông tin chắc chắn thì nói rõ.` }] }],
-      tools: [{ google_search: {} }],
-    });
-    return {
-      lines: textOf(r).split("\n").map((s) => s.replace(/^[-*•]\s*/, "").replace(/\*\*/g, "").trim()).filter(Boolean),
-      sources: sourcesOf(r), searched: !!r._searched,
-    };
-  }
-
-  async function identify({ imageBase64, lat, lng, hint }) {
-    let ctx = lat && lng ? `Ảnh chụp gần toạ độ GPS ${lat}, ${lng}.` : "Không có GPS.";
-    if (hint) ctx += ` Du khách cho biết ảnh chụp gần: "${hint.slice(0, 120)}".`;
-    const r = await callGemini("text", {
-      contents: [{ role: "user", parts: [
-        { inline_data: { mime_type: "image/jpeg", data: imageBase64 } },
-        { text: `Bạn là chuyên gia nhận diện địa danh du lịch. Xác định địa điểm du lịch / công trình / danh lam trong ảnh. ${ctx}
-Nếu không chắc, hạ confidence (0-1) và liệt kê các khả năng trong alternatives. Nếu ảnh không phải địa điểm du lịch (người, đồ ăn, đồ vật), đặt is_landmark=false.` },
-      ] }],
-      generationConfig: {
-        temperature: 0.2, responseMimeType: "application/json",
-        responseSchema: { type: "OBJECT", properties: {
-          is_landmark: { type: "BOOLEAN" }, name: { type: "STRING" }, city: { type: "STRING" }, country: { type: "STRING" },
-          category: { type: "STRING" }, confidence: { type: "NUMBER" }, alternatives: { type: "ARRAY", items: { type: "STRING" } },
-        }, required: ["is_landmark", "name", "confidence"] },
-      },
-    });
-    return parseJSON(textOf(r));
-  }
-
-  async function guide({ name, city, country, lang: lg, style }) {
-    const L = LNAME[lg] || LNAME.vi;
-    const key = [name, city, lg, style].join("|");
-    if (cache.has(key)) return cache.get(key);
-    const words = style === "short" ? "khoảng 80 từ" : "khoảng 180-220 từ (đọc ~1,5 phút)";
-    const r = await callGemini("text", {
-      contents: [{ role: "user", parts: [{ text: `Hãy tìm kiếm thông tin mới nhất, chính xác về: "${name}"${city ? ", " + city : ""}${country ? ", " + country : ""}.
-Sau đó đóng vai hướng dẫn viên du lịch thân thiện, viết bằng ${L}:
-- "title": tên địa điểm. "summary": 1 câu tóm tắt.
-- "narration": lời thuyết minh ${words}, văn nói tự nhiên để đọc thành tiếng, có mở đầu hấp dẫn, lịch sử, ý nghĩa văn hoá, 1 chi tiết thú vị. Không markdown, không đánh số.
-- "facts": 3-5 thông tin nhanh. "visitor_tips": 3-4 mẹo (giờ mở cửa, vé, trang phục, thời điểm đẹp; ghi "có thể thay đổi").
-- "nearby": 2-3 điểm gần đó (chỉ tên). "questions": 3 câu hỏi ngắn du khách hay hỏi.
-Chỉ dùng thông tin tìm được, không bịa. Mọi nội dung viết bằng ${L}.
-Chỉ trả về MỘT khối JSON: {"title":"","summary":"","narration":"","facts":[],"visitor_tips":[],"nearby":[],"questions":[]}` }] }],
-      tools: [{ google_search: {} }],
-      generationConfig: { temperature: 0.6 },
-    });
-    let d;
-    try { d = parseJSON(textOf(r)); }
-    catch { d = { title: name, summary: "", narration: textOf(r), facts: [], visitor_tips: [], nearby: [], questions: [] }; }
-    d.sources = sourcesOf(r);
-    cache.set(key, d);
-    return d;
-  }
-
-  async function askGuide({ place, context, lang: lg, history = [], question }) {
-    const contents = [];
-    history.slice(-6).forEach((h) => {
-      contents.push({ role: "user", parts: [{ text: h.q }] });
-      contents.push({ role: "model", parts: [{ text: h.a }] });
-    });
-    contents.push({ role: "user", parts: [{ text: question }] });
-    const r = await callGemini("text", {
-      systemInstruction: { parts: [{ text: `Bạn là hướng dẫn viên du lịch địa phương thân thiện. Du khách đang ở: ${place}.
-Bối cảnh đã kể: ${String(context).slice(0, 600)}
-Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-4 câu ngắn, văn bản thường. Nếu không chắc về giá vé, giờ mở cửa thì khuyên kiểm tra tại chỗ.` }] },
-      contents, generationConfig: { temperature: 0.5 },
-      ...(/giá|vé|giờ|mở cửa|đóng cửa|hôm nay|bây giờ|thời tiết|sự kiện|price|ticket|open|hour|weather/i.test(question) ? { tools: [{ google_search: {} }] } : {}),
-    });
-    return { ok: true, answer: textOf(r) };
-  }
-
-  function pcmToWavB64(b64, rate = 24000) {
+  /* ================= Giọng đọc ================= */
+  const audio = new Audio(); audio.preload = "auto";
+  function pcmToWavUrl(b64, rate = 24000) {
     const pcm = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    const buf = new ArrayBuffer(44 + pcm.length); const v = new DataView(buf);
-    const w = (o, s) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+    const buf = new ArrayBuffer(44 + pcm.length), v = new DataView(buf);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
     w(0, "RIFF"); v.setUint32(4, 36 + pcm.length, true); w(8, "WAVE"); w(12, "fmt ");
     v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
     v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-    w(36, "data"); v.setUint32(40, pcm.length, true);
-    new Uint8Array(buf, 44).set(pcm);
+    w(36, "data"); v.setUint32(40, pcm.length, true); new Uint8Array(buf, 44).set(pcm);
     return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
   }
-  async function tts({ text, lang: lg }) {
-    const r = await callGemini("tts", {
-      contents: [{ parts: [{ text: "Đọc bằng giọng hướng dẫn viên ấm áp, rõ ràng: " + text }] }],
-      generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE[lg] || "Kore" } } } },
-    });
-    const part = ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).find((p) => p.inlineData || p.inline_data);
-    const b64 = part && (part.inlineData || part.inline_data).data;
-    if (!b64) throw { code: "server", message: "AI không trả về âm thanh" };
-    return { url: pcmToWavB64(b64) };
+  // Mở khoá âm thanh trên iPhone ngay lần chạm đầu tiên
+  const SILENT = pcmToWavUrl(btoa("\0".repeat(2400)));
+  let unlocked = false;
+  function unlockAudio() {
+    if (unlocked) return; unlocked = true;
+    try { audio.src = SILENT; audio.play().catch(() => {}); } catch {}
+    try { if ("speechSynthesis" in window) { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } } catch {}
   }
+  ["touchend", "click"].forEach((ev) => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
 
-  // Giữ nguyên giao diện gọi như bản server: post("/api/...")
-  async function post(path, body) {
-    if (path === "/api/analyze") {
-      const l = await identify(body);
-      if (!l.is_landmark || (l.confidence || 0) < 0.35) return { ok: false, landmark: l };
-      return { ok: true, landmark: l, guide: await guide({ name: l.name, city: l.city, country: l.country, lang: body.lang, style: body.style }) };
+  const TTS_STYLE = "Read this aloud like a warm, charismatic tour guide telling a captivating story to a small group of travellers: lively and expressive, with natural pauses, varied intonation and a smile in the voice. Read it in its own language:";
+  const ttsCache = new Map();
+  let ttsOffUntil = store.get("ttsOff", 0);
+  function ttsUrl(text) {
+    const k = voiceStyle + "|" + text;
+    if (ttsCache.has(k)) return ttsCache.get(k);
+    const p = (async () => {
+      if (!aiVoice || Date.now() < ttsOffUntil) return null;
+      try {
+        const r = await gem("tts", M.TTS || "gemini-2.5-flash-preview-tts", {
+          contents: [{ parts: [{ text: TTS_STYLE + "\n\n" + text }] }],
+          generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } } } },
+        });
+        const part = ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).find((x) => x.inlineData || x.inline_data);
+        const d = part && (part.inlineData || part.inline_data);
+        if (!d || !d.data) throw new Error("no audio");
+        const rate = +((d.mimeType || d.mime_type || "").match(/rate=(\d+)/) || [0, 24000])[1];
+        return pcmToWavUrl(d.data, rate);
+      } catch (e) {
+        ttsOffUntil = Date.now() + 10 * 60e3; store.set("ttsOff", ttsOffUntil); // tạm dùng giọng máy 10 phút
+        ttsCache.delete(k); return null;
+      }
+    })();
+    ttsCache.set(k, p);
+    return p;
+  }
+  const splitS = (s) => (String(s).match(/[^.!?。！？]+[.!?。！？]+["”’»)]*\s*|[^.!?。！？]+\s*$/g) || []).map((x) => x.trim()).filter(Boolean);
+  function chunksOf(sents) {
+    if (!sents.length) return [];
+    const first = Math.min(2, sents.length);
+    const out = [{ from: 0, to: first }];
+    let i = first;
+    while (i < sents.length) { let j = i, n = 0; while (j < sents.length && (n < 450 || j === i)) { n += sents[j].length; j++; } out.push({ from: i, to: j }); i = j; }
+    return out.map((c) => ({ ...c, text: sents.slice(c.from, c.to).join(" ") }));
+  }
+  function bestVoice(code) {
+    const vs = ("speechSynthesis" in window ? speechSynthesis.getVoices() : []).filter((v) => v.lang && v.lang.toLowerCase().replace("_", "-").startsWith(code.slice(0, 2)));
+    const score = (v) => (/premium|enhanced|natural|neural|siri/i.test(v.name) ? 3 : 0) + (/google/i.test(v.name) ? 2 : 0) + (v.lang.replace("_", "-") === code ? 1 : 0) + (v.localService ? 0.5 : 0);
+    return vs.sort((a, b) => score(b) - score(a))[0] || null;
+  }
+  if ("speechSynthesis" in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
+
+  const R = { sents: [], chunks: [], state: "idle", hl: -1, token: 0, mode: "", resumeAt: 0 };
+  function setHL(i) {
+    R.hl = i;
+    document.querySelectorAll("#pNarr .s").forEach((e, k) => e.classList.toggle("on", k === i));
+    const on = document.querySelector("#pNarr .s.on");
+    if (on && R.state === "playing") { const r = on.getBoundingClientRect(); if (r.top < 90 || r.bottom > innerHeight - 140) on.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    $("pBar").style.width = R.sents.length && i >= 0 ? Math.round(((i + 1) / R.sents.length) * 100) + "%" : "0%";
+  }
+  function renderPlayer() {
+    const s = R.state;
+    $("pPlay").innerHTML = s === "playing" ? "❚❚" : s === "loading" ? '<span class="wave"><i></i><i></i><i></i></span>' : "▶";
+    $("pState").textContent = s === "playing" ? t("reading") : s === "loading" ? t("voice_load") : s === "paused" ? t("paused") : t("listen");
+    $("pVoice").textContent = R.mode === "device" || !aiVoice || Date.now() < ttsOffUntil ? "🔊 " + t("voice_device") : "🎙️ " + t("v_" + voiceStyle);
+  }
+  function setState(s) { R.state = s; renderPlayer(); }
+  function prepareReader(narr) { R.sents = splitS(narr); R.chunks = chunksOf(R.sents); R.resumeAt = 0; }
+
+  async function play(fromSent = 0) {
+    const my = ++R.token;
+    if (focus) toast(t("dnd"));
+    audio.pause(); if ("speechSynthesis" in window) speechSynthesis.cancel();
+    if (!R.sents.length) return;
+    const useAI = aiVoice && Date.now() >= ttsOffUntil;
+    if (!useAI) return deviceFrom(fromSent, my);
+    R.mode = "ai"; setState("loading");
+    for (let ci = 0; ci < R.chunks.length; ci++) {
+      const c = R.chunks[ci];
+      if (c.to <= fromSent) continue;
+      const url = await ttsUrl(c.text);
+      if (R.chunks[ci + 1]) ttsUrl(R.chunks[ci + 1].text); // chuẩn bị đoạn sau trong lúc đọc
+      if (my !== R.token) return;
+      if (!url) return deviceFrom(c.from, my);
+      const ok = await playUrl(url, c, my);
+      if (my !== R.token) return;
+      if (!ok) return deviceFrom(c.from, my);
     }
-    if (path === "/api/narrate") return { ok: true, guide: await guide(body) };
-    if (path === "/api/ask") return askGuide(body);
-    if (path === "/api/tts") return tts(body);
-    throw { code: "server", message: "Không hỗ trợ" };
+    if (my === R.token) { setState("idle"); setHL(-1); R.resumeAt = 0; }
   }
-
-  function errText(e) {
-    if (e && e.code === "rate_limited") return "Key miễn phí đã hết lượt tạm thời. Đợi khoảng 1 phút rồi thử lại. Nếu vẫn lỗi, có thể đã hết lượt trong ngày." + (e.message ? "\n\nGoogle báo: " + String(e.message).slice(0, 220) : "");
-    if (e && e.code === "network") return "Không kết nối được AI. Kiểm tra mạng rồi thử lại.";
-    if (e && e.code === "nokey") { openKey(); return "Chưa có API key. Hãy nhập key để dùng AI."; }
-    if (e && e.code === "badkey") { openKey(); return "API key không hợp lệ. Hãy kiểm tra lại key."; }
-    return "Có lỗi: " + ((e && e.message) || "không rõ") + ". Thử lại nhé.";
+  function playUrl(url, c, my) {
+    return new Promise((res) => {
+      const lens = R.sents.slice(c.from, c.to).map((s) => s.length), tot = lens.reduce((a, b) => a + b, 0) || 1;
+      audio.onended = () => res(true);
+      audio.onerror = () => res(false);
+      audio.ontimeupdate = () => {
+        if (my !== R.token || !audio.duration) return;
+        const target = (audio.currentTime / audio.duration) * tot;
+        let acc = 0, k = 0; while (k < lens.length - 1 && acc + lens[k] < target) { acc += lens[k]; k++; }
+        if (R.hl !== c.from + k) { setHL(c.from + k); R.resumeAt = c.from + k; }
+      };
+      audio.src = url;
+      R.onStop = () => res(false);
+      R.resumeAt = c.from;
+      // Nếu trình duyệt chặn tự phát: chờ khách bấm ▶ rồi phát tiếp đúng chỗ
+      audio.play().then(() => { if (my === R.token) { setState("playing"); setHL(c.from); } })
+        .catch(() => { if (my === R.token) setState("paused"); });
+    });
   }
-
-  function updatePill() {
-    serverOk = !!getKey();
-    const p = $("aiPill");
-    p.className = serverOk ? "pill" : "pill off";
-    p.querySelector("span").textContent = serverOk ? "AI ACTIVE" : "CHƯA CÓ KEY";
+  function deviceFrom(i, my) {
+    R.mode = "device";
+    if (!("speechSynthesis" in window)) { setState("idle"); return; }
+    const code = LANGS[(cur && cur.lang) || lang].code, voice = bestVoice(code);
+    if (!voice && code.startsWith("vi")) toast(t("no_vi_voice"));
+    const next = (k) => {
+      if (my !== R.token) return;
+      if (k >= R.sents.length) { setState("idle"); setHL(-1); R.resumeAt = 0; return; }
+      const u = new SpeechSynthesisUtterance(R.sents[k]);
+      u.lang = code; if (voice) u.voice = voice;
+      u.rate = 1.0; u.pitch = voiceStyle.endsWith("_m") ? 0.95 : 1.08;
+      u.onstart = () => { if (my === R.token) { setState("playing"); setHL(k); R.resumeAt = k; } };
+      u.onend = () => setTimeout(() => next(k + 1), 180); // ngắt nghỉ tự nhiên giữa các câu
+      u.onerror = () => { if (my === R.token) setState("idle"); };
+      speechSynthesis.speak(u);
+    };
+    next(i);
   }
-  function openKey() { $("keyIn").value = store.get("key", ""); $("keyModal").classList.remove("hidden"); }
-  $("keySave").onclick = () => {
-    const k = $("keyIn").value.trim();
-    store.set("key", k); modelsReady = null; $("keyModal").classList.add("hidden"); updatePill();
-    toast(k ? "Đã lưu key trên máy này" : "Đã xoá key");
-  };
-  $("keyLater").onclick = () => $("keyModal").classList.add("hidden");
-  $("keyBtn").onclick = openKey;
-  if (GEMINI_KEY) $("keyCard").classList.add("hidden");
-  updatePill();
-  if (!getKey()) setTimeout(openKey, 600);
+  function pause() {
+    if (R.mode === "ai") { audio.pause(); setState("paused"); return; }
+    R.token++; if ("speechSynthesis" in window) speechSynthesis.cancel();
+    setState("paused");
+  }
+  function resume() {
+    if (R.mode === "ai" && audio.src && audio.src !== SILENT && !audio.ended) {
+      audio.play().then(() => { setState("playing"); if (R.hl < 0) setHL(R.resumeAt); }).catch(() => play(R.resumeAt || 0));
+      return;
+    }
+    play(R.resumeAt || 0);
+  }
+  function stopAudio() {
+    R.token++; if (R.onStop) R.onStop();
+    audio.pause(); if ("speechSynthesis" in window) speechSynthesis.cancel();
+    R.resumeAt = 0; setState("idle"); setHL(-1);
+  }
+  $("pPlay").onclick = () => { if (R.state === "playing") pause(); else if (R.state === "paused") resume(); else if (R.state === "idle") play(0); };
+  $("pStop").onclick = stopAudio;
 
-  /* ---------- Điều hướng ---------- */
+  /* ================= Giao diện ================= */
+  const VIEWS = ["home", "place", "hist", "sos"];
+  let view = "home";
   function go(v) {
-    ["home", "scan", "lang", "sos"].forEach((x) => $("v-" + x).classList.toggle("hidden", x !== v));
-    document.querySelectorAll("nav button").forEach((b) => b.classList.toggle("on", b.dataset.go === v));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (v !== "place" && view === "place") stopAudio();
+    view = v;
+    VIEWS.forEach((x) => $("v-" + x).classList.toggle("hidden", x !== v));
+    document.querySelectorAll("nav [data-go]").forEach((b) => b.classList.toggle("on", b.dataset.go === v));
+    window.scrollTo({ top: 0 });
+    if (v === "hist") renderHist();
+    if (v === "sos") locate();
   }
   document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
 
-  /* ---------- Trạng thái thiết bị ---------- */
-  if (navigator.getBattery) navigator.getBattery().then((b) => {
-    const f = () => ($("batt").textContent = Math.round(b.level * 100) + "%");
-    f(); b.addEventListener("levelchange", f);
-  }).catch(() => ($("batt").textContent = "—"));
-  else $("batt").textContent = "—";
-  const netF = () => ($("net").textContent = navigator.onLine ? "Online" : "Offline");
-  netF(); addEventListener("online", netF); addEventListener("offline", netF);
-
-  /* ---------- Ngôn ngữ & giọng đọc ---------- */
-  function renderLangs() {
-    $("langs").innerHTML = "";
-    Object.entries(LANGS).forEach(([k, v]) => {
-      const b = el("button", "lang" + (k === lang ? " on" : ""));
-      b.innerHTML = `<span>${v.flag} ${v.label}</span><span>${k === lang ? "✓" : ""}</span>`;
-      b.onclick = () => { lang = k; store.set("lang", k); renderLangs(); toast("Đã chọn " + v.label); };
-      $("langs").appendChild(b);
-    });
-    $("langLbl").textContent = LANGS[lang].label;
+  function applyI18n() {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-i]").forEach((e) => (e.textContent = t(e.dataset.i)));
+    document.querySelectorAll("[data-ph]").forEach((e) => (e.placeholder = t(e.dataset.ph)));
+    $("langFlag").textContent = LANGS[lang].flag; $("langCode").textContent = lang.toUpperCase();
+    $("aiDot").className = "dot" + (getKey() ? "" : " off");
+    $("langBtn").title = getKey() ? t("ai_on") : t("ai_off");
+    renderPop(); renderRecent(); renderSettings(); renderPlayer();
+    if (view === "hist") renderHist();
   }
-  renderLangs();
-  const vsw = $("voiceSw");
-  const paintV = () => vsw.classList.toggle("on", aiVoice);
-  paintV();
-  vsw.onclick = () => { aiVoice = !aiVoice; store.set("aiVoice", aiVoice); paintV(); };
+  function renderPop() {
+    const box = $("pop"); box.innerHTML = "";
+    POPULAR.forEach(([e, vi, en]) => {
+      const b = el("button"); b.type = "button";
+      b.append(el("span", "e", e), el("span", null, lang === "vi" ? vi : en));
+      b.onclick = () => searchPlace(lang === "vi" ? vi : en);
+      box.appendChild(b);
+    });
+  }
 
-  /* ---------- Chế độ tập trung ---------- */
-  const sw = $("focusSw");
-  const paintSw = () => sw.classList.toggle("on", focus);
-  paintSw();
-  sw.onclick = () => { if (!focus) $("focusModal").classList.remove("hidden"); else { focus = false; store.set("focus", false); paintSw(); } };
-  $("fAllow").onclick = () => { focus = true; store.set("focus", true); paintSw(); $("focusModal").classList.add("hidden"); toast("Đã bật chế độ tập trung"); };
-  $("fLater").onclick = () => $("focusModal").classList.add("hidden");
+  /* ---- Ngôn ngữ & cài đặt ---- */
+  function renderSettings() {
+    const ls = $("langs"); ls.innerHTML = "";
+    Object.entries(LANGS).forEach(([k, v]) => {
+      const b = el("button", "lang" + (k === lang ? " on" : "")); b.type = "button";
+      b.append(el("span", null, v.flag), el("span", null, v.label));
+      b.onclick = () => setLang(k);
+      ls.appendChild(b);
+    });
+    $("swVoice").classList.toggle("on", aiVoice);
+    $("voiceWrap").classList.toggle("hidden", !aiVoice);
+    const vs = $("voiceSeg"); vs.innerHTML = "";
+    Object.keys(VOICES).forEach((k) => {
+      const b = el("button", k === voiceStyle ? "on" : "", t("v_" + k)); b.type = "button";
+      b.onclick = () => { voiceStyle = k; store.set("voice", k); renderSettings(); renderPlayer(); };
+      vs.appendChild(b);
+    });
+    [...$("lenSeg").children].forEach((b) => b.classList.toggle("on", b.dataset.len === len));
+    $("swFocus").classList.toggle("on", focus);
+  }
+  function setLang(k) {
+    if (k === lang) return;
+    lang = k; store.set("lang", k); applyI18n();
+    // Đang xem một địa điểm -> thuyết minh lại bằng ngôn ngữ mới
+    if (view === "place" && cur && cur.lang !== k) runGuide({ name: cur.name, photo: curPhoto });
+  }
+  const openSheet = (id) => $(id).classList.remove("hidden");
+  const closeSheet = (id) => $(id).classList.add("hidden");
+  document.querySelectorAll(".sheetbg").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s) s.classList.add("hidden"); }));
+  $("langBtn").onclick = $("navLang").onclick = () => openSheet("langSheet");
+  $("langDone").onclick = () => closeSheet("langSheet");
+  $("swVoice").onclick = () => { aiVoice = !aiVoice; store.set("aiVoice", aiVoice); if (aiVoice) { ttsOffUntil = 0; store.set("ttsOff", 0); } renderSettings(); renderPlayer(); };
+  $("swFocus").onclick = () => { focus = !focus; store.set("focus", focus); renderSettings(); };
+  $("lenSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; len = b.dataset.len; store.set("len", len); renderSettings(); };
 
-  /* ---------- Chọn & nén ảnh ---------- */
-  async function compress(file, max = 896) {
+  function openKey() { $("keyIn").value = store.get("key", ""); openSheet("keySheet"); }
+  $("keySave").onclick = () => { store.set("key", $("keyIn").value.trim()); store.set("models", null); modelsReady = null; closeSheet("keySheet"); applyI18n(); };
+  $("keyLater").onclick = () => closeSheet("keySheet");
+
+  /* ---- Ảnh ---- */
+  async function compress(file, max = 768) {
     const bmp = await createImageBitmap(file);
     const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
     const c = document.createElement("canvas");
     c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
     c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.8));
-    const t = document.createElement("canvas"); const ts = 96 / Math.max(c.width, c.height);
-    t.width = c.width * ts; t.height = c.height * ts; t.getContext("2d").drawImage(c, 0, 0, t.width, t.height);
-    return { blob, thumb: t.toDataURL("image/jpeg", 0.7), url: c.toDataURL("image/jpeg", 0.85) };
+    const url = c.toDataURL("image/jpeg", 0.78);
+    const tc = document.createElement("canvas"), ts = 160 / Math.max(c.width, c.height);
+    tc.width = c.width * ts; tc.height = c.height * ts; tc.getContext("2d").drawImage(c, 0, 0, tc.width, tc.height);
+    return { b64: url.split(",")[1], url, thumb: tc.toDataURL("image/jpeg", 0.7) };
   }
-  $("file").onchange = async (e) => {
-    const f = e.target.files[0]; if (!f) return;
+  let lastPos = null;
+  function getGps(wait = 800) {
+    return new Promise((res) => {
+      if (!navigator.geolocation) return res(lastPos || {});
+      const timer = setTimeout(() => res(lastPos || {}), wait);
+      navigator.geolocation.getCurrentPosition((p) => {
+        lastPos = { lat: p.coords.latitude.toFixed(5), lng: p.coords.longitude.toFixed(5) };
+        clearTimeout(timer); res(lastPos);
+      }, () => { clearTimeout(timer); res(lastPos || {}); }, { timeout: 5000, maximumAge: 600000, enableHighAccuracy: false });
+    });
+  }
+  document.querySelectorAll(".fileIn").forEach((inp) => inp.addEventListener("change", async (e) => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
     try {
-      const r = await compress(f);
-      imgBlob = r.blob; thumb = r.thumb;
-      $("preview").src = r.url;
-      $("pickWrap").classList.add("hidden"); $("previewWrap").classList.remove("hidden");
-      hideResult();
-    } catch { toast("Không đọc được ảnh này, thử ảnh khác"); }
-  };
-  $("retake").onclick = () => {
-    stopAudio(); imgBlob = null; $("file").value = "";
-    $("pickWrap").classList.remove("hidden"); $("previewWrap").classList.add("hidden");
-    hideResult();
-  };
-  $("lenSeg").onclick = (e) => {
-    const b = e.target.closest("button"); if (!b) return;
-    len = b.dataset.len;
-    [...$("lenSeg").children].forEach((x) => x.classList.toggle("on", x === b));
-  };
-  function hideResult() { $("result").classList.add("hidden"); $("askCard").classList.add("hidden"); }
+      const [img, gps] = await Promise.all([compress(f), getGps()]);
+      runGuide({ imageBase64: img.b64, photo: img.url, thumb: img.thumb, ...gps });
+    } catch { toast(t("err_gen")); }
+  }));
+  $("searchForm").onsubmit = (e) => { e.preventDefault(); const q = $("searchIn").value.trim(); if (q) { $("searchIn").blur(); searchPlace(q); } };
+  const searchPlace = (name) => runGuide({ name });
 
-  const blobToB64 = (b) => new Promise((res) => { const f = new FileReader(); f.onload = () => res(f.result.split(",")[1]); f.readAsDataURL(b); });
-  const getGps = () => Promise.race([new Promise((r) => setTimeout(() => r({}), 1500)), gpsOnce()]);
-  const gpsOnce = () => new Promise((res) => {
-    if (!navigator.geolocation) return res({});
-    navigator.geolocation.getCurrentPosition(
-      (p) => res({ lat: p.coords.latitude.toFixed(5), lng: p.coords.longitude.toFixed(5) }),
-      () => res({}), { timeout: 1500, maximumAge: 600000 });
-  });
-
-  /* ---------- Loading ---------- */
-  let loadTimer = null;
-  function startLoading(steps) {
-    $("loading").classList.remove("hidden");
-    let i = 0;
-    const show = () => { $("loadTitle").textContent = steps[i][0]; $("loadSub").textContent = steps[i][1]; };
-    show();
-    loadTimer = setInterval(() => { if (i < steps.length - 1) { i++; show(); } }, 3500);
+  /* ---- Màn hình địa điểm ---- */
+  let cur = null, curPhoto = null, curThumb = null, runId = 0, chatLog = [];
+  function setHero(photo, emoji = "🏛️") {
+    const h = $("pHero");
+    h.style.backgroundImage = photo ? `url("${photo}")` : "";
+    $("pEmoji").textContent = photo ? "" : emoji;
   }
-  function stopLoading() { clearInterval(loadTimer); $("loading").classList.add("hidden"); }
+  function setScanning(on) { $("pScan").classList.toggle("hidden", !on); $("pCorners").classList.toggle("hidden", !on); }
+  function status(txt) { $("pStatus").classList.toggle("hidden", !txt); $("pStatusT").textContent = txt || ""; }
 
-  /* ---------- Hiện kết quả ngay khi AI đang viết ---------- */
-  function liveBox() {
-    const box = $("result"); box.innerHTML = ""; box.classList.remove("hidden");
-    const h = el("h3", null, "Đang nhận diện…"), loc = el("div", "loc", ""), n = el("p", "narr", "");
-    const st = el("div", "muted"); st.innerHTML = '<span class="wave"><i></i><i></i><i></i></span> AI đang viết thuyết minh…';
-    box.append(h, loc, n, st);
-    return (p) => {
-      if (p.title || p.name) h.textContent = p.title || p.name;
-      if (p.place) loc.textContent = "📍 " + p.place;
-      n.textContent = p.narration;
-    };
-  }
-  async function runGuide(opts, btn, steps) {
-    stopAudio(); hideResult();
-    btn.disabled = true;
-    startLoading(steps);
-    let upd = null;
+  async function runGuide(o) {
+    const my = ++runId;
+    stopAudio(); go("place");
+    cur = null; chatLog = [];
+    curPhoto = o.photo || null; curThumb = o.thumb || curThumb;
+    if (!o.photo) curThumb = null;
+    setHero(curPhoto); setScanning(!!o.imageBase64);
+    $("pTitle").textContent = o.name || t("identifying");
+    $("pLoc").textContent = ""; $("pBadge").classList.add("hidden");
+    $("player").classList.add("hidden"); $("pNF").classList.add("hidden"); $("pMore").innerHTML = ""; $("askCard").classList.add("hidden");
+    const n = $("pNarr"); n.className = "narr"; n.innerHTML = '<div class="skel"></div><div class="skel" style="width:92%"></div><div class="skel" style="width:76%"></div>';
+    status(o.imageBase64 ? t("scanning") : t("writing"));
+    let prefetched = false;
     try {
-      const res = await fastGuide(opts, (p) => {
-        if (!p.name && !p.narration) return;
-        if (!upd) { stopLoading(); upd = liveBox(); }
-        upd(p);
+      const res = await fastGuide({ ...o, lang, style: len }, (p) => {
+        if (my !== runId) return;
+        if (p.title || p.name) $("pTitle").textContent = p.title || p.name;
+        if (p.place) $("pLoc").textContent = "📍 " + p.place;
+        if (p.narration) {
+          setScanning(false); status(t("writing"));
+          n.classList.add("typing"); n.textContent = p.narration;
+          // Chuẩn bị giọng đọc cho 2 câu đầu ngay khi AI vừa viết xong 2 câu
+          if (!prefetched && aiVoice) {
+            const ss = splitS(p.narration);
+            if (ss.length >= 3) { prefetched = true; ttsUrl(chunksOf(ss)[0].text); }
+          }
+        }
       });
+      if (my !== runId) return;
+      setScanning(false); status("");
       if (!res.ok) return showNotFound(res.landmark);
-      openPlace(res.place, opts.thumb || null);
+      showPlace(res.place, true);
+      saveHistory(res.place, curThumb);
     } catch (e) {
-      showError(errText(e));
-    } finally {
-      stopLoading(); btn.disabled = false;
+      if (my !== runId) return;
+      setScanning(false); status("");
+      n.className = "narr"; n.innerHTML = "";
+      const p = el("p", null, errText(e)); p.style.whiteSpace = "pre-line"; n.appendChild(p);
+      const b = el("button", "btn btn-primary", "↻ " + t("retry")); b.style.marginTop = "12px"; b.onclick = () => runGuide(o); n.appendChild(b);
     }
   }
 
-  /* ---------- Phân tích ảnh ---------- */
-  $("analyze").onclick = async () => {
-    if (!imgBlob) return;
-    const [imageBase64, gps] = await Promise.all([blobToB64(imgBlob), getGps()]);
-    runGuide({ imageBase64, ...gps, hint: $("hint").value.trim(), lang, style: len, thumb }, $("analyze"),
-      [["Đang nhận diện địa điểm…", "AI đang xem ảnh của bạn"], ["Đang viết lời thuyết minh…", "Bằng " + LANGS[lang].label]]);
-  };
-
-  /* ---------- Tìm theo tên (không cần ảnh) ---------- */
-  $("nameForm").onsubmit = (e) => {
-    e.preventDefault();
-    const name = $("nameIn").value.trim(); if (!name) return;
-    runGuide({ name, lang, style: len }, $("nameBtn"), [["Đang viết lời thuyết minh…", name + " · " + LANGS[lang].label]]);
-  };
-
-  function toPlace(l = {}, g = {}) {
-    return {
-      name: l.name || g.title, city: l.city, country: l.country, category: l.category,
-      confidence: l.confidence, title: g.title, summary: g.summary, narration: g.narration || "",
-      facts: g.facts, tips: g.visitor_tips, nearby: g.nearby, questions: g.questions,
-      sources: g.sources, lang,
-    };
-  }
-  function openPlace(d, img) {
-    current = d; chatLog = [];
-    showResult(d);
-    saveHistory(d, img);
-    speak();
-  }
-
-  function showError(msg) {
-    const box = $("result"); box.innerHTML = ""; box.classList.remove("hidden");
-    box.appendChild(el("p", null, msg));
-  }
   function showNotFound(l) {
-    const box = $("result"); box.innerHTML = ""; box.classList.remove("hidden");
-    box.appendChild(el("h3", null, "🤔 Chưa nhận ra địa điểm"));
-    box.appendChild(el("p", "muted", l.is_landmark
-      ? "AI chưa chắc chắn về địa điểm này. Hãy chụp rõ toàn cảnh hơn, thêm gợi ý vị trí hoặc nhập tên địa điểm."
-      : "Ảnh này có vẻ không phải một địa điểm du lịch. Hãy chụp công trình, danh lam hoặc cảnh quan."));
+    $("pTitle").textContent = "🤔 " + t("nf_t");
+    $("pNarr").className = "narr"; $("pNarr").innerHTML = "";
+    const box = $("pNF"); box.innerHTML = ""; box.classList.remove("hidden");
+    box.appendChild(el("p", "muted", l.is_landmark ? t("nf_land") : t("nf_obj")));
     if (l.alternatives && l.alternatives.length) {
-      const s = el("div", "sec"); s.appendChild(el("h4", null, "Có thể là (bấm để xem)"));
+      const s = el("div", "sec"); s.appendChild(el("h4", null, t("maybe")));
       const c = el("div", "chips");
-      l.alternatives.slice(0, 4).forEach((a) => {
-        const b = el("button", "chip", a); b.type = "button";
-        b.onclick = () => { $("nameIn").value = a; $("nameForm").requestSubmit(); };
-        c.appendChild(b);
-      });
+      l.alternatives.slice(0, 4).forEach((a) => { const b = el("button", "chip go", a); b.type = "button"; b.onclick = () => searchPlace(a); c.appendChild(b); });
       s.appendChild(c); box.appendChild(s);
     }
   }
 
-  function list(title, arr, chips) {
-    if (!arr || !arr.length) return null;
-    const s = el("div", "sec"); s.appendChild(el("h4", null, title));
-    if (chips) { const c = el("div", "chips"); arr.forEach((x) => c.appendChild(el("span", "chip", "📍 " + x))); s.appendChild(c); }
-    else { const u = el("ul"); arr.forEach((x) => u.appendChild(el("li", null, x))); s.appendChild(u); }
-    return s;
-  }
-
-  function showResult(d) {
-    const box = $("result"); box.innerHTML = ""; box.classList.remove("hidden");
-    const head = el("div", "result-head");
-    head.appendChild(el("h3", null, d.title || d.name));
-    if (d.confidence && d.confidence < 1) head.appendChild(el("span", "badge", Math.round(d.confidence * 100) + "% khớp"));
-    box.appendChild(head);
+  function showPlace(d, autoplay) {
+    cur = d;
+    $("pTitle").textContent = d.title || d.name;
     const loc = [d.name !== d.title ? d.name : "", d.city, d.country].filter(Boolean).join(" · ");
-    if (loc || d.category) box.appendChild(el("div", "loc", "📍 " + loc + (d.category ? "  •  " + d.category : "")));
-    box.appendChild(el("p", "narr", d.narration));
-    const pl = el("div", "player"); pl.id = "player"; box.appendChild(pl);
-    renderPlayer();
-    [list("Thông tin nhanh", d.facts), list("Mẹo tham quan", d.tips), list("Gần đây", d.nearby, true)]
-      .forEach((x) => x && box.appendChild(x));
-    if (d.sources && d.sources.length) {
-      const s = el("div", "sec"); s.appendChild(el("h4", null, "Nguồn tham khảo"));
-      const u = el("ul");
-      d.sources.forEach((x) => {
-        const li = el("li"); const a = el("a", null, x.title || x.url);
-        a.href = x.url; a.target = "_blank"; a.rel = "noopener"; li.appendChild(a); u.appendChild(li);
-      });
-      s.appendChild(u); box.appendChild(s);
+    $("pLoc").textContent = loc ? "📍 " + loc + (d.category ? "  ·  " + d.category : "") : "";
+    if (d.confidence && d.confidence < 1) { $("pBadge").textContent = Math.round(d.confidence * 100) + "% " + t("match"); $("pBadge").classList.remove("hidden"); }
+    const n = $("pNarr"); n.className = "narr"; n.innerHTML = "";
+    prepareReader(d.narration);
+    R.sents.forEach((s, i) => { const sp = el("span", "s", s + " "); sp.onclick = () => play(i); n.appendChild(sp); });
+    $("player").classList.remove("hidden"); setHL(-1); setState("idle");
+
+    const more = $("pMore"); more.innerHTML = "";
+    if (d.facts.length) { const s = el("div", "sec"); s.appendChild(el("h4", null, t("facts"))); const f = el("div", "facts"); d.facts.forEach((x) => f.appendChild(el("div", null, x))); s.appendChild(f); more.appendChild(s); }
+    if (d.tips.length) { const s = el("div", "sec"); s.appendChild(el("h4", null, t("tips"))); const u = el("ul"); d.tips.forEach((x) => u.appendChild(el("li", null, x))); s.appendChild(u); more.appendChild(s); }
+    if (d.nearby.length) {
+      const s = el("div", "sec"); s.appendChild(el("h4", null, t("nearby"))); const c = el("div", "chips");
+      d.nearby.forEach((x) => { const b = el("button", "chip go", "📍 " + x); b.type = "button"; b.onclick = () => searchPlace(x + (d.city ? ", " + d.city : "")); c.appendChild(b); });
+      s.appendChild(c); more.appendChild(s);
     }
     const lv = el("div", "sec");
-    const lb = el("button", "btn btn-ghost", "🔄 Cập nhật giờ mở cửa, giá vé (Google)"); lb.type = "button"; lb.style.width = "100%";
+    const lb = el("button", "btn btn-ghost", "🔄 " + t("live_btn")); lb.type = "button"; lb.style.width = "100%";
     lb.onclick = async () => {
-      lb.disabled = true; lb.textContent = "Đang tra Google…";
+      lb.disabled = true; lb.textContent = t("live_load");
       try {
-        const r = await liveInfo(d, d.lang || lang);
+        const r = await gem("text", M.FAST, {
+          contents: [{ role: "user", parts: [{ text: `Search Google for the LATEST visitor information about "${d.name}"${d.city ? ", " + d.city : ""}${d.country ? ", " + d.country : ""}: opening hours, ticket prices, current notices (renovation, events, dress code). Answer in ${LANGS[d.lang].name}, 3-5 short lines, each starting with "- ". If nothing reliable is found, say so.` }] }],
+          tools: [{ google_search: {} }],
+        });
         lv.innerHTML = "";
-        lv.appendChild(el("h4", null, r.searched ? "Thông tin mới nhất (Google)" : "Thông tin tham khảo (chưa tra được Google)"));
-        const u = el("ul"); r.lines.forEach((x) => u.appendChild(el("li", null, x))); lv.appendChild(u);
-        if (r.sources.length) {
-          const sEl = el("div", "muted"); sEl.style.marginTop = "6px"; sEl.appendChild(document.createTextNode("Nguồn: "));
-          r.sources.forEach((x, i) => {
-            const a = el("a", null, x.title || x.url); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; sEl.appendChild(a);
-            if (i < r.sources.length - 1) sEl.appendChild(document.createTextNode(" · "));
-          });
+        lv.appendChild(el("h4", null, r._searched ? t("live_t") : t("live_nosearch")));
+        const u = el("ul"); textOf(r).split("\n").map((s) => s.replace(/^[-*•]\s*/, "").replace(/\*\*/g, "").trim()).filter(Boolean).forEach((x) => u.appendChild(el("li", null, x))); lv.appendChild(u);
+        const src = srcOf(r.candidates && r.candidates[0] && r.candidates[0].groundingMetadata);
+        if (src.length) {
+          const sEl = el("div", "muted"); sEl.style.marginTop = "6px"; sEl.appendChild(document.createTextNode(t("sources") + ": "));
+          src.forEach((x, i) => { const a = el("a", null, x.title || x.url); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; sEl.appendChild(a); if (i < src.length - 1) sEl.appendChild(document.createTextNode(" · ")); });
           lv.appendChild(sEl);
         }
-      } catch (e) { lb.disabled = false; lb.textContent = "🔄 Thử lại"; toast(errText(e).split("\n")[0]); }
+      } catch (e) { lb.disabled = false; lb.textContent = "🔄 " + t("retry"); toast(errText(e).split("\n")[0]); }
     };
-    lv.appendChild(lb); box.appendChild(lv);
-    box.appendChild(el("div", "disclaimer", "Lời thuyết minh do AI tạo từ kiến thức có sẵn để trả lời nhanh. Giờ mở cửa và giá vé có thể thay đổi, bấm nút trên để tra thông tin mới nhất."));
+    lv.appendChild(lb); more.appendChild(lv);
+    more.appendChild(el("div", "disc", t("disc")));
 
-    $("askCard").classList.remove("hidden");
-    $("chat").innerHTML = "";
+    $("askCard").classList.remove("hidden"); $("chat").innerHTML = "";
     const sg = $("suggest"); sg.innerHTML = "";
-    (d.questions || []).forEach((q) => {
-      const b = el("button", "chip", q); b.type = "button";
-      b.onclick = () => ask(q); sg.appendChild(b);
-    });
+    d.questions.forEach((q) => { const b = el("button", "chip go", q); b.type = "button"; b.onclick = () => ask(q); sg.appendChild(b); });
+    if (autoplay) play(0);
   }
+  $("pBack").onclick = () => go("home");
 
-  /* ---------- Giọng đọc ---------- */
-  let audioEl = null, speaking = false, loadingVoice = false;
-  const audioCache = new Map();
-  function renderPlayer() {
-    const pl = $("player"); if (!pl) return;
-    pl.innerHTML = "";
-    const play = el("button", "btn btn-primary");
-    play.innerHTML = loadingVoice ? "⏳ Đang tạo giọng…" : speaking ? '<span class="wave"><i></i><i></i><i></i></span> Đang thuyết minh' : "▶ Nghe thuyết minh";
-    play.disabled = loadingVoice;
-    play.onclick = () => { if (!speaking) speak(); };
-    const stop = el("button", "btn btn-ghost", "■ Dừng");
-    stop.onclick = stopAudio;
-    pl.append(play, stop);
-  }
-  function setSpeaking(v) { speaking = v; renderPlayer(); }
-
-  async function speak() {
-    if (!current || !current.narration) return;
-    stopAudio();
-    if (focus) toast("🎧 Nhớ bật Không làm phiền trên điện thoại nhé");
-    const text = current.narration;
-    if (aiVoice) {
-      try {
-        const key = current.lang + "|" + text.slice(0, 80);
-        let src = audioCache.get(key);
-        if (!src) {
-          loadingVoice = true; renderPlayer();
-          const j = await post("/api/tts", { text, lang: current.lang });
-          src = j.url;
-          audioCache.set(key, src);
-        }
-        loadingVoice = false;
-        audioEl = new Audio(src);
-        audioEl.onended = () => setSpeaking(false);
-        await audioEl.play();
-        setSpeaking(true);
-        return;
-      } catch {
-        loadingVoice = false;
-        toast("Giọng AI lỗi, chuyển sang giọng của máy");
-      }
-    }
-    browserSpeak(text, LANGS[current.lang || lang].code);
-  }
-  function browserSpeak(text, code) {
-    if (!("speechSynthesis" in window)) { toast("Thiết bị chưa hỗ trợ đọc thành tiếng"); return; }
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = code; u.rate = 0.95;
-    const v = speechSynthesis.getVoices().find((x) => x.lang && x.lang.toLowerCase().startsWith(code.slice(0, 2)));
-    if (v) u.voice = v;
-    else if (code.startsWith("vi")) toast("Máy chưa có giọng tiếng Việt. Thử bật Giọng AI trong mục Ngôn ngữ.");
-    u.onstart = () => setSpeaking(true);
-    u.onend = u.onerror = () => setSpeaking(false);
-    speechSynthesis.speak(u);
-  }
-  function stopAudio() {
-    if (audioEl) { audioEl.pause(); audioEl = null; }
-    if ("speechSynthesis" in window) speechSynthesis.cancel();
-    loadingVoice = false; setSpeaking(false);
-  }
-  if ("speechSynthesis" in window) speechSynthesis.getVoices();
-
-  /* ---------- Hỏi đáp ---------- */
+  /* ---- Hướng dẫn viên AI: trả lời dạng stream ---- */
   $("askForm").onsubmit = (e) => { e.preventDefault(); const q = $("askIn").value.trim(); if (q) ask(q); };
   async function ask(q) {
-    if (!current) return;
+    if (!cur) return;
     $("askIn").value = "";
     $("chat").appendChild(el("div", "msg me", q));
-    const bubble = el("div", "msg ai", "…"); $("chat").appendChild(bubble);
-    bubble.scrollIntoView({ behavior: "smooth", block: "end" });
+    const bubble = el("div", "msg ai", t("thinking")); $("chat").appendChild(bubble);
+    bubble.scrollIntoView({ behavior: "smooth", block: "center" });
     $("askBtn").disabled = true;
+    const contents = [];
+    chatLog.slice(-6).forEach((h) => { contents.push({ role: "user", parts: [{ text: h.q }] }); contents.push({ role: "model", parts: [{ text: h.a }] }); });
+    contents.push({ role: "user", parts: [{ text: q }] });
+    const needSearch = /giá|vé|giờ|mở cửa|đóng cửa|hôm nay|bây giờ|thời tiết|sự kiện|price|ticket|open|hour|weather|today|料金|時間|가격|시간|prix|horaire/i.test(q);
     try {
-      const j = await post("/api/ask", {
-        place: [current.name, current.city, current.country].filter(Boolean).join(", "),
-        context: current.summary || current.narration.slice(0, 400), lang, history: chatLog, question: q,
-      });
-      bubble.textContent = j.answer;
-      chatLog.push({ q, a: j.answer });
+      const r = await gem("text", M.FAST, {
+        systemInstruction: { parts: [{ text: `You are a friendly, witty local tour guide in Vietnam. The tourist is at: ${cur.name}${cur.city ? ", " + cur.city : ""}. What you already told them: ${cur.narration.slice(0, 500)}
+Answer in ${LANGS[lang].name}, 1-4 short sentences, conversational, plain text, no markdown. If unsure about prices or hours, say to check on site.` }] },
+        contents, generationConfig: { temperature: 0.7 },
+        ...(needSearch ? { tools: [{ google_search: {} }] } : {}),
+      }, (s) => { bubble.textContent = s; });
+      chatLog.push({ q, a: r.text });
+      bubble.textContent = r.text || "…";
     } catch (e) { bubble.textContent = errText(e); }
     finally { $("askBtn").disabled = false; }
   }
 
-  /* ---------- Lịch sử ---------- */
-  function saveHistory(d, img) {
+  /* ---- Lịch sử ---- */
+  function saveHistory(d, thumb) {
     const h = store.get("hist", []).filter((x) => x.d.name !== d.name);
-    h.unshift({ d, thumb: img, t: Date.now() });
-    store.set("hist", h.slice(0, 12));
-    renderHist();
+    h.unshift({ d, thumb: thumb || null, t: Date.now() });
+    store.set("hist", h.slice(0, 20)); renderRecent();
+  }
+  function openHist(x) {
+    if (x.d.lang === lang && x.d.style === len) { stopAudio(); go("place"); curPhoto = null; curThumb = x.thumb; setHero(x.thumb); setScanning(false); status(""); chatLog = []; $("pNF").classList.add("hidden"); showPlace(x.d, false); }
+    else { curThumb = x.thumb; runGuide({ name: x.d.name, photo: x.thumb }); }
+  }
+  function histImg(x, cls) { const d = el("div", cls); if (x.thumb) d.style.backgroundImage = `url("${x.thumb}")`; else d.textContent = "🏛️"; return d; }
+  function renderRecent() {
+    const h = store.get("hist", []); $("recentWrap").classList.toggle("hidden", !h.length);
+    const box = $("recent"); box.innerHTML = "";
+    h.slice(0, 8).forEach((x) => { const b = el("button", "rc"); b.type = "button"; b.append(histImg(x, "img"), el("b", null, x.d.title || x.d.name)); b.onclick = () => openHist(x); box.appendChild(b); });
   }
   function renderHist() {
-    const h = store.get("hist", []);
-    const box = $("hist");
-    if (!h.length) return;
-    box.innerHTML = "";
+    const h = store.get("hist", []), box = $("hist"); box.innerHTML = "";
+    if (!h.length) { box.appendChild(el("p", "muted", t("hist_empty"))); return; }
     h.forEach((x) => {
-      const b = el("button");
-      if (x.thumb) { const i = document.createElement("img"); i.src = x.thumb; i.alt = ""; b.appendChild(i); }
-      else b.appendChild(el("span", null, "🏛️"));
-      const t = el("div"); t.appendChild(el("b", null, x.d.title || x.d.name));
-      t.appendChild(el("span", "muted", [[x.d.city, x.d.country].filter(Boolean).join(", "), new Date(x.t).toLocaleDateString("vi-VN")].filter(Boolean).join(" · ")));
-      b.appendChild(t);
-      b.onclick = () => { stopAudio(); current = x.d; chatLog = []; showResult(x.d); $("result").scrollIntoView({ behavior: "smooth" }); };
-      box.appendChild(b);
+      const b = el("button", "hi"); b.type = "button";
+      const tx = el("div"); tx.append(el("b", null, x.d.title || x.d.name), el("span", "muted", [x.d.city, new Date(x.t).toLocaleDateString(LANGS[lang].code)].filter(Boolean).join(" · ")));
+      b.append(histImg(x, "img"), tx); b.onclick = () => openHist(x); box.appendChild(b);
     });
   }
-  renderHist();
 
-  /* ---------- SOS (mô phỏng) ---------- */
-  let sosT = null, sosDone = false;
-  $("sosBtn").onclick = () => {
-    let n = 5; sosDone = false;
-    $("sosCount").textContent = n;
-    $("sosMsg").textContent = "Tín hiệu mô phỏng sẽ được gửi sau khi đếm ngược kết thúc.";
-    $("sosCancel").textContent = "Huỷ";
-    $("sosOverlay").classList.remove("hidden");
-    if (navigator.vibrate) try { navigator.vibrate(200); } catch {}
-    sosT = setInterval(() => {
-      n--; $("sosCount").textContent = n;
-      if (n <= 0) {
-        clearInterval(sosT); sosDone = true;
-        $("sosCount").textContent = "✓";
-        $("sosMsg").textContent = "Mô phỏng hoàn tất. Không có tín hiệu thật nào được gửi. Nếu khẩn cấp, gọi 113, 114 hoặc 115.";
-        $("sosCancel").textContent = "Về trang chủ";
-      }
-    }, 1000);
+  /* ---- SOS ---- */
+  $("sosBig").onclick = () => openSheet("sosSheet");
+  $("sosCancel").onclick = () => closeSheet("sosSheet");
+  function locate() {
+    $("coords").textContent = t("loc_wait");
+    if (!navigator.geolocation) { $("coords").textContent = t("loc_na"); return; }
+    navigator.geolocation.getCurrentPosition((p) => {
+      const la = p.coords.latitude.toFixed(5), lo = p.coords.longitude.toFixed(5);
+      lastPos = { lat: la, lng: lo };
+      $("coords").textContent = `${la}, ${lo}`;
+      const m = $("mapLink"); m.href = `https://www.google.com/maps?q=${la},${lo}`; m.classList.remove("hidden");
+      $("copyLoc").classList.remove("hidden");
+    }, () => { $("coords").textContent = t("loc_na"); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+  }
+  $("copyLoc").onclick = async () => {
+    if (!lastPos) return;
+    const txt = `${lastPos.lat}, ${lastPos.lng} – https://www.google.com/maps?q=${lastPos.lat},${lastPos.lng}`;
+    try { await navigator.clipboard.writeText(txt); toast(t("copied")); } catch { toast(txt); }
   };
-  $("sosCancel").onclick = () => {
-    clearInterval(sosT); $("sosOverlay").classList.add("hidden");
-    if (sosDone) go("home");
-  };
+
+  /* ---- Khởi động ---- */
+  applyI18n();
+  if (!getKey()) setTimeout(openKey, 500); else resolveModels(); // làm nóng kết nối trước khi khách bấm
 })();
+
 </script>
 </body>
 </html>
