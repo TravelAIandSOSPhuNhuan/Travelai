@@ -190,6 +190,19 @@
   nav .fab .ic { width: 58px; height: 58px; border-radius: 50%; margin-top: -26px; display: grid; place-items: center; font-size: 26px; color: #fff;
     background: linear-gradient(135deg, var(--brand), var(--brand2)); box-shadow: 0 8px 20px rgba(11, 94, 215, .4); border: 4px solid #fff; }
   nav .fab input { position: absolute; inset: 0; opacity: 0; width: 100%; }
+  .gal { display: flex; gap: 8px; overflow-x: auto; margin: 12px -16px 0; padding: 0 16px 4px; scrollbar-width: none; }
+  .gal::-webkit-scrollbar { display: none; }
+  .gal button { flex: none; height: 112px; border-radius: 14px; overflow: hidden; background: #e8edf5; }
+  .gal img { height: 112px; width: auto; min-width: 84px; max-width: 220px; object-fit: cover; display: block; }
+  .gcap { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+  .links { display: flex; gap: 8px; margin-top: 10px; }
+  .links a { flex: 1; text-decoration: none; font-size: 14px; padding: 10px; }
+  .viewer { position: fixed; inset: 0; z-index: 90; background: rgba(5, 10, 20, .94); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; animation: fade .2s; }
+  .viewer img { max-width: 100%; max-height: 78vh; border-radius: 12px; }
+  .viewer a { color: #cfd8e6; font-size: 12px; margin-top: 12px; }
+  .viewer button { position: absolute; top: calc(var(--safe-t) + 14px); right: 14px; width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; font-size: 20px; }
+  .pop .e { overflow: hidden; background-size: cover; background-position: center; }
+  .ph.hasimg .emoji { display: none; }
   .toast { position: fixed; bottom: calc(96px + var(--safe-b)); left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 14px; font-size: 13px; z-index: 70; max-width: 90%; text-align: center; animation: fade .2s; }
   .fadein { animation: fade .3s; }
 </style>
@@ -199,7 +212,7 @@
   <header>
     <div class="brand">
       <div class="logo">T</div>
-      <div><b>TRAVEL<span>AI</span></b><small>YOUR SMART TRAVEL COMPANION · v3.3</small></div>
+      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v3.4</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
     </div>
     <div class="hdr-r">
       <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
@@ -240,6 +253,11 @@
     <div class="card pcard">
       <div class="ptitle"><h3 id="pTitle"></h3><span class="badge hidden" id="pBadge"></span></div>
       <div class="loc" id="pLoc"></div>
+      <div id="pGalWrap" class="hidden"><div class="gal" id="pGal"></div><div class="gcap" data-i="credit"></div></div>
+      <div class="links hidden" id="pLinks">
+        <a class="btn btn-ghost" id="pMap" target="_blank" rel="noopener">🗺️ <span data-i="directions"></span></a>
+        <a class="btn btn-ghost hidden" id="pWiki" target="_blank" rel="noopener">📖 Wikipedia</a>
+      </div>
       <div class="status hidden" id="pStatus"><span class="wave"><i></i><i></i><i></i></span><span id="pStatusT"></span></div>
       <div class="player hidden" id="player">
         <button class="pbtn" id="pPlay">▶</button>
@@ -295,14 +313,15 @@
   <button data-go="sos" class="sosn"><span class="ic">🆘</span><span data-i="nav_sos"></span></button>
 </div></nav>
 
+<div class="viewer hidden" id="viewer"><button id="vClose" aria-label="Close">✕</button><img id="vImg" alt="" /><a id="vSrc" target="_blank" rel="noopener">Wikimedia Commons</a></div>
+
 <!-- Language & settings -->
 <div class="sheetbg hidden" id="langSheet"><div class="sheet">
   <div class="grab"></div>
   <h3 data-i="lang_t"></h3>
   <p class="muted" data-i="lang_s"></p>
   <div class="langs" id="langs"></div>
-  <div class="setrow"><div><b data-i="voice_ai"></b><span class="muted" data-i="voice_ai_s"></span></div><button class="switch" id="swVoice"></button></div>
-  <div style="padding-bottom:12px" id="voiceWrap"><b style="font-size:15px" data-i="voice_style"></b><div class="seg" id="voiceSeg"></div></div>
+  <div class="setrow" style="display:block"><b data-i="voice_style"></b><span class="muted" style="display:block" data-i="voice_ai_s"></span><div class="seg" id="voiceSeg"></div></div>
   <div class="setrow" style="display:block"><b data-i="len"></b><div class="seg" id="lenSeg"><button data-len="short" data-i="len_short"></button><button data-len="standard" data-i="len_full"></button></div></div>
   <div class="setrow"><div><b data-i="focus"></b><span class="muted" data-i="focus_s"></span></div><button class="switch" id="swFocus"></button></div>
   <button class="btn btn-primary" id="langDone" data-i="done"></button>
@@ -384,6 +403,7 @@
       dnd: "🎧 Nhớ bật Không làm phiền nhé", no_vi_voice: "Máy chưa có giọng tiếng Việt, hãy bật Giọng đọc AI.",
       key_t: "Nhập API key Gemini", key_s: "Key chỉ lưu trên trình duyệt của máy này.", key_save: "Lưu key", key_later: "Để sau",
       thinking: "Đang trả lời…",
+      voice_err: "Giọng đọc đang bận, chạm ↻ để thử lại", photos: "Hình ảnh", directions: "Chỉ đường", credit: "Ảnh: Wikipedia / Wikimedia Commons", voice_ai_s: "Giọng AI truyền cảm như hướng dẫn viên thật",
     },
     en: {
       ai_on: "AI ready", ai_off: "No API key",
@@ -422,6 +442,7 @@
       dnd: "🎧 Turn on Do Not Disturb", no_vi_voice: "No voice for this language on your device. Turn on the AI voice.",
       key_t: "Enter your Gemini API key", key_s: "The key is stored only in this browser.", key_save: "Save key", key_later: "Later",
       thinking: "Answering…",
+      voice_err: "Voice is busy, tap ↻ to retry", photos: "Photos", directions: "Directions", credit: "Photos: Wikipedia / Wikimedia Commons", voice_ai_s: "Expressive AI voice, like a real tour guide",
     },
     ja: {
       ai_on: "AI準備完了", ai_off: "APIキー未設定",
@@ -460,6 +481,7 @@
       dnd: "🎧 おやすみモードをオンにしましょう", no_vi_voice: "この言語の音声が端末にありません。AI音声をオンにしてください。",
       key_t: "Gemini APIキーを入力", key_s: "キーはこのブラウザにのみ保存されます。", key_save: "保存", key_later: "後で",
       thinking: "回答中…",
+      voice_err: "音声が混み合っています。↻で再試行", photos: "写真", directions: "ルート", credit: "写真：Wikipedia / Wikimedia Commons", voice_ai_s: "本物のガイドのような表現豊かなAI音声",
     },
     ko: {
       ai_on: "AI 준비됨", ai_off: "API 키 없음",
@@ -498,6 +520,7 @@
       dnd: "🎧 방해 금지 모드를 켜 주세요", no_vi_voice: "기기에 이 언어 음성이 없습니다. AI 음성을 켜 주세요.",
       key_t: "Gemini API 키 입력", key_s: "키는 이 브라우저에만 저장됩니다.", key_save: "저장", key_later: "나중에",
       thinking: "답변 중…",
+      voice_err: "음성이 혼잡합니다. ↻를 눌러 다시 시도", photos: "사진", directions: "길찾기", credit: "사진: Wikipedia / Wikimedia Commons", voice_ai_s: "실제 가이드처럼 생생한 AI 음성",
     },
     fr: {
       ai_on: "IA prête", ai_off: "Pas de clé API",
@@ -536,6 +559,7 @@
       dnd: "🎧 Activez Ne pas déranger", no_vi_voice: "Pas de voix pour cette langue sur l'appareil. Activez la voix IA.",
       key_t: "Saisissez votre clé API Gemini", key_s: "La clé est enregistrée uniquement dans ce navigateur.", key_save: "Enregistrer", key_later: "Plus tard",
       thinking: "Réponse en cours…",
+      voice_err: "Voix occupée, touchez ↻ pour réessayer", photos: "Photos", directions: "Itinéraire", credit: "Photos : Wikipédia / Wikimedia Commons", voice_ai_s: "Voix IA expressive, comme un vrai guide",
     },
   };
 
@@ -556,7 +580,6 @@
   ];
 
   let lang = store.get("lang", "vi"); if (!LANGS[lang]) lang = "vi";
-  let aiVoice = store.get("aiVoice", true);
   let voiceStyle = store.get("voice", "warm_f"); if (!VOICES[voiceStyle]) voiceStyle = "warm_f";
   let len = store.get("len", "standard");
   let focus = store.get("focus", false);
@@ -670,7 +693,7 @@
     if (e && e.code === "rate_limited") return t("err_rate");
     if (e && e.code === "network") return t("err_net") + (e.message ? "\n(" + e.message + ")" : "");
     if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
-    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v3.3 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v3.4 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
   }
 
   /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
@@ -755,73 +778,56 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   function unlockAudio() {
     if (unlocked) return; unlocked = true;
     try { audio.src = SILENT; audio.play().catch(() => {}); } catch {}
-    try { if ("speechSynthesis" in window) { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } } catch {}
   }
   ["touchend", "click"].forEach((ev) => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
 
-  // Chỉ dẫn đọc viết bằng CHÍNH ngôn ngữ đang chọn, để AI không chen ngôn ngữ khác
-  const TTS_STYLE = {
-    vi: "Đọc bằng tiếng Việt, giọng hướng dẫn viên ấm áp, truyền cảm:",
-    en: "Say in English, like a warm, lively tour guide:",
-    ja: "日本語で、温かく生き生きとした観光ガイドのように読んでください：",
-    ko: "한국어로, 따뜻하고 생동감 있는 관광 가이드처럼 읽어 주세요:",
-    fr: "Dites en français, comme un guide touristique chaleureux et vivant :",
-  };
+  // Chỉ gửi đúng lời thuyết minh (không kèm câu chỉ dẫn) -> AI không đọc thừa câu nào
   const ttsCache = new Map();
-  let ttsOffUntil = store.get("ttsOff", 0);
   let ttsLangCode = store.get("ttsLangCode", true);
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   function ttsUrl(text, lg) {
     lg = lg || (cur && cur.lang) || lang;
     const k = voiceStyle + "|" + lg + "|" + text;
     if (ttsCache.has(k)) return ttsCache.get(k);
     const p = (async () => {
-      if (!aiVoice || Date.now() < ttsOffUntil) return null;
-      try {
-        const body = (withCode) => ({
-          contents: [{ parts: [{ text: TTS_STYLE[lg] + " " + text }] }],
-          generationConfig: { responseModalities: ["AUDIO"], speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } },
-            ...(withCode ? { languageCode: LANGS[lg].code } : {}),
-          } },
-        });
-        let r;
-        try { r = await gem("tts", M.TTS || "gemini-2.5-flash-preview-tts", body(ttsLangCode)); }
-        catch (e) {
-          // Mô hình không nhận mã ngôn ngữ -> thử lại không kèm mã
-          if (!ttsLangCode || e.code === "rate_limited") throw e;
-          ttsLangCode = false; store.set("ttsLangCode", false);
-          r = await gem("tts", M.TTS || "gemini-2.5-flash-preview-tts", body(false));
+      const body = (withCode) => ({
+        contents: [{ parts: [{ text }] }],
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } },
+          ...(withCode ? { languageCode: LANGS[lg].code } : {}),
+        } },
+      });
+      const model = () => M.TTS || "gemini-2.5-flash-preview-tts";
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const r = await gem("tts", model(), body(ttsLangCode));
+          const part = ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).find((x) => x.inlineData || x.inline_data);
+          const d = part && (part.inlineData || part.inline_data);
+          if (!d || !d.data) throw { code: "server" };
+          const rate = +((d.mimeType || d.mime_type || "").match(/rate=(\d+)/) || [0, 24000])[1];
+          return pcmToWavUrl(d.data, rate);
+        } catch (e) {
+          if (e && e.code === "rate_limited") { await sleep(2500 * (attempt + 1)); continue; } // bận -> chờ rồi thử lại
+          if (ttsLangCode && attempt === 0) { ttsLangCode = false; store.set("ttsLangCode", false); continue; } // không nhận mã ngôn ngữ
+          break;
         }
-        const part = ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).find((x) => x.inlineData || x.inline_data);
-        const d = part && (part.inlineData || part.inline_data);
-        if (!d || !d.data) throw new Error("no audio");
-        const rate = +((d.mimeType || d.mime_type || "").match(/rate=(\d+)/) || [0, 24000])[1];
-        return pcmToWavUrl(d.data, rate);
-      } catch (e) {
-        ttsOffUntil = Date.now() + 10 * 60e3; store.set("ttsOff", ttsOffUntil); // tạm dùng giọng máy 10 phút
-        ttsCache.delete(k); return null;
       }
+      ttsCache.delete(k); return null;
     })();
     ttsCache.set(k, p);
     return p;
   }
   const splitS = (s) => (String(s).match(/[^.!?。！？]+[.!?。！？]+["”’»)]*\s*|[^.!?。！？]+\s*$/g) || []).map((x) => x.trim()).filter(Boolean);
+  // Đoạn 1 = 2 câu đầu (để bắt đầu đọc nhanh), phần còn lại gộp thành 1 đoạn (ít lượt gọi)
   function chunksOf(sents) {
     if (!sents.length) return [];
     const first = Math.min(2, sents.length);
     const out = [{ from: 0, to: first }];
-    let i = first;
-    while (i < sents.length) { let j = i, n = 0; while (j < sents.length && (n < 450 || j === i)) { n += sents[j].length; j++; } out.push({ from: i, to: j }); i = j; }
+    if (first < sents.length) out.push({ from: first, to: sents.length });
     return out.map((c) => ({ ...c, text: sents.slice(c.from, c.to).join(" ") }));
   }
-  function bestVoice(code) {
-    const vs = ("speechSynthesis" in window ? speechSynthesis.getVoices() : []).filter((v) => v.lang && v.lang.toLowerCase().replace("_", "-").startsWith(code.slice(0, 2)));
-    const score = (v) => (/premium|enhanced|natural|neural|siri/i.test(v.name) ? 3 : 0) + (/google/i.test(v.name) ? 2 : 0) + (v.lang.replace("_", "-") === code ? 1 : 0) + (v.localService ? 0.5 : 0);
-    return vs.sort((a, b) => score(b) - score(a))[0] || null;
-  }
-  if ("speechSynthesis" in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); }
 
-  const R = { sents: [], chunks: [], state: "idle", hl: -1, token: 0, mode: "", resumeAt: 0 };
+  const R = { sents: [], chunks: [], state: "idle", hl: -1, token: 0, resumeAt: 0 };
   function setHL(i) {
     R.hl = i;
     document.querySelectorAll("#pNarr .s").forEach((e, k) => e.classList.toggle("on", k === i));
@@ -831,9 +837,9 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   }
   function renderPlayer() {
     const s = R.state;
-    $("pPlay").innerHTML = s === "playing" ? "❚❚" : s === "loading" ? '<span class="wave"><i></i><i></i><i></i></span>' : "▶";
-    $("pState").textContent = s === "playing" ? t("reading") : s === "loading" ? t("voice_load") : s === "paused" ? t("paused") : t("listen");
-    $("pVoice").textContent = R.mode === "device" || !aiVoice || Date.now() < ttsOffUntil ? "🔊 " + t("voice_device") : "🎙️ " + t("v_" + voiceStyle);
+    $("pPlay").innerHTML = s === "playing" ? "❚❚" : s === "loading" ? '<span class="wave"><i></i><i></i><i></i></span>' : s === "error" ? "↻" : "▶";
+    $("pState").textContent = s === "playing" ? t("reading") : s === "loading" ? t("voice_load") : s === "paused" ? t("paused") : s === "error" ? t("voice_err") : t("listen");
+    $("pVoice").textContent = "🎙️ " + t("v_" + voiceStyle);
   }
   function setState(s) { R.state = s; renderPlayer(); }
   function prepareReader(narr) { R.sents = splitS(narr); R.chunks = chunksOf(R.sents); R.resumeAt = 0; }
@@ -841,21 +847,19 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   async function play(fromSent = 0) {
     const my = ++R.token;
     if (focus) toast(t("dnd"));
-    audio.pause(); if ("speechSynthesis" in window) speechSynthesis.cancel();
+    audio.pause();
     if (!R.sents.length) return;
-    const useAI = aiVoice && Date.now() >= ttsOffUntil;
-    if (!useAI) return deviceFrom(fromSent, my);
-    R.mode = "ai"; setState("loading");
+    setState("loading");
     for (let ci = 0; ci < R.chunks.length; ci++) {
       const c = R.chunks[ci];
       if (c.to <= fromSent) continue;
       const url = await ttsUrl(c.text);
       if (R.chunks[ci + 1]) ttsUrl(R.chunks[ci + 1].text); // chuẩn bị đoạn sau trong lúc đọc
       if (my !== R.token) return;
-      if (!url) return deviceFrom(c.from, my);
+      if (!url) { R.resumeAt = c.from; setState("error"); return; }
       const ok = await playUrl(url, c, my);
       if (my !== R.token) return;
-      if (!ok) return deviceFrom(c.from, my);
+      if (!ok) { R.resumeAt = c.from; setState("error"); return; }
     }
     if (my === R.token) { setState("idle"); setHL(-1); R.resumeAt = 0; }
   }
@@ -878,31 +882,9 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
         .catch(() => { if (my === R.token) setState("paused"); });
     });
   }
-  function deviceFrom(i, my) {
-    R.mode = "device";
-    if (!("speechSynthesis" in window)) { setState("idle"); return; }
-    const code = LANGS[(cur && cur.lang) || lang].code, voice = bestVoice(code);
-    if (!voice && code.startsWith("vi")) toast(t("no_vi_voice"));
-    const next = (k) => {
-      if (my !== R.token) return;
-      if (k >= R.sents.length) { setState("idle"); setHL(-1); R.resumeAt = 0; return; }
-      const u = new SpeechSynthesisUtterance(R.sents[k]);
-      u.lang = code; if (voice) u.voice = voice;
-      u.rate = 1.0; u.pitch = voiceStyle.endsWith("_m") ? 0.95 : 1.08;
-      u.onstart = () => { if (my === R.token) { setState("playing"); setHL(k); R.resumeAt = k; } };
-      u.onend = () => setTimeout(() => next(k + 1), 180); // ngắt nghỉ tự nhiên giữa các câu
-      u.onerror = () => { if (my === R.token) setState("idle"); };
-      speechSynthesis.speak(u);
-    };
-    next(i);
-  }
-  function pause() {
-    if (R.mode === "ai") { audio.pause(); setState("paused"); return; }
-    R.token++; if ("speechSynthesis" in window) speechSynthesis.cancel();
-    setState("paused");
-  }
+  function pause() { audio.pause(); setState("paused"); }
   function resume() {
-    if (R.mode === "ai" && audio.src && audio.src !== SILENT && !audio.ended) {
+    if (audio.src && audio.src !== SILENT && !audio.ended) {
       audio.play().then(() => { setState("playing"); if (R.hl < 0) setHL(R.resumeAt); }).catch(() => play(R.resumeAt || 0));
       return;
     }
@@ -910,11 +892,85 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   }
   function stopAudio() {
     R.token++; if (R.onStop) R.onStop();
-    audio.pause(); if ("speechSynthesis" in window) speechSynthesis.cancel();
+    audio.pause();
     R.resumeAt = 0; setState("idle"); setHL(-1);
   }
-  $("pPlay").onclick = () => { if (R.state === "playing") pause(); else if (R.state === "paused") resume(); else if (R.state === "idle") play(0); };
+  $("pPlay").onclick = () => {
+    if (R.state === "playing") pause();
+    else if (R.state === "paused") resume();
+    else if (R.state === "error") play(R.resumeAt || 0);
+    else if (R.state === "idle") play(0);
+  };
   $("pStop").onclick = stopAudio;
+
+
+  /* ================= Hình ảnh (Wikipedia + Wikimedia Commons, ảnh dùng tự do) ================= */
+  const imgMem = new Map();
+  const jget = (u) => fetch(u).then((r) => r.json());
+  async function wikiLead(q, wl) {
+    const j = await jget(`https://${wl}.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=1&gsrsearch=${encodeURIComponent(q)}&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize=1200`);
+    const pg = j.query && Object.values(j.query.pages)[0];
+    return pg ? { img: pg.thumbnail && pg.thumbnail.source, url: pg.fullurl } : null;
+  }
+  async function commons(q) {
+    const j = await jget(`https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=14&gsrsearch=${encodeURIComponent(q + " filetype:bitmap")}&prop=imageinfo&iiprop=url|mime&iiurlwidth=640`);
+    return Object.values((j.query && j.query.pages) || {}).sort((a, b) => a.index - b.index)
+      .map((p) => p.imageinfo && p.imageinfo[0]).filter((i) => i && /jpe?g|png|webp/i.test(i.mime || "") && i.thumburl)
+      .map((i) => ({ thumb: i.thumburl, page: i.descriptionurl }));
+  }
+  function loadImages(name, city) {
+    const k = (name + "|" + (city || "")).toLowerCase();
+    if (imgMem.has(k)) return imgMem.get(k);
+    const p = (async () => {
+      const [lead, gal] = await Promise.all([
+        (async () => { try { return (await wikiLead(name, "vi")) || (await wikiLead(name + (city ? " " + city : ""), "en")); } catch { return null; } })(),
+        (async () => { try { let g = await commons(name); if (g.length < 4 && city) g = g.concat(await commons(name + " " + city)); return g; } catch { return []; } })(),
+      ]);
+      const seen = new Set(); const gallery = gal.filter((x) => !seen.has(x.thumb) && seen.add(x.thumb)).slice(0, 12);
+      return { lead: lead || {}, gallery };
+    })();
+    imgMem.set(k, p);
+    return p;
+  }
+  function applyImages(res, my) {
+    if (my !== runId) return;
+    const heroImg = res.lead.img || (res.gallery[0] && res.gallery[0].thumb);
+    if (!curPhoto && heroImg) { setHero(heroImg); curThumb = curThumb || heroImg; updateHistThumb(heroImg); }
+    if (res.lead.url) { $("pWiki").href = res.lead.url; $("pWiki").classList.remove("hidden"); }
+    const g = $("pGal"); g.innerHTML = "";
+    res.gallery.forEach((x) => {
+      const b = el("button"); b.type = "button";
+      const im = el("img"); im.loading = "lazy"; im.alt = ""; im.src = x.thumb; im.onerror = () => b.remove();
+      b.appendChild(im); b.onclick = () => openViewer(x); g.appendChild(b);
+    });
+    $("pGalWrap").classList.toggle("hidden", !res.gallery.length);
+  }
+  function openViewer(x) { $("vImg").src = x.thumb; $("vSrc").href = x.page; $("viewer").classList.remove("hidden"); }
+  $("vClose").onclick = () => $("viewer").classList.add("hidden");
+  $("viewer").onclick = (e) => { if (e.target.id === "viewer") $("viewer").classList.add("hidden"); };
+  let imgStarted = "";
+  function startImages(name, city, my) {
+    if (!name || imgStarted === name) return;
+    imgStarted = name;
+    const q = [name, city].filter(Boolean).join(", ");
+    $("pMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+    $("pLinks").classList.remove("hidden");
+    loadImages(name, city).then((r) => applyImages(r, my)).catch(() => {});
+  }
+  function updateHistThumb(img) {
+    if (!cur) return;
+    const h = store.get("hist", []); const x = h.find((y) => y.d.name === cur.name);
+    if (x && !x.thumb) { x.thumb = img; store.set("hist", h); renderRecent(); }
+  }
+  // Ảnh cho thẻ địa danh nổi bật (lưu 7 ngày)
+  async function loadPopImages() {
+    const c = store.get("popimg", null);
+    if (c && Date.now() - c.t < 7 * 864e5) return c.d;
+    const d = {};
+    await Promise.all(POPULAR.map(async ([, vi]) => { try { const r = await wikiLead(vi, "vi"); if (r && r.img) d[vi] = r.img.replace(/\/\d+px-/, "/240px-"); } catch {} }));
+    store.set("popimg", { t: Date.now(), d });
+    return d;
+  }
 
   /* ================= Giao diện ================= */
   const VIEWS = ["home", "place", "hist", "sos"];
@@ -940,11 +996,15 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     renderPop(); renderRecent(); renderSettings(); renderPlayer();
     if (view === "hist") renderHist();
   }
+  let popImgs = {};
+  function paintPop() { document.querySelectorAll("#pop .e").forEach((x) => { const u = popImgs[x.dataset.vi]; if (u) { x.style.backgroundImage = `url("${u}")`; x.textContent = ""; } }); }
   function renderPop() {
     const box = $("pop"); box.innerHTML = "";
+    setTimeout(paintPop, 0);
     POPULAR.forEach(([e, vi, en]) => {
       const b = el("button"); b.type = "button";
-      b.append(el("span", "e", e), el("span", null, lang === "vi" ? vi : en));
+      const ic = el("span", "e", e); ic.dataset.vi = vi;
+      b.append(ic, el("span", null, lang === "vi" ? vi : en));
       b.onclick = () => searchPlace(lang === "vi" ? vi : en);
       box.appendChild(b);
     });
@@ -959,8 +1019,6 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
       b.onclick = () => setLang(k);
       ls.appendChild(b);
     });
-    $("swVoice").classList.toggle("on", aiVoice);
-    $("voiceWrap").classList.toggle("hidden", !aiVoice);
     const vs = $("voiceSeg"); vs.innerHTML = "";
     Object.keys(VOICES).forEach((k) => {
       const b = el("button", k === voiceStyle ? "on" : "", t("v_" + k)); b.type = "button";
@@ -981,7 +1039,6 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   document.querySelectorAll(".sheetbg").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s) s.classList.add("hidden"); }));
   $("langBtn").onclick = $("navLang").onclick = () => openSheet("langSheet");
   $("langDone").onclick = () => closeSheet("langSheet");
-  $("swVoice").onclick = () => { aiVoice = !aiVoice; store.set("aiVoice", aiVoice); if (aiVoice) { ttsOffUntil = 0; store.set("ttsOff", 0); } renderSettings(); renderPlayer(); };
   $("swFocus").onclick = () => { focus = !focus; store.set("focus", focus); renderSettings(); };
   $("lenSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; len = b.dataset.len; store.set("len", len); renderSettings(); };
 
@@ -1027,7 +1084,8 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   function setHero(photo, emoji = "🏛️") {
     const h = $("pHero");
     h.style.backgroundImage = photo ? `url("${photo}")` : "";
-    $("pEmoji").textContent = photo ? "" : emoji;
+    h.classList.toggle("hasimg", !!photo);
+    $("pEmoji").textContent = emoji;
   }
   function setScanning(on) { $("pScan").classList.toggle("hidden", !on); $("pCorners").classList.toggle("hidden", !on); }
   function status(txt) { $("pStatus").classList.toggle("hidden", !txt); $("pStatusT").textContent = txt || ""; }
@@ -1042,6 +1100,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     $("pTitle").textContent = o.name || t("identifying");
     $("pLoc").textContent = ""; $("pBadge").classList.add("hidden");
     $("player").classList.add("hidden"); $("pNF").classList.add("hidden"); $("pMore").innerHTML = ""; $("askCard").classList.add("hidden");
+    $("pGalWrap").classList.add("hidden"); $("pGal").innerHTML = ""; $("pLinks").classList.add("hidden"); $("pWiki").classList.add("hidden"); imgStarted = "";
     const n = $("pNarr"); n.className = "narr"; n.innerHTML = '<div class="skel"></div><div class="skel" style="width:92%"></div><div class="skel" style="width:76%"></div>';
     status(o.imageBase64 ? t("scanning") : t("writing"));
     let prefetched = false;
@@ -1049,12 +1108,12 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
       const res = await fastGuide({ ...o, lang, style: len }, (p) => {
         if (my !== runId) return;
         if (p.title || p.name) $("pTitle").textContent = p.title || p.name;
-        if (p.place) $("pLoc").textContent = "📍 " + p.place;
+        if (p.place) { $("pLoc").textContent = "📍 " + p.place; startImages(p.name, p.place.split(",")[0].trim(), my); } // tên đã đủ -> tải ảnh song song
         if (p.narration) {
           setScanning(false); status(t("writing"));
           n.classList.add("typing"); n.textContent = p.narration;
           // Chuẩn bị giọng đọc cho 2 câu đầu ngay khi AI vừa viết xong 2 câu
-          if (!prefetched && aiVoice) {
+          if (!prefetched) {
             const ss = splitS(p.narration);
             if (ss.length >= 3) { prefetched = true; ttsUrl(chunksOf(ss)[0].text, lang); }
           }
@@ -1089,6 +1148,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
 
   function showPlace(d, autoplay) {
     cur = d;
+    startImages(d.name, d.city, runId);
     $("pTitle").textContent = d.title || d.name;
     const loc = [d.name !== d.title ? d.name : "", d.city, d.country].filter(Boolean).join(" · ");
     $("pLoc").textContent = loc ? "📍 " + loc + (d.category ? "  ·  " + d.category : "") : "";
@@ -1169,7 +1229,7 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
     store.set("hist", h.slice(0, 20)); renderRecent();
   }
   function openHist(x) {
-    if (x.d.lang === lang && x.d.style === len) { stopAudio(); go("place"); curPhoto = null; curThumb = x.thumb; setHero(x.thumb); setScanning(false); status(""); chatLog = []; $("pNF").classList.add("hidden"); showPlace(x.d, false); }
+    if (x.d.lang === lang && x.d.style === len) { stopAudio(); go("place"); runId++; imgStarted = ""; $("pGal").innerHTML = ""; $("pGalWrap").classList.add("hidden"); curPhoto = null; curThumb = x.thumb; setHero(x.thumb); setScanning(false); status(""); chatLog = []; $("pNF").classList.add("hidden"); showPlace(x.d, false); }
     else { curThumb = x.thumb; runGuide({ name: x.d.name, photo: x.thumb }); }
   }
   function histImg(x, cls) { const d = el("div", cls); if (x.thumb) d.style.backgroundImage = `url("${x.thumb}")`; else d.textContent = "🏛️"; return d; }
@@ -1210,6 +1270,7 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
 
   /* ---- Khởi động ---- */
   applyI18n();
+  loadPopImages().then((d) => { popImgs = d; paintPop(); }).catch(() => {});
   // Mở trong trình xem file / khung xem trước (không phải web thật) -> AI bị chặn, báo rõ cho người dùng
   if (!/^https?:$/.test(location.protocol) || /claude|claudeusercontent|anthropic/i.test(location.hostname) || window.claude) {
     const b = el("div", null, lang === "vi" ? "⚠️ Bạn đang mở bản xem trước, AI bị chặn ở đây. Hãy mở bằng Safari tại link github.io của bạn." : "⚠️ This is a preview where AI is blocked. Open your github.io link in Safari.");
