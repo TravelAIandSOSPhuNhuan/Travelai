@@ -199,7 +199,7 @@
   <header>
     <div class="brand">
       <div class="logo">T</div>
-      <div><b>TRAVEL<span>AI</span></b><small>YOUR SMART TRAVEL COMPANION · v3.2</small></div>
+      <div><b>TRAVEL<span>AI</span></b><small>YOUR SMART TRAVEL COMPANION · v3.3</small></div>
     </div>
     <div class="hdr-r">
       <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
@@ -670,7 +670,7 @@
     if (e && e.code === "rate_limited") return t("err_rate");
     if (e && e.code === "network") return t("err_net") + (e.message ? "\n(" + e.message + ")" : "");
     if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
-    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v3.2 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v3.3 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
   }
 
   /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
@@ -691,7 +691,7 @@ Reply IMMEDIATELY in exactly this format, no preamble, no markdown:
 ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, reply only:
 @@NONE
 {"is_landmark":false,"alternatives":["possible places, if any"]}
-` : ""}Everything except @@NAME must be in ${L}. State only facts you are sure of; never invent numbers.`;
+` : ""}Everything except @@NAME must be in ${L} ONLY. Never mix in words from other languages (no Vietnamese, English or Chinese words unless ${L} is that language). When a Vietnamese proper name appears in non-Vietnamese text, write it the way ${L} speakers normally write it (without Vietnamese diacritics, e.g. "Hoi An", "Hue"). The narration will be read aloud by a ${L} voice, so it must sound 100% natural in ${L}. State only facts you are sure of; never invent numbers.`;
   }
   function parseStream(s) {
     const g = (k) => { const m = s.match(new RegExp("@@" + k + ":[ \\t]*(.*)")); return m ? m[1].trim() : ""; };
@@ -759,19 +759,39 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   }
   ["touchend", "click"].forEach((ev) => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
 
-  const TTS_STYLE = "Read this aloud like a warm, charismatic tour guide telling a captivating story to a small group of travellers: lively and expressive, with natural pauses, varied intonation and a smile in the voice. Read it in its own language:";
+  // Chỉ dẫn đọc viết bằng CHÍNH ngôn ngữ đang chọn, để AI không chen ngôn ngữ khác
+  const TTS_STYLE = {
+    vi: "Đọc bằng tiếng Việt, giọng hướng dẫn viên ấm áp, truyền cảm:",
+    en: "Say in English, like a warm, lively tour guide:",
+    ja: "日本語で、温かく生き生きとした観光ガイドのように読んでください：",
+    ko: "한국어로, 따뜻하고 생동감 있는 관광 가이드처럼 읽어 주세요:",
+    fr: "Dites en français, comme un guide touristique chaleureux et vivant :",
+  };
   const ttsCache = new Map();
   let ttsOffUntil = store.get("ttsOff", 0);
-  function ttsUrl(text) {
-    const k = voiceStyle + "|" + text;
+  let ttsLangCode = store.get("ttsLangCode", true);
+  function ttsUrl(text, lg) {
+    lg = lg || (cur && cur.lang) || lang;
+    const k = voiceStyle + "|" + lg + "|" + text;
     if (ttsCache.has(k)) return ttsCache.get(k);
     const p = (async () => {
       if (!aiVoice || Date.now() < ttsOffUntil) return null;
       try {
-        const r = await gem("tts", M.TTS || "gemini-2.5-flash-preview-tts", {
-          contents: [{ parts: [{ text: TTS_STYLE + "\n\n" + text }] }],
-          generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } } } },
+        const body = (withCode) => ({
+          contents: [{ parts: [{ text: TTS_STYLE[lg] + " " + text }] }],
+          generationConfig: { responseModalities: ["AUDIO"], speechConfig: {
+            voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } },
+            ...(withCode ? { languageCode: LANGS[lg].code } : {}),
+          } },
         });
+        let r;
+        try { r = await gem("tts", M.TTS || "gemini-2.5-flash-preview-tts", body(ttsLangCode)); }
+        catch (e) {
+          // Mô hình không nhận mã ngôn ngữ -> thử lại không kèm mã
+          if (!ttsLangCode || e.code === "rate_limited") throw e;
+          ttsLangCode = false; store.set("ttsLangCode", false);
+          r = await gem("tts", M.TTS || "gemini-2.5-flash-preview-tts", body(false));
+        }
         const part = ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).find((x) => x.inlineData || x.inline_data);
         const d = part && (part.inlineData || part.inline_data);
         if (!d || !d.data) throw new Error("no audio");
@@ -1036,7 +1056,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
           // Chuẩn bị giọng đọc cho 2 câu đầu ngay khi AI vừa viết xong 2 câu
           if (!prefetched && aiVoice) {
             const ss = splitS(p.narration);
-            if (ss.length >= 3) { prefetched = true; ttsUrl(chunksOf(ss)[0].text); }
+            if (ss.length >= 3) { prefetched = true; ttsUrl(chunksOf(ss)[0].text, lang); }
           }
         }
       });
@@ -1132,7 +1152,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     try {
       const r = await gem("text", M.FAST, {
         systemInstruction: { parts: [{ text: `You are a friendly, witty local tour guide in Vietnam. The tourist is at: ${cur.name}${cur.city ? ", " + cur.city : ""}. What you already told them: ${cur.narration.slice(0, 500)}
-Answer in ${LANGS[lang].name}, 1-4 short sentences, conversational, plain text, no markdown. If unsure about prices or hours, say to check on site.` }] },
+Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist writes in another language), 1-4 short sentences, conversational, plain text, no markdown. If unsure about prices or hours, say to check on site.` }] },
         contents, generationConfig: { temperature: 0.7 },
         ...(needSearch ? { tools: [{ google_search: {} }] } : {}),
       }, (s) => { bubble.textContent = s; });
