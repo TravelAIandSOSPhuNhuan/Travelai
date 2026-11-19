@@ -199,7 +199,7 @@
   <header>
     <div class="brand">
       <div class="logo">T</div>
-      <div><b>TRAVEL<span>AI</span></b><small>YOUR SMART TRAVEL COMPANION</small></div>
+      <div><b>TRAVEL<span>AI</span></b><small>YOUR SMART TRAVEL COMPANION · v3.2</small></div>
     </div>
     <div class="hdr-r">
       <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
@@ -626,12 +626,15 @@
       st.tried.add(st.model);
       const stream = !!onText;
       let r;
-      try {
-        r = await fetch(`${API}/${st.model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`, {
-          method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-          body: JSON.stringify(kind === "tts" ? st.b : withThink(st.b)),
-        });
-      } catch { throw { code: "network" }; }
+      const doFetch = () => fetch(`${API}/${st.model}:${stream ? "streamGenerateContent?alt=sse" : "generateContent"}`, {
+        method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify(kind === "tts" ? st.b : withThink(st.b)),
+      });
+      try { r = await doFetch(); }
+      catch (e1) {
+        await new Promise((ok) => setTimeout(ok, 600)); // mạng chập chờn: thử lại 1 lần
+        try { r = await doFetch(); } catch (e2) { throw { code: "network", message: String((e2 && e2.message) || e2) + " · " + location.host }; }
+      }
       if (r.ok) {
         if (!stream) { const j = await r.json(); j._searched = !!st.b.tools; return j; }
         const reader = r.body.getReader(), dec = new TextDecoder();
@@ -665,9 +668,9 @@
   function parseJSON(s) { const x = String(s).replace(/```(?:json)?/gi, ""); return JSON.parse(x.slice(x.indexOf("{"), x.lastIndexOf("}") + 1)); }
   function errText(e) {
     if (e && e.code === "rate_limited") return t("err_rate");
-    if (e && e.code === "network") return t("err_net");
+    if (e && e.code === "network") return t("err_net") + (e.message ? "\n(" + e.message + ")" : "");
     if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
-    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "");
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v3.2 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
   }
 
   /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
@@ -1187,6 +1190,12 @@ Answer in ${LANGS[lang].name}, 1-4 short sentences, conversational, plain text, 
 
   /* ---- Khởi động ---- */
   applyI18n();
+  // Mở trong trình xem file / khung xem trước (không phải web thật) -> AI bị chặn, báo rõ cho người dùng
+  if (!/^https?:$/.test(location.protocol) || /claude|claudeusercontent|anthropic/i.test(location.hostname) || window.claude) {
+    const b = el("div", null, lang === "vi" ? "⚠️ Bạn đang mở bản xem trước, AI bị chặn ở đây. Hãy mở bằng Safari tại link github.io của bạn." : "⚠️ This is a preview where AI is blocked. Open your github.io link in Safari.");
+    b.style.cssText = "background:#fff4d6;color:#7a5200;border-radius:14px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:12px";
+    $("v-home").prepend(b);
+  }
   if (!getKey()) setTimeout(openKey, 500); else resolveModels(); // làm nóng kết nối trước khi khách bấm
 })();
 
