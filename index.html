@@ -16,7 +16,8 @@
 <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<!-- Font tải không chặn hiển thị: trang hiện ngay bằng font máy, font đẹp tải xong thì tự thay -->
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
 <style>
   :root {
     --bg: #f2f5fb; --card: #fff; --ink: #0f1b2d; --muted: #61708a; --line: #e4e9f2;
@@ -285,7 +286,7 @@
   <header>
     <div class="brand">
       <div class="logo">T</div>
-      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v4.4</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
+      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v4.5</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
     </div>
     <div class="hdr-r">
       <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
@@ -811,8 +812,12 @@
       const next = sug[1].replace(/[.-]+$/, "");
       if (!st.tried.has(next)) { st.model = next; if (st.kind === "tts") M.TTS = next; return true; }
     }
-    // Lỗi 400 (tham số không hợp lệ): bỏ dần cài đặt "tắt suy nghĩ" rồi mới đổi mô hình
+    // Lỗi 400 (tham số không hợp lệ): bỏ cài đặt độ phân giải ảnh, rồi "tắt suy nghĩ", rồi mới đổi mô hình
     if (st.kind !== "tts" && res.status === 400 && !/api.?key|key not valid|invalid.*key/i.test(res.m)) {
+      if (st.b.generationConfig && st.b.generationConfig.mediaResolution) {
+        const gc = { ...st.b.generationConfig }; delete gc.mediaResolution; st.b = { ...st.b, generationConfig: gc };
+        store.set("noMediaRes", 1); return true;
+      }
       if (thinkIdx < THINK.length - 1) { thinkIdx++; store.set("thinkIdx2", thinkIdx); return true; }
       const alt = M.ALTS.find((x) => !st.tried.has(x));
       if (alt) { st.model = alt; return true; }
@@ -880,7 +885,7 @@
     if (e && e.code === "rate_limited") return t("err_rate");
     if (e && e.code === "network") return t("err_net") + (e.message ? "\n(" + e.message + ")" : "");
     if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
-    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v4.4 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v4.5 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
   }
 
   /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
@@ -941,9 +946,13 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
     const parts = [];
     if (hasImage) parts.push({ inline_data: { mime_type: "image/jpeg", data: o.imageBase64 } });
     parts.push({ text: guidePrompt({ name: o.name, hasImage, ctx, lg: o.lang, style: o.style }) });
-    const { text } = await gem("text", hasImage ? M.MODEL : M.FAST, { contents: [{ role: "user", parts }], generationConfig: { temperature: 0.6 } },
+    const model = o.model || M.FAST; // mô hình nhanh nhất cho mọi yêu cầu
+    const gc = { temperature: 0.6, ...(hasImage && !store.get("noMediaRes", 0) ? { mediaResolution: "MEDIA_RESOLUTION_MEDIUM" } : {}) };
+    const { text } = await gem("text", model, { contents: [{ role: "user", parts }], generationConfig: gc },
       (s) => { const p = parseStream(s); if (!p.none) onUpdate(p); });
     const p = parseStream(text);
+    // mô hình nhanh không nhận ra ảnh -> hỏi lại mô hình mạnh hơn
+    if (hasImage && (p.none || (!p.name && !p.narration)) && model !== M.MODEL && !o.model) return fastGuide({ ...o, model: M.MODEL }, onUpdate);
     if (p.none || (!p.name && !p.narration)) {
       let a = {}; try { a = parseJSON(text.slice(Math.max(0, text.indexOf("@@NONE")))); } catch {}
       return { ok: false, landmark: { is_landmark: !!a.is_landmark, alternatives: a.alternatives || [] } };
@@ -1001,11 +1010,33 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
     }
     return out;
   }
-  function pcmToClip(b64, rate) {
-    const pcm = pcmClean(b64, rate, true), pad = Math.round(rate * 0.06), f32 = new Float32Array(pcm.length + pad);
+  function clipFromI16(pcm, rate) {
+    const pad = Math.round(rate * 0.06), f32 = new Float32Array(pcm.length + pad);
     for (let i = 0; i < pcm.length; i++) f32[i] = pcm[i] / 32768;
-    return { f32, rate };
+    return { f32, rate, i16: pcm };
   }
+  function pcmToClip(b64, rate) { return clipFromI16(pcmClean(b64, rate, true), rate); }
+  // Kho giọng đọc trên máy: tối đa 30 đoạn gần nhất
+  const VoiceDB = (() => {
+    let dbp = null;
+    const open = () => dbp || (dbp = new Promise((ok, no) => {
+      try { const r = indexedDB.open("travelai", 1); r.onupgradeneeded = () => r.result.createObjectStore("tts"); r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error); } catch (e) { no(e); }
+    }));
+    return {
+      async get(k) {
+        try { const db = await open(); return await new Promise((ok) => { const q = db.transaction("tts").objectStore("tts").get(k); q.onsuccess = () => ok(q.result || null); q.onerror = () => ok(null); }); } catch { return null; }
+      },
+      async put(k, v) {
+        try {
+          const db = await open(), tx = db.transaction("tts", "readwrite"), os = tx.objectStore("tts");
+          os.put(v, k);
+          const keys = store.get("ttsKeys", []).filter((x) => x !== k); keys.push(k);
+          while (keys.length > 30) os.delete(keys.shift());
+          store.set("ttsKeys", keys);
+        } catch {}
+      },
+    };
+  })();
   function toBuf(a, ctx = ac()) { const b = ctx.createBuffer(1, a.f32.length, a.rate); b.getChannelData(0).set(a.f32); return b; }
 
   // Chỉ gửi đúng lời thuyết minh (không kèm câu chỉ dẫn) -> AI không đọc thừa câu nào
@@ -1016,6 +1047,8 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
     const k = voiceStyle + "|" + code + "|" + text;
     if (ttsCache.has(k)) return ttsCache.get(k);
     const p = (async () => {
+      const saved = await VoiceDB.get(k);
+      if (saved && saved.i16) return clipFromI16(new Int16Array(saved.i16), saved.rate); // đã có trên máy -> phát ngay
       const body = (withCode) => ({
         contents: [{ parts: [{ text }] }],
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: {
@@ -1032,7 +1065,9 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
           const d = part && (part.inlineData || part.inline_data);
           if (!d || !d.data) throw { code: "server" };
           const rate = +((d.mimeType || d.mime_type || "").match(/rate=(\d+)/) || [0, 24000])[1];
-          return pcmToClip(d.data, rate);
+          const clip = pcmToClip(d.data, rate);
+          VoiceDB.put(k, { i16: clip.i16.buffer, rate });
+          return clip;
         } catch (e) {
           if (e && e.code === "rate_limited") { await sleep(2500 * (attempt + 1)); continue; } // bận -> chờ rồi thử lại
           if (useCode) { ttsBadCodes[code] = 1; store.set("ttsBadCodes", ttsBadCodes); continue; } // không nhận mã ngôn ngữ này
@@ -1332,20 +1367,21 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
   $("keyLater").onclick = () => closeSheet("keySheet");
 
   /* ---- Ảnh ---- */
-  async function compress(file, max = 768) {
+  async function compress(file, max = 640) {
     const bmp = await createImageBitmap(file);
     const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
     const c = document.createElement("canvas");
     c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
     c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-    const url = c.toDataURL("image/jpeg", 0.78);
+    const url = c.toDataURL("image/jpeg", 0.72);
     const tc = document.createElement("canvas"), ts = 160 / Math.max(c.width, c.height);
     tc.width = c.width * ts; tc.height = c.height * ts; tc.getContext("2d").drawImage(c, 0, 0, tc.width, tc.height);
     return { b64: url.split(",")[1], url, thumb: tc.toDataURL("image/jpeg", 0.7) };
   }
   let lastPos = null;
-  function getGps(wait = 800) {
+  function getGps(wait = 400) {
     return new Promise((res) => {
+      if (lastPos && lastPos.lat) return res(lastPos); // đã có vị trí (đang theo dõi) -> không chờ
       if (!navigator.geolocation) return res(lastPos || {});
       const timer = setTimeout(() => res(lastPos || {}), wait);
       navigator.geolocation.getCurrentPosition((p) => {
@@ -2059,7 +2095,14 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
     b.style.cssText = "background:#fff4d6;color:#7a5200;border-radius:14px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:12px";
     $("v-home").prepend(b);
   }
-  if (!getKey()) setTimeout(openKey, 500); else resolveModels(); // làm nóng kết nối trước khi khách bấm
+  let lastWarm = 0;
+  function warm() {
+    if (!getKey() || Date.now() - lastWarm < 45000) return; lastWarm = Date.now();
+    fetch(API + "?pageSize=1", { headers: { "x-goog-api-key": getKey() } }).catch(() => {}); // mở sẵn đường truyền tới máy chủ AI
+  }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) warm(); });
+  document.querySelectorAll(".snap, nav .fab, #searchIn, #askIn, [data-call]").forEach((x) => x.addEventListener("pointerdown", warm, { passive: true }));
+  if (!getKey()) setTimeout(openKey, 500); else { resolveModels(); warm(); }
 })();
 
 </script>
