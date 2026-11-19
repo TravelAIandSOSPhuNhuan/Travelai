@@ -592,7 +592,7 @@
   }
   // Tắt chế độ "suy nghĩ" để trả lời ngay; tự lùi nếu mô hình không hỗ trợ
   const THINK = [{ thinkingLevel: "minimal" }, { thinkingBudget: 0 }, null];
-  let thinkIdx = store.get("thinkIdx", 0);
+  let thinkIdx = store.get("thinkIdx2", 0);
   const withThink = (b) => { const x = THINK[thinkIdx]; return x ? { ...b, generationConfig: { ...(b.generationConfig || {}), thinkingConfig: x } } : b; };
 
   function decideRetry(res, st) {
@@ -601,7 +601,12 @@
       const next = sug[1].replace(/[.-]+$/, "");
       if (!st.tried.has(next)) { st.model = next; if (st.kind === "tts") M.TTS = next; return true; }
     }
-    if (st.kind !== "tts" && res.status === 400 && /think/i.test(res.m) && thinkIdx < THINK.length - 1) { thinkIdx++; store.set("thinkIdx", thinkIdx); return true; }
+    // Lỗi 400 (tham số không hợp lệ): bỏ dần cài đặt "tắt suy nghĩ" rồi mới đổi mô hình
+    if (st.kind !== "tts" && res.status === 400 && !/api.?key|key not valid|invalid.*key/i.test(res.m)) {
+      if (thinkIdx < THINK.length - 1) { thinkIdx++; store.set("thinkIdx2", thinkIdx); return true; }
+      const alt = M.ALTS.find((x) => !st.tried.has(x));
+      if (alt) { st.model = alt; return true; }
+    }
     if (st.kind === "text" && [429, 500, 503, 404].includes(res.status)) {
       if (st.b.tools && res.status !== 404) { st.b = { ...st.b }; delete st.b.tools; return true; }
       const alt = M.ALTS.find((x) => !st.tried.has(x));
@@ -609,7 +614,7 @@
     }
     return false;
   }
-  const failErr = (r) => ({ code: !r ? "server" : r.status === 429 ? "rate_limited" : (r.status === 400 || r.status === 403) && /key/i.test(r.m) ? "badkey" : "server", message: r ? r.m : "" });
+  const failErr = (r) => ({ code: !r ? "server" : r.status === 429 ? "rate_limited" : (r.status === 400 || r.status === 403) && /api.?key|key not valid|invalid.*key/i.test(r.m) ? "badkey" : "server", message: r ? r.m : "" });
 
   async function gem(kind, model, body, onText) {
     const key = getKey();
@@ -617,7 +622,7 @@
     await resolveModels();
     const st = { kind, b: body, model: model || M.MODEL, tried: new Set() };
     let last = null;
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 10; i++) {
       st.tried.add(st.model);
       const stream = !!onText;
       let r;
