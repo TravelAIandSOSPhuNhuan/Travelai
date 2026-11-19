@@ -355,16 +355,39 @@
   }
 
   /* ---------- AI: gọi thẳng Google Gemini từ trình duyệt ---------- */
-  const MODEL = "gemini-2.5-flash";
-  const MODEL_TTS = "gemini-2.5-flash-preview-tts";
+  // Mô hình được chọn tự động theo danh sách Google cho phép với key của bạn
+  let MODEL = "gemini-3.8-flash";
+  let MODEL_TTS = "";
+  let modelsReady = null;
+  const verNum = (n) => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
+  function resolveModels() {
+    if (modelsReady) return modelsReady;
+    modelsReady = (async () => {
+      try {
+        const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000", { headers: { "x-goog-api-key": getKey() } });
+        if (!r.ok) return;
+        const j = await r.json();
+        const ms = (j.models || [])
+          .filter((m) => (m.supportedGenerationMethods || []).includes("generateContent"))
+          .map((m) => m.name.replace("models/", ""));
+        const flash = ms.filter((n) => /^gemini-[\d.]+-flash$/.test(n)).sort((a, b) => verNum(b) - verNum(a));
+        if (flash.length) MODEL = flash[0];
+        const tts = ms.filter((n) => /tts/.test(n) && /flash/.test(n)).sort((a, b) => verNum(b) - verNum(a));
+        if (tts.length) MODEL_TTS = tts[0];
+      } catch {}
+    })();
+    return modelsReady;
+  }
   const LNAME = { vi: "Tiếng Việt", en: "English", ja: "日本語 (Japanese)", ko: "한국어 (Korean)", fr: "Français (French)" };
   const VOICE = { vi: "Kore", en: "Puck", ja: "Kore", ko: "Kore", fr: "Puck" };
   const getKey = () => GEMINI_KEY || store.get("key", "");
   const cache = new Map();
 
-  async function callGemini(model, body) {
+  async function callGemini(kind, body, retried) {
     const key = getKey();
     if (!key) throw { code: "nokey", message: "Chưa có API key" };
+    await resolveModels();
+    const model = kind === "tts" ? (MODEL_TTS || "gemini-2.5-flash-preview-tts") : MODEL;
     let r;
     try {
       r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -376,6 +399,13 @@
     const j = await r.json().catch(() => ({}));
     if (!r.ok) {
       const m = (j.error && j.error.message) || "Lỗi AI " + r.status;
+      // Google ngừng một mô hình và gợi ý mô hình mới -> tự chuyển và thử lại 1 lần
+      const sug = m.match(/use (?:models\/)?(gemini-[\w.-]+)/i);
+      if (!retried && sug && /no longer|deprecated|not found|not available/i.test(m)) {
+        const next = sug[1].replace(/[.-]+$/, "");
+        if (kind === "tts") MODEL_TTS = next; else MODEL = next;
+        return callGemini(kind, body, true);
+      }
       throw { code: r.status === 429 ? "rate_limited" : (r.status === 400 || r.status === 403) && /key/i.test(m) ? "badkey" : "server", message: m };
     }
     return j;
@@ -391,7 +421,7 @@
   async function identify({ imageBase64, lat, lng, hint }) {
     let ctx = lat && lng ? `Ảnh chụp gần toạ độ GPS ${lat}, ${lng}.` : "Không có GPS.";
     if (hint) ctx += ` Du khách cho biết ảnh chụp gần: "${hint.slice(0, 120)}".`;
-    const r = await callGemini(MODEL, {
+    const r = await callGemini("text", {
       contents: [{ role: "user", parts: [
         { inline_data: { mime_type: "image/jpeg", data: imageBase64 } },
         { text: `Bạn là chuyên gia nhận diện địa danh du lịch. Xác định địa điểm du lịch / công trình / danh lam trong ảnh. ${ctx}
@@ -413,7 +443,7 @@ Nếu không chắc, hạ confidence (0-1) và liệt kê các khả năng trong
     const key = [name, city, lg, style].join("|");
     if (cache.has(key)) return cache.get(key);
     const words = style === "short" ? "khoảng 80 từ" : "khoảng 180-220 từ (đọc ~1,5 phút)";
-    const r = await callGemini(MODEL, {
+    const r = await callGemini("text", {
       contents: [{ role: "user", parts: [{ text: `Hãy tìm kiếm thông tin mới nhất, chính xác về: "${name}"${city ? ", " + city : ""}${country ? ", " + country : ""}.
 Sau đó đóng vai hướng dẫn viên du lịch thân thiện, viết bằng ${L}:
 - "title": tên địa điểm. "summary": 1 câu tóm tắt.
@@ -440,7 +470,7 @@ Chỉ trả về MỘT khối JSON: {"title":"","summary":"","narration":"","fac
       contents.push({ role: "model", parts: [{ text: h.a }] });
     });
     contents.push({ role: "user", parts: [{ text: question }] });
-    const r = await callGemini(MODEL, {
+    const r = await callGemini("text", {
       systemInstruction: { parts: [{ text: `Bạn là hướng dẫn viên du lịch địa phương thân thiện. Du khách đang ở: ${place}.
 Bối cảnh đã kể: ${String(context).slice(0, 600)}
 Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thường. Tìm kiếm nếu cần. Nếu không chắc về giá vé, giờ mở cửa thì khuyên kiểm tra tại chỗ.` }] },
@@ -461,7 +491,7 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
     return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
   }
   async function tts({ text, lang: lg }) {
-    const r = await callGemini(MODEL_TTS, {
+    const r = await callGemini("tts", {
       contents: [{ parts: [{ text: "Đọc bằng giọng hướng dẫn viên ấm áp, rõ ràng: " + text }] }],
       generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE[lg] || "Kore" } } } },
     });
@@ -501,7 +531,7 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
   function openKey() { $("keyIn").value = store.get("key", ""); $("keyModal").classList.remove("hidden"); }
   $("keySave").onclick = () => {
     const k = $("keyIn").value.trim();
-    store.set("key", k); $("keyModal").classList.add("hidden"); updatePill();
+    store.set("key", k); modelsReady = null; $("keyModal").classList.add("hidden"); updatePill();
     toast(k ? "Đã lưu key trên máy này" : "Đã xoá key");
   };
   $("keyLater").onclick = () => $("keyModal").classList.add("hidden");
