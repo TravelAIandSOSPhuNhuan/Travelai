@@ -236,6 +236,9 @@
   .call h3 { font-size: 22px; }
   #cStatus { font-size: 15px; opacity: .9; }
   #cTimer { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .cmeter { display: flex; align-items: center; gap: 8px; width: 180px; margin-top: 6px; font-size: 13px; }
+  .cmeter div { flex: 1; height: 6px; border-radius: 9px; background: rgba(255,255,255,.18); overflow: hidden; }
+  .cmeter i { display: block; height: 100%; width: 0; background: #7ff7e9; border-radius: 9px; transition: width .08s; }
   .ccap { min-height: 60px; max-width: 420px; font-size: 15px; line-height: 1.5; opacity: .92; margin: 10px 0; }
   .cptt { width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 15px; font-weight: 700; border: 3px solid rgba(255,255,255,.4); touch-action: none; user-select: none; -webkit-user-select: none; }
   .cptt.rec { background: var(--danger); border-color: #fff; transform: scale(1.06); }
@@ -282,7 +285,7 @@
   <header>
     <div class="brand">
       <div class="logo">T</div>
-      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v4.3</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
+      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v4.4</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
     </div>
     <div class="hdr-r">
       <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
@@ -437,6 +440,7 @@
   <div class="cav"><div class="ring"></div><div class="face">🧑‍💼</div></div>
   <h3>TravelAI</h3>
   <div id="cStatus"></div><div id="cTimer">00:00</div>
+  <div class="cmeter"><span>🎙️</span><div><i id="cLv"></i></div></div>
   <div class="ccap" id="cCap"></div>
   <button class="cptt hidden" id="cPtt" type="button" data-i="call_ptt"></button>
   <div class="cbtns"><button id="cMute" type="button">🎙️</button><button id="cEnd" class="end" type="button">📞</button></div>
@@ -536,6 +540,7 @@
       dnd: "🎧 Nhớ bật Không làm phiền nhé", no_vi_voice: "Máy chưa có giọng tiếng Việt, hãy bật Giọng đọc AI.",
       key_t: "Nhập API key Gemini", key_s: "Key chỉ lưu trên trình duyệt của máy này.", key_save: "Lưu key", key_later: "Để sau",
       thinking: "Đang trả lời…",
+      mic_silent: "Micro chưa thu được tiếng. Trên iPhone: bấm aA cạnh thanh địa chỉ → Cài đặt trang web → Micrô → Cho phép, rồi gọi lại.",
       kind_landmark: "Địa danh", kind_food: "Món ăn & đồ uống", kind_object: "Đồ vật", find_food: "Tìm quán gần đây", find_shop: "Tìm nơi bán", near_food: "Món tương tự · chạm để nghe", near_obj: "Liên quan · chạm để nghe", mic_none: "Chưa nghe rõ, bạn nói lại gần micro hơn nhé",
       del_acc: "Xoá tài khoản", del_confirm: "Nhấn lần nữa để xoá vĩnh viễn", deleted: "Đã xoá tài khoản và dữ liệu", privacy: "Chính sách quyền riêng tư",
       nav_acct: "Tài khoản", call: "Gọi hướng dẫn viên AI", call_short: "Gọi", call_home_s: "Nói chuyện trực tiếp, hỏi gì cũng được, mọi thứ tiếng",
@@ -591,6 +596,7 @@
       dnd: "🎧 Turn on Do Not Disturb", no_vi_voice: "No voice for this language on your device. Turn on the AI voice.",
       key_t: "Enter your Gemini API key", key_s: "The key is stored only in this browser.", key_save: "Save key", key_later: "Later",
       thinking: "Answering…",
+      mic_silent: "The microphone hears nothing. On iPhone: tap aA next to the address bar → Website Settings → Microphone → Allow, then call again.",
       kind_landmark: "Landmark", kind_food: "Food & drink", kind_object: "Object", find_food: "Find places nearby", find_shop: "Where to buy", near_food: "Similar dishes · tap to listen", near_obj: "Related · tap to listen", mic_none: "Didn't catch that, please speak closer to the mic",
       del_acc: "Delete account", del_confirm: "Tap again to delete permanently", deleted: "Account and data deleted", privacy: "Privacy policy",
       nav_acct: "Account", call: "Call your AI guide", call_short: "Call", call_home_s: "Talk live, ask anything, in any language",
@@ -874,7 +880,7 @@
     if (e && e.code === "rate_limited") return t("err_rate");
     if (e && e.code === "network") return t("err_net") + (e.message ? "\n(" + e.message + ")" : "");
     if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
-    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v4.3 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v4.4 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
   }
 
   /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
@@ -959,9 +965,20 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
   }
 
   /* ================= Giọng đọc (Web Audio: tự phát được trên iPhone, kêu cả khi gạt im lặng) ================= */
-  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {}
+  // iPhone: "playback" = phát được cả khi gạt im lặng nhưng KHÔNG thu âm được -> khi dùng micro phải đổi sang "play-and-record"
+  let micUsers = 0;
+  const setSession = (type) => { try { if (navigator.audioSession && navigator.audioSession.type !== type) navigator.audioSession.type = type; } catch {} };
+  setSession("playback");
   let actx = null;
-  const ac = () => { if (!actx) { const C = window.AudioContext || window.webkitAudioContext; actx = new C(); } return actx; };
+  const ac = () => {
+    if (!actx) {
+      const C = window.AudioContext || window.webkitAudioContext; actx = new C();
+      // iPhone tạm ngắt âm thanh (sau cuộc gọi, khoá màn hình...) -> khi chạy lại thì đọc tiếp đúng chỗ
+      actx.onstatechange = () => { if (actx.state === "running" && R.pend && R.autoPend) resume(); };
+    }
+    return actx;
+  };
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && actx && actx.state !== "running") actx.resume().catch(() => {}); });
   // Mỗi lần chạm: đánh thức bộ âm thanh (iPhone chỉ cho phép trong lúc chạm) -> lời thuyết minh sau đó tự phát
   function unlockAudio() {
     try {
@@ -1087,8 +1104,8 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
       const c = ac(), buf = toBuf(a);
       const go = () => { if (my === R.token && !R.src) { R.pend = null; startSrc(buf, 0, ch, res); } };
       if (c.state === "running") return go();
-      // Bộ âm thanh đang ngủ (máy vừa khoá màn hình...): thử đánh thức, nếu không được thì chờ khách chạm ▶
-      R.pend = { buf, offset: 0, ch, res }; setState("paused");
+      // Bộ âm thanh đang ngủ: thử đánh thức; chạy lại được là tự đọc tiếp (không cần bấm)
+      R.pend = { buf, offset: 0, ch, res }; R.autoPend = true; setState("paused");
       c.resume().then(go).catch(() => {});
     });
   }
@@ -1112,11 +1129,13 @@ ${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what i
   }
   function stopSrc() { if (R.src) { const s = R.src; R.src = null; try { s.onended = null; s.stop(); } catch {} } R.pend = null; }
   function pause() {
+    R.autoPend = false; // khách chủ động tạm dừng -> không tự phát lại
     if (!R.src) { setState("paused"); return; }
     const off = ac().currentTime - R.t0, p = { buf: R.buf, offset: off, ch: R.ch, res: R.res };
     stopSrc(); R.pend = p; setState("paused");
   }
   function resume() {
+    R.autoPend = false;
     if (R.pend) {
       const p = R.pend; R.pend = null; const c = ac();
       const go = () => startSrc(p.buf, Math.max(0, Math.min(p.offset, p.buf.duration - 0.05)), p.ch, p.res);
@@ -1568,7 +1587,10 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
   // ctx phải được tạo NGAY trong lúc chạm (iPhone), rồi mới mở micro
   // Micro: thu nguyên giọng (không lọc), chỉ giữ chống vọng để AI không nghe lại tiếng loa của chính nó
   async function micOpen(ctx, onData) {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true, channelCount: 1 } });
+    micUsers++; setSession("play-and-record");
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: true, channelCount: 1 } }); }
+    catch (e) { micDone(); throw e; }
     try { await ctx.resume(); } catch {}
     const src = ctx.createMediaStreamSource(stream);
     const proc = ctx.createScriptProcessor(1024, 1, 1); // khối nhỏ -> gửi âm thanh đi nhanh hơn
@@ -1583,8 +1605,10 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
       onData(down16(x, ctx.sampleRate), { rms, speaking: now < openUntil });
     };
     src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
-    return { close() { try { proc.disconnect(); src.disconnect(); } catch {} stream.getTracks().forEach((x) => x.stop()); } };
+    let closed = false;
+    return { close() { if (closed) return; closed = true; try { proc.disconnect(); src.disconnect(); } catch {} stream.getTracks().forEach((x) => x.stop()); micDone(); } };
   }
+  function micDone() { micUsers = Math.max(0, micUsers - 1); if (!micUsers) { setSession("playback"); if (actx && actx.state !== "running") actx.resume().catch(() => {}); } }
   const level = (f32) => { let m = 0; for (let i = 0; i < f32.length; i += 16) m = Math.max(m, Math.abs(f32[i])); return m; };
 
   /* ================= Hỏi bằng giọng nói (hiểu mọi thứ tiếng) ================= */
@@ -1682,9 +1706,19 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
     call.tick = setInterval(() => { if (!call) return; const s = Math.floor((Date.now() - call.t0) / 1000); $("cTimer").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }, 500);
     // Mở micro NGAY, song song với lúc kết nối -> vừa kết nối xong là nói được luôn
     const c0 = call;
-    micOpen(ctx, (d, info) => { if (call === c0 && call.onMic) call.onMic(d, info); })
-      .then((m) => { if (call === c0) call.mic = m; else m.close(); })
-      .catch(() => toast(t("mic_denied")));
+    let peak = 0;
+    micOpen(ctx, (d, info) => {
+      if (call !== c0) return;
+      peak = Math.max(peak, info.rms);
+      $("cLv").style.width = Math.min(100, Math.round(info.rms * 900)) + "%";
+      if (call.onMic) call.onMic(d, info);
+    })
+      .then((m) => {
+        if (call !== c0) return m.close();
+        call.mic = m;
+        setTimeout(() => { if (call === c0 && peak < 0.002) $("cCap").textContent = t("mic_silent"); }, 2500); // micro không thu được gì
+      })
+      .catch(() => { if (call === c0) $("cCap").textContent = t("mic_silent"); });
     try { await resolveModels(); } catch {}
     if (M.LIVE) {
       // thử lần lượt: nhanh nhất (nhạy cao + không "suy nghĩ") -> nhạy cao -> thường
@@ -1806,7 +1840,8 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
     pttRec = null;
     c.srcs.forEach((s) => { try { s.stop(); } catch {} });
     try { c.ctx.close(); } catch {}
-    $("call").classList.add("hidden");
+    $("call").classList.add("hidden"); $("cLv").style.width = "0%";
+    unlockAudio(); // đánh thức lại bộ phát thuyết minh ngay trong lúc bấm kết thúc
   }
   $("cEnd").onclick = endCall;
   $("cMute").onclick = () => { if (!call) return; call.muted = !call.muted; $("cMute").textContent = call.muted ? "🔇" : "🎙️"; $("cMute").classList.toggle("off", call.muted); };
