@@ -401,34 +401,6 @@
     return { ok: r.ok, status: r.status, j, m: (j.error && j.error.message) || "Lỗi AI " + r.status };
   }
 
-  // Gọi AI, tự xử lý: mô hình bị ngừng -> đổi mô hình; hết lượt (429) -> bỏ tra Google, rồi thử mô hình nhẹ hơn
-  async function callGemini(kind, body) {
-    const key = getKey();
-    if (!key) throw { code: "nokey", message: "Chưa có API key" };
-    await resolveModels();
-    let model = kind === "tts" ? (MODEL_TTS || "gemini-2.5-flash-preview-tts") : MODEL;
-    let b = body, last = null;
-    const tried = new Set();
-    for (let i = 0; i < 6; i++) {
-      tried.add(model);
-      const res = await rawCall(model, b, key);
-      if (res.ok) { res.j._searched = !!b.tools; return res.j; }
-      last = res;
-      const sug = res.m.match(/use (?:models\/)?(gemini-[\w.-]+)/i);
-      if (sug && /no longer|deprecated|not available/i.test(res.m)) {
-        const next = sug[1].replace(/[.-]+$/, "");
-        if (!tried.has(next)) { if (kind === "tts") MODEL_TTS = next; else MODEL = next; model = next; continue; }
-      }
-      if (kind === "text" && [429, 503, 404].includes(res.status)) {
-        if (b.tools && res.status !== 404) { b = { ...b }; delete b.tools; continue; }
-        const alt = TEXT_ALTS.find((x) => !tried.has(x));
-        if (alt) { model = alt; continue; }
-      }
-      break;
-    }
-    const m = last.m;
-    throw { code: last.status === 429 ? "rate_limited" : (last.status === 400 || last.status === 403) && /key/i.test(m) ? "badkey" : "server", message: m };
-  }
   const textOf = (r) => ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).map((p) => p.text || "").join("").trim();
   function parseJSON(t) {
     const x = String(t).replace(/```(?:json)?/gi, "");
@@ -436,6 +408,171 @@
   }
   const sourcesOf = (r) => ((r.candidates && r.candidates[0] && r.candidates[0].groundingMetadata && r.candidates[0].groundingMetadata.groundingChunks) || [])
     .map((c) => c.web && { title: c.web.title, url: c.web.uri }).filter(Boolean).slice(0, 6);
+
+  /* ---------- Tăng tốc: tắt "suy nghĩ", stream chữ, 1 lần gọi, cache ---------- */
+  const THINK = [{ thinkingLevel: "minimal" }, { thinkingBudget: 0 }, null];
+  let thinkIdx = store.get("thinkIdx", 0);
+  const withThink = (b) => {
+    const t = THINK[thinkIdx]; if (!t) return b;
+    return { ...b, generationConfig: { ...(b.generationConfig || {}), thinkingConfig: t } };
+  };
+  // Quyết định thử lại: mô hình bị ngừng / không hỗ trợ tắt suy nghĩ / hết lượt
+  function decideRetry(res, st) {
+    const sug = res.m.match(/use (?:models\/)?(gemini-[\w.-]+)/i);
+    if (sug && /no longer|deprecated|not available/i.test(res.m)) {
+      const next = sug[1].replace(/[.-]+$/, "");
+      if (!st.tried.has(next)) { if (st.kind === "tts") MODEL_TTS = next; else MODEL = next; st.model = next; return true; }
+    }
+    if (st.kind !== "tts" && res.status === 400 && /think/i.test(res.m) && thinkIdx < THINK.length - 1) {
+      thinkIdx++; store.set("thinkIdx", thinkIdx); return true;
+    }
+    if (st.kind === "text" && [429, 503, 404].includes(res.status)) {
+      if (st.b.tools && res.status !== 404) { st.b = { ...st.b }; delete st.b.tools; return true; }
+      const alt = TEXT_ALTS.find((x) => !st.tried.has(x));
+      if (alt) { st.model = alt; return true; }
+    }
+    return false;
+  }
+  const failErr = (res) => ({ code: res.status === 429 ? "rate_limited" : (res.status === 400 || res.status === 403) && /key/i.test(res.m) ? "badkey" : "server", message: res.m });
+
+  async function callGemini(kind, body) {
+    const key = getKey();
+    if (!key) throw { code: "nokey", message: "Chưa có API key" };
+    await resolveModels();
+    const st = { kind, b: body, tried: new Set(), model: kind === "tts" ? (MODEL_TTS || "gemini-2.5-flash-preview-tts") : MODEL };
+    let last = null;
+    for (let i = 0; i < 8; i++) {
+      st.tried.add(st.model);
+      const res = await rawCall(st.model, kind === "tts" ? st.b : withThink(st.b), key);
+      if (res.ok) { res.j._searched = !!st.b.tools; return res.j; }
+      last = res;
+      if (!decideRetry(res, st)) break;
+    }
+    throw failErr(last);
+  }
+
+  // Stream: chữ hiện dần ngay khi AI đang viết
+  async function streamGemini(body, onText) {
+    const key = getKey();
+    if (!key) throw { code: "nokey", message: "Chưa có API key" };
+    await resolveModels();
+    const st = { kind: "text", b: body, tried: new Set(), model: MODEL };
+    let last = null;
+    for (let i = 0; i < 8; i++) {
+      st.tried.add(st.model);
+      let r;
+      try {
+        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${st.model}:streamGenerateContent?alt=sse`, {
+          method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+          body: JSON.stringify(withThink(st.b)),
+        });
+      } catch { throw { code: "network", message: "Không kết nối được AI" }; }
+      if (r.ok && r.body) {
+        const reader = r.body.getReader(); const dec = new TextDecoder();
+        let buf = "", text = "";
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          let idx;
+          while ((idx = buf.indexOf("\n")) >= 0) {
+            const line = buf.slice(0, idx).trim(); buf = buf.slice(idx + 1);
+            if (!line.startsWith("data:")) continue;
+            try {
+              const j = JSON.parse(line.slice(5));
+              const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+              const add = parts.filter((p) => !p.thought).map((p) => p.text || "").join("");
+              if (add) { text += add; onText(text); }
+            } catch {}
+          }
+        }
+        return text;
+      }
+      const j = await r.json().catch(() => ({}));
+      last = { status: r.status, m: (j.error && j.error.message) || "Lỗi AI " + r.status };
+      if (!decideRetry(last, st)) break;
+    }
+    throw failErr(last);
+  }
+
+  // Cache lâu dài trên máy (7 ngày, tối đa 40 địa điểm) -> mở lại là hiện ngay
+  function pcGet(k) { const c = store.get("gc", {}); const v = c[k]; return v && Date.now() - v.t < 7 * 864e5 ? v.d : null; }
+  function pcSet(k, d) {
+    const c = store.get("gc", {}); c[k] = { t: Date.now(), d };
+    const ks = Object.keys(c);
+    if (ks.length > 40) ks.sort((a, b) => c[a].t - c[b].t).slice(0, ks.length - 40).forEach((x) => delete c[x]);
+    store.set("gc", c);
+  }
+  const gKey = (name, lg, style) => ["g", String(name).toLowerCase().trim(), lg, style].join("|");
+
+  const VN_HINT = "Ứng dụng dành cho du khách tại Việt Nam: ưu tiên nhận diện các địa danh ở Việt Nam (đền, chùa, phố cổ, cầu, nhà thờ, lăng, bảo tàng, cảnh quan thiên nhiên).";
+  function guidePrompt({ name, hasImage, ctx, lg, style }) {
+    const L = LNAME[lg] || LNAME.vi;
+    const words = style === "short" ? "70-90 từ" : "170-200 từ";
+    return `Bạn là hướng dẫn viên du lịch Việt Nam giàu kinh nghiệm.
+${hasImage ? `Xác định địa điểm du lịch trong ảnh. ${VN_HINT} ${ctx}` : `Địa điểm du khách muốn nghe thuyết minh: "${name}". ${VN_HINT}`}
+Trả lời NGAY theo đúng định dạng sau, không lời dẫn, không markdown:
+@@NAME: <tên chính thức của địa điểm>
+@@PLACE: <tỉnh/thành phố>, <quốc gia>
+@@CONF: <độ chắc chắn nhận diện, số từ 0 đến 1>
+@@TITLE: <tên địa điểm viết bằng ${L}>
+@@NARRATION
+<lời thuyết minh bằng ${L}, ${words}, văn nói tự nhiên để đọc to: mở đầu hấp dẫn, lịch sử, ý nghĩa văn hoá, 1 chi tiết thú vị. Không gạch đầu dòng.>
+@@EXTRA
+{"summary":"1 câu","category":"loại địa điểm","facts":["3-4 ý ngắn"],"visitor_tips":["3 mẹo ngắn; giá vé, giờ mở cửa ghi 'có thể thay đổi'"],"nearby":["2-3 tên điểm gần"],"questions":["3 câu hỏi ngắn du khách hay hỏi"]}
+${hasImage ? `Nếu ảnh KHÔNG phải địa điểm du lịch hoặc không nhận ra, chỉ trả về:
+@@NONE
+{"is_landmark":false,"alternatives":["các địa điểm có thể là, nếu có"]}
+` : ""}Mọi nội dung (trừ @@NAME) viết bằng ${L}. Chỉ nêu điều chắc chắn, không bịa số liệu.`;
+  }
+  function parseStream(t) {
+    const g = (k) => { const m = t.match(new RegExp("@@" + k + ":[ \\t]*(.*)")); return m ? m[1].trim() : ""; };
+    const ni = t.indexOf("@@NARRATION"), ei = t.indexOf("@@EXTRA");
+    let narration = ni >= 0 ? t.slice(ni + 11, ei >= 0 ? ei : undefined) : "";
+    narration = narration.replace(/@+[A-Z]*\s*$/, "").trim();
+    return { none: t.includes("@@NONE"), name: g("NAME"), place: g("PLACE"), conf: parseFloat(g("CONF")), title: g("TITLE"), narration, extra: ei >= 0 ? t.slice(ei + 7) : "" };
+  }
+
+  async function fastGuide(o, onUpdate) {
+    const hasImage = !!o.imageBase64;
+    if (!hasImage) { const hit = pcGet(gKey(o.name, o.lang, o.style)); if (hit) return { ok: true, place: hit, cached: true }; }
+    let ctx = o.lat && o.lng ? `Ảnh chụp gần toạ độ GPS ${o.lat}, ${o.lng}.` : "";
+    if (o.hint) ctx += ` Du khách cho biết ảnh chụp gần: "${o.hint.slice(0, 120)}".`;
+    const parts = [];
+    if (hasImage) parts.push({ inline_data: { mime_type: "image/jpeg", data: o.imageBase64 } });
+    parts.push({ text: guidePrompt({ name: o.name, hasImage, ctx, lg: o.lang, style: o.style }) });
+    const text = await streamGemini({ contents: [{ role: "user", parts }], generationConfig: { temperature: 0.5 } },
+      (t) => { const p = parseStream(t); if (!p.none) onUpdate(p); });
+    const p = parseStream(text);
+    if (p.none || (!p.name && !p.narration)) {
+      let alt = {}; try { alt = parseJSON(text.slice(Math.max(0, text.indexOf("@@NONE")))); } catch {}
+      return { ok: false, landmark: { is_landmark: !!alt.is_landmark, alternatives: alt.alternatives || [] } };
+    }
+    const conf = isNaN(p.conf) ? (hasImage ? 0.7 : 1) : p.conf;
+    if (hasImage && conf < 0.35) return { ok: false, landmark: { is_landmark: true, confidence: conf, alternatives: [p.name].filter(Boolean) } };
+    let ex = {}; try { ex = parseJSON(p.extra); } catch {}
+    const [city, ...rest] = (p.place || "").split(",");
+    const place = {
+      name: p.name || o.name, city: (city || "").trim(), country: rest.join(",").trim(), category: ex.category,
+      confidence: hasImage ? conf : 1, title: p.title || p.name || o.name, summary: ex.summary, narration: p.narration,
+      facts: ex.facts, tips: ex.visitor_tips, nearby: ex.nearby, questions: ex.questions, sources: [], lang: o.lang,
+    };
+    pcSet(gKey(place.name, o.lang, o.style), place);
+    if (!hasImage) pcSet(gKey(o.name, o.lang, o.style), place);
+    return { ok: true, place };
+  }
+
+  // Tra Google khi khách cần: giờ mở cửa, giá vé, lưu ý hiện tại
+  async function liveInfo(place, lg) {
+    const r = await callGemini("text", {
+      contents: [{ role: "user", parts: [{ text: `Tìm trên Google thông tin MỚI NHẤT cho du khách về "${place.name}"${place.city ? ", " + place.city : ""}${place.country ? ", " + place.country : ""}: giờ mở cửa, giá vé, lưu ý hiện tại (đang tu sửa, sự kiện, quy định trang phục). Trả lời bằng ${LNAME[lg] || LNAME.vi}, 3-5 ý ngắn, mỗi ý một dòng bắt đầu bằng "- ". Nếu không tìm thấy thông tin chắc chắn thì nói rõ.` }] }],
+      tools: [{ google_search: {} }],
+    });
+    return {
+      lines: textOf(r).split("\n").map((s) => s.replace(/^[-*•]\s*/, "").replace(/\*\*/g, "").trim()).filter(Boolean),
+      sources: sourcesOf(r), searched: !!r._searched,
+    };
+  }
 
   async function identify({ imageBase64, lat, lng, hint }) {
     let ctx = lat && lng ? `Ảnh chụp gần toạ độ GPS ${lat}, ${lng}.` : "Không có GPS.";
@@ -492,8 +629,9 @@ Chỉ trả về MỘT khối JSON: {"title":"","summary":"","narration":"","fac
     const r = await callGemini("text", {
       systemInstruction: { parts: [{ text: `Bạn là hướng dẫn viên du lịch địa phương thân thiện. Du khách đang ở: ${place}.
 Bối cảnh đã kể: ${String(context).slice(0, 600)}
-Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thường. Tìm kiếm nếu cần. Nếu không chắc về giá vé, giờ mở cửa thì khuyên kiểm tra tại chỗ.` }] },
-      contents, tools: [{ google_search: {} }], generationConfig: { temperature: 0.5 },
+Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-4 câu ngắn, văn bản thường. Nếu không chắc về giá vé, giờ mở cửa thì khuyên kiểm tra tại chỗ.` }] },
+      contents, generationConfig: { temperature: 0.5 },
+      ...(/giá|vé|giờ|mở cửa|đóng cửa|hôm nay|bây giờ|thời tiết|sự kiện|price|ticket|open|hour|weather/i.test(question) ? { tools: [{ google_search: {} }] } : {}),
     });
     return { ok: true, answer: textOf(r) };
   }
@@ -602,13 +740,13 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
   $("fLater").onclick = () => $("focusModal").classList.add("hidden");
 
   /* ---------- Chọn & nén ảnh ---------- */
-  async function compress(file, max = 1024) {
+  async function compress(file, max = 896) {
     const bmp = await createImageBitmap(file);
     const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
     const c = document.createElement("canvas");
     c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
     c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.85));
+    const blob = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.8));
     const t = document.createElement("canvas"); const ts = 96 / Math.max(c.width, c.height);
     t.width = c.width * ts; t.height = c.height * ts; t.getContext("2d").drawImage(c, 0, 0, t.width, t.height);
     return { blob, thumb: t.toDataURL("image/jpeg", 0.7), url: c.toDataURL("image/jpeg", 0.85) };
@@ -636,11 +774,12 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
   function hideResult() { $("result").classList.add("hidden"); $("askCard").classList.add("hidden"); }
 
   const blobToB64 = (b) => new Promise((res) => { const f = new FileReader(); f.onload = () => res(f.result.split(",")[1]); f.readAsDataURL(b); });
-  const getGps = () => new Promise((res) => {
+  const getGps = () => Promise.race([new Promise((r) => setTimeout(() => r({}), 1500)), gpsOnce()]);
+  const gpsOnce = () => new Promise((res) => {
     if (!navigator.geolocation) return res({});
     navigator.geolocation.getCurrentPosition(
       (p) => res({ lat: p.coords.latitude.toFixed(5), lng: p.coords.longitude.toFixed(5) }),
-      () => res({}), { timeout: 4000, maximumAge: 60000 });
+      () => res({}), { timeout: 1500, maximumAge: 600000 });
   });
 
   /* ---------- Loading ---------- */
@@ -654,41 +793,51 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
   }
   function stopLoading() { clearInterval(loadTimer); $("loading").classList.add("hidden"); }
 
-  /* ---------- Phân tích ảnh ---------- */
-  $("analyze").onclick = async () => {
-    if (!imgBlob) return;
+  /* ---------- Hiện kết quả ngay khi AI đang viết ---------- */
+  function liveBox() {
+    const box = $("result"); box.innerHTML = ""; box.classList.remove("hidden");
+    const h = el("h3", null, "Đang nhận diện…"), loc = el("div", "loc", ""), n = el("p", "narr", "");
+    const st = el("div", "muted"); st.innerHTML = '<span class="wave"><i></i><i></i><i></i></span> AI đang viết thuyết minh…';
+    box.append(h, loc, n, st);
+    return (p) => {
+      if (p.title || p.name) h.textContent = p.title || p.name;
+      if (p.place) loc.textContent = "📍 " + p.place;
+      n.textContent = p.narration;
+    };
+  }
+  async function runGuide(opts, btn, steps) {
     stopAudio(); hideResult();
-    $("analyze").disabled = true;
-    startLoading([
-      ["Đang nhận diện địa điểm…", "AI đang phân tích kiến trúc và chi tiết trong ảnh"],
-      ["Đang tìm kiếm thông tin…", "Tra cứu Google: lịch sử, văn hoá, mẹo tham quan"],
-      ["Đang viết lời thuyết minh…", "Bằng " + LANGS[lang].label],
-    ]);
+    btn.disabled = true;
+    startLoading(steps);
+    let upd = null;
     try {
-      const [imageBase64, gps] = await Promise.all([blobToB64(imgBlob), getGps()]);
-      const j = await post("/api/analyze", { imageBase64, mimeType: "image/jpeg", lang, style: len, hint: $("hint").value.trim(), ...gps });
-      if (!j.ok) return showNotFound(j.landmark || {});
-      const d = toPlace(j.landmark, j.guide);
-      openPlace(d, thumb);
+      const res = await fastGuide(opts, (p) => {
+        if (!p.name && !p.narration) return;
+        if (!upd) { stopLoading(); upd = liveBox(); }
+        upd(p);
+      });
+      if (!res.ok) return showNotFound(res.landmark);
+      openPlace(res.place, opts.thumb || null);
     } catch (e) {
       showError(errText(e));
     } finally {
-      stopLoading(); $("analyze").disabled = false;
+      stopLoading(); btn.disabled = false;
     }
+  }
+
+  /* ---------- Phân tích ảnh ---------- */
+  $("analyze").onclick = async () => {
+    if (!imgBlob) return;
+    const [imageBase64, gps] = await Promise.all([blobToB64(imgBlob), getGps()]);
+    runGuide({ imageBase64, ...gps, hint: $("hint").value.trim(), lang, style: len, thumb }, $("analyze"),
+      [["Đang nhận diện địa điểm…", "AI đang xem ảnh của bạn"], ["Đang viết lời thuyết minh…", "Bằng " + LANGS[lang].label]]);
   };
 
   /* ---------- Tìm theo tên (không cần ảnh) ---------- */
-  $("nameForm").onsubmit = async (e) => {
+  $("nameForm").onsubmit = (e) => {
     e.preventDefault();
     const name = $("nameIn").value.trim(); if (!name) return;
-    stopAudio(); hideResult();
-    $("nameBtn").disabled = true;
-    startLoading([["Đang tìm kiếm thông tin…", name], ["Đang viết lời thuyết minh…", "Bằng " + LANGS[lang].label]]);
-    try {
-      const j = await post("/api/narrate", { name, lang, style: len });
-      openPlace(toPlace({ name, confidence: 1 }, j.guide), null);
-    } catch (e) { showError(errText(e)); }
-    finally { stopLoading(); $("nameBtn").disabled = false; }
+    runGuide({ name, lang, style: len }, $("nameBtn"), [["Đang viết lời thuyết minh…", name + " · " + LANGS[lang].label]]);
   };
 
   function toPlace(l = {}, g = {}) {
@@ -758,7 +907,27 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
       });
       s.appendChild(u); box.appendChild(s);
     }
-    box.appendChild(el("div", "disclaimer", (d.sources && d.sources.length ? "Thông tin do AI tổng hợp từ Google Search." : "Thông tin do AI tạo từ kiến thức có sẵn (lần này không tra Google được).") + " Giờ mở cửa và giá vé có thể thay đổi, hãy kiểm tra lại trước khi đi."));
+    const lv = el("div", "sec");
+    const lb = el("button", "btn btn-ghost", "🔄 Cập nhật giờ mở cửa, giá vé (Google)"); lb.type = "button"; lb.style.width = "100%";
+    lb.onclick = async () => {
+      lb.disabled = true; lb.textContent = "Đang tra Google…";
+      try {
+        const r = await liveInfo(d, d.lang || lang);
+        lv.innerHTML = "";
+        lv.appendChild(el("h4", null, r.searched ? "Thông tin mới nhất (Google)" : "Thông tin tham khảo (chưa tra được Google)"));
+        const u = el("ul"); r.lines.forEach((x) => u.appendChild(el("li", null, x))); lv.appendChild(u);
+        if (r.sources.length) {
+          const sEl = el("div", "muted"); sEl.style.marginTop = "6px"; sEl.appendChild(document.createTextNode("Nguồn: "));
+          r.sources.forEach((x, i) => {
+            const a = el("a", null, x.title || x.url); a.href = x.url; a.target = "_blank"; a.rel = "noopener"; sEl.appendChild(a);
+            if (i < r.sources.length - 1) sEl.appendChild(document.createTextNode(" · "));
+          });
+          lv.appendChild(sEl);
+        }
+      } catch (e) { lb.disabled = false; lb.textContent = "🔄 Thử lại"; toast(errText(e).split("\n")[0]); }
+    };
+    lv.appendChild(lb); box.appendChild(lv);
+    box.appendChild(el("div", "disclaimer", "Lời thuyết minh do AI tạo từ kiến thức có sẵn để trả lời nhanh. Giờ mở cửa và giá vé có thể thay đổi, bấm nút trên để tra thông tin mới nhất."));
 
     $("askCard").classList.remove("hidden");
     $("chat").innerHTML = "";
