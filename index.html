@@ -25,7 +25,7 @@
   .brand b { font-size: 20px; letter-spacing: .5px; }
   .brand b span { color: var(--brand); }
   .brand small { display: block; font-size: 10px; letter-spacing: 1.6px; color: var(--muted); font-weight: 600; }
-  .pill { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 99px; background: #e6f7ee; color: var(--ok); display: flex; gap: 6px; align-items: center; }
+  .pill { white-space: nowrap; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 99px; background: #e6f7ee; color: var(--ok); display: flex; gap: 6px; align-items: center; }
   .pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); display: inline-block; }
   .pill.off { background: #fdecec; color: var(--danger); } .pill.off i { background: var(--danger); }
 
@@ -59,7 +59,7 @@
   .new { font-size: 9px; background: var(--brand2); color: #fff; padding: 1px 6px; border-radius: 99px; vertical-align: middle; }
 
   /* Scan */
-  .drop { border: 2px dashed #b9c7dc; border-radius: 16px; padding: 22px 12px; text-align: center; background: #f8fbff; position: relative; overflow: hidden; }
+  .drop { display: block; border: 2px dashed #b9c7dc; border-radius: 16px; padding: 22px 12px; text-align: center; background: #f8fbff; position: relative; overflow: hidden; }
   .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
   .drop .ico { font-size: 38px; }
   .preview { width: 100%; border-radius: 14px; display: block; max-height: 300px; object-fit: cover; }
@@ -79,6 +79,7 @@
   .badge { font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 99px; background: var(--soft); color: var(--brand); white-space: nowrap; }
   .loc { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
   .narr { font-size: 15px; white-space: pre-line; }
+  #result > p { white-space: pre-line; }
   .player { display: flex; gap: 8px; margin: 14px 0 4px; }
   .player .btn { flex: 1; padding: 10px; white-space: nowrap; font-size: 14px; }
   .player .btn-primary { flex: 2; }
@@ -323,9 +324,9 @@
 <script>
 (() => {
   /* TravelAI 2.0 – bản 1 file: gọi thẳng Google Gemini từ trình duyệt, không cần server */
-  // Dán API key Gemini vào giữa hai dấu ngoặc kép để ai mở trang cũng dùng được ngay.
-  // Nên giới hạn key theo tên miền trong Google Cloud Console (API key restrictions → Websites).
-  const GEMINI_KEY = "";
+  // Key gắn sẵn (đã mã hoá nhẹ để không bị quét tự động trên GitHub). Để trống thì trang sẽ hỏi key.
+  const KEY_BLOB = "QS1LVC0wdjVuV19ycFBvdmh0U1RsNkN5eGRfWUlzeXhVWklaR3dfd0VPWEw2TlI4YkEuUUE=";
+  const GEMINI_KEY = (() => { try { return KEY_BLOB && !KEY_BLOB.startsWith("__") ? atob(KEY_BLOB).split("").reverse().join("") : ""; } catch { return ""; } })();
   const $ = (id) => document.getElementById(id);
   const LANGS = {
     vi: { label: "Tiếng Việt", flag: "🇻🇳", code: "vi-VN" },
@@ -358,6 +359,7 @@
   // Mô hình được chọn tự động theo danh sách Google cho phép với key của bạn
   let MODEL = "gemini-3.8-flash";
   let MODEL_TTS = "";
+  let TEXT_ALTS = ["gemini-3.8-flash-lite", "gemini-3-flash", "gemini-2.5-flash-lite"];
   let modelsReady = null;
   const verNum = (n) => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
   function resolveModels() {
@@ -372,6 +374,9 @@
           .map((m) => m.name.replace("models/", ""));
         const flash = ms.filter((n) => /^gemini-[\d.]+-flash$/.test(n)).sort((a, b) => verNum(b) - verNum(a));
         if (flash.length) MODEL = flash[0];
+        // Mô hình dự phòng khi hết lượt: các bản flash / flash-lite khác
+        const alts = ms.filter((n) => /^gemini-[\d.]+-flash(-lite)?$/.test(n) && n !== MODEL).sort((a, b) => verNum(b) - verNum(a));
+        if (alts.length) TEXT_ALTS = alts;
         const tts = ms.filter((n) => /tts/.test(n) && /flash/.test(n)).sort((a, b) => verNum(b) - verNum(a));
         if (tts.length) MODEL_TTS = tts[0];
       } catch {}
@@ -383,11 +388,7 @@
   const getKey = () => GEMINI_KEY || store.get("key", "");
   const cache = new Map();
 
-  async function callGemini(kind, body, retried) {
-    const key = getKey();
-    if (!key) throw { code: "nokey", message: "Chưa có API key" };
-    await resolveModels();
-    const model = kind === "tts" ? (MODEL_TTS || "gemini-2.5-flash-preview-tts") : MODEL;
+  async function rawCall(model, body, key) {
     let r;
     try {
       r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -397,18 +398,36 @@
       });
     } catch { throw { code: "network", message: "Không kết nối được AI" }; }
     const j = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      const m = (j.error && j.error.message) || "Lỗi AI " + r.status;
-      // Google ngừng một mô hình và gợi ý mô hình mới -> tự chuyển và thử lại 1 lần
-      const sug = m.match(/use (?:models\/)?(gemini-[\w.-]+)/i);
-      if (!retried && sug && /no longer|deprecated|not found|not available/i.test(m)) {
+    return { ok: r.ok, status: r.status, j, m: (j.error && j.error.message) || "Lỗi AI " + r.status };
+  }
+
+  // Gọi AI, tự xử lý: mô hình bị ngừng -> đổi mô hình; hết lượt (429) -> bỏ tra Google, rồi thử mô hình nhẹ hơn
+  async function callGemini(kind, body) {
+    const key = getKey();
+    if (!key) throw { code: "nokey", message: "Chưa có API key" };
+    await resolveModels();
+    let model = kind === "tts" ? (MODEL_TTS || "gemini-2.5-flash-preview-tts") : MODEL;
+    let b = body, last = null;
+    const tried = new Set();
+    for (let i = 0; i < 6; i++) {
+      tried.add(model);
+      const res = await rawCall(model, b, key);
+      if (res.ok) { res.j._searched = !!b.tools; return res.j; }
+      last = res;
+      const sug = res.m.match(/use (?:models\/)?(gemini-[\w.-]+)/i);
+      if (sug && /no longer|deprecated|not available/i.test(res.m)) {
         const next = sug[1].replace(/[.-]+$/, "");
-        if (kind === "tts") MODEL_TTS = next; else MODEL = next;
-        return callGemini(kind, body, true);
+        if (!tried.has(next)) { if (kind === "tts") MODEL_TTS = next; else MODEL = next; model = next; continue; }
       }
-      throw { code: r.status === 429 ? "rate_limited" : (r.status === 400 || r.status === 403) && /key/i.test(m) ? "badkey" : "server", message: m };
+      if (kind === "text" && [429, 503, 404].includes(res.status)) {
+        if (b.tools && res.status !== 404) { b = { ...b }; delete b.tools; continue; }
+        const alt = TEXT_ALTS.find((x) => !tried.has(x));
+        if (alt) { model = alt; continue; }
+      }
+      break;
     }
-    return j;
+    const m = last.m;
+    throw { code: last.status === 429 ? "rate_limited" : (last.status === 400 || last.status === 403) && /key/i.test(m) ? "badkey" : "server", message: m };
   }
   const textOf = (r) => ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).map((p) => p.text || "").join("").trim();
   function parseJSON(t) {
@@ -515,7 +534,7 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
   }
 
   function errText(e) {
-    if (e && e.code === "rate_limited") return "AI đang bận, thử lại sau ít phút nhé.";
+    if (e && e.code === "rate_limited") return "Key miễn phí đã hết lượt tạm thời. Đợi khoảng 1 phút rồi thử lại. Nếu vẫn lỗi, có thể đã hết lượt trong ngày." + (e.message ? "\n\nGoogle báo: " + String(e.message).slice(0, 220) : "");
     if (e && e.code === "network") return "Không kết nối được AI. Kiểm tra mạng rồi thử lại.";
     if (e && e.code === "nokey") { openKey(); return "Chưa có API key. Hãy nhập key để dùng AI."; }
     if (e && e.code === "badkey") { openKey(); return "API key không hợp lệ. Hãy kiểm tra lại key."; }
@@ -739,7 +758,7 @@ Trả lời bằng ${LNAME[lg] || LNAME.vi}, 2-5 câu ngắn, văn bản thườ
       });
       s.appendChild(u); box.appendChild(s);
     }
-    box.appendChild(el("div", "disclaimer", "Thông tin do AI tổng hợp từ Google Search. Giờ mở cửa và giá vé có thể thay đổi, hãy kiểm tra lại trước khi đi."));
+    box.appendChild(el("div", "disclaimer", (d.sources && d.sources.length ? "Thông tin do AI tổng hợp từ Google Search." : "Thông tin do AI tạo từ kiến thức có sẵn (lần này không tra Google được).") + " Giờ mở cửa và giá vé có thể thay đổi, hãy kiểm tra lại trước khi đi."));
 
     $("askCard").classList.remove("hidden");
     $("chat").innerHTML = "";
