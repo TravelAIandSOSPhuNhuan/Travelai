@@ -158,7 +158,7 @@
   .callrow .ph-ic { color: #fff; background: var(--ok); width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; }
 
   /* Sheets */
-  .sheetbg { position: fixed; inset: 0; z-index: 50; background: rgba(15, 27, 45, .45); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
+  .sheetbg { position: fixed; inset: 0; z-index: 97; background: rgba(15, 27, 45, .45); display: flex; align-items: flex-end; justify-content: center; animation: fade .2s; }
   .sheet { background: #fff; width: 100%; max-width: 520px; border-radius: 24px 24px 0 0; padding: 10px 18px calc(20px + var(--safe-b)); max-height: 88vh; overflow-y: auto; animation: up .25s ease-out; }
   .sheet .grab { width: 40px; height: 5px; border-radius: 9px; background: var(--line); margin: 0 auto 12px; }
   .sheet h3 { font-size: 19px; margin-bottom: 4px; }
@@ -203,6 +203,67 @@
   .viewer button { position: absolute; top: calc(var(--safe-t) + 14px); right: 14px; width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.15); color: #fff; font-size: 20px; }
   .pop .e { overflow: hidden; background-size: cover; background-position: center; }
   .ph.hasimg .emoji { display: none; }
+
+  /* v4: mic, gọi AI, tài khoản */
+  .askh { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .askh h2 { margin: 0; }
+  .askh .btn { padding: 8px 12px; font-size: 13px; }
+  .mic { width: 46px; height: 46px; flex: none; border-radius: 14px; background: var(--soft); font-size: 20px; position: relative; }
+  .mic.rec { background: var(--danger); color: #fff; box-shadow: 0 0 0 calc(4px + var(--lv, 0) * 12px) rgba(229, 56, 59, .25); transition: box-shadow .1s; }
+  .callcard { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fff; border-radius: 18px; padding: 12px 14px; box-shadow: var(--shadow); margin-top: 12px; }
+  .callcard .cic { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center; font-size: 22px; background: linear-gradient(135deg, #12a150, #12b5a5); color: #fff; }
+  .callcard b { display: block; font-size: 15px; }
+  .callcard span { font-size: 12.5px; color: var(--muted); }
+  .callcard .go { margin-left: auto; font-size: 24px; color: var(--muted); }
+  .navav { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 14px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand2)); margin: 0 auto; }
+  .call { position: fixed; inset: 0; z-index: 85; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 30px 20px calc(30px + var(--safe-b)); color: #fff; text-align: center;
+    background: radial-gradient(120% 80% at 50% 0%, #1b4fa8 0%, #0a1f45 60%, #06122a 100%); animation: fade .2s; }
+  .cav { position: relative; width: 150px; height: 150px; margin-bottom: 14px; }
+  .cav .face { position: absolute; inset: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 56px; background: linear-gradient(135deg, var(--brand), var(--brand2)); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .cav .ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(127, 247, 233, .5); }
+  .call[data-state="speaking"] .ring { animation: ring 1s ease-out infinite; }
+  .call[data-state="listening"] .ring { animation: ring 2.2s ease-out infinite; border-color: rgba(255,255,255,.35); }
+  @keyframes ring { 0% { transform: scale(.85); opacity: 1 } 100% { transform: scale(1.25); opacity: 0 } }
+  .call h3 { font-size: 22px; }
+  #cStatus { font-size: 15px; opacity: .9; }
+  #cTimer { font-size: 13px; opacity: .6; font-variant-numeric: tabular-nums; }
+  .ccap { min-height: 60px; max-width: 420px; font-size: 15px; line-height: 1.5; opacity: .92; margin: 10px 0; }
+  .cptt { width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 15px; font-weight: 700; border: 3px solid rgba(255,255,255,.4); touch-action: none; user-select: none; -webkit-user-select: none; }
+  .cptt.rec { background: var(--danger); border-color: #fff; transform: scale(1.06); }
+  .cbtns { display: flex; gap: 36px; margin-top: 18px; }
+  .cbtns button { width: 66px; height: 66px; border-radius: 50%; font-size: 26px; background: rgba(255,255,255,.15); color: #fff; }
+  .cbtns button.off { background: #fff; color: var(--ink); }
+  .cbtns .end { background: var(--danger); transform: rotate(135deg); }
+  .call .muted { color: rgba(255,255,255,.55); margin-top: 10px; }
+  .auth { position: fixed; inset: 0; z-index: 96; overflow-y: auto; background: radial-gradient(120% 70% at 100% 0%, rgba(18,181,165,.35), transparent 60%), linear-gradient(160deg, #0b5ed7, #0a3f94);
+    display: flex; align-items: center; justify-content: center; padding: calc(var(--safe-t) + 20px) 18px calc(var(--safe-b) + 20px); }
+  .authbox { width: 100%; max-width: 420px; background: #fff; border-radius: 26px; padding: 22px 18px; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  .authbox .logo { margin: 0 auto 10px; width: 54px; height: 54px; font-size: 26px; }
+  .authbox h1 { font-size: 22px; text-align: center; }
+  .authbox > p { text-align: center; margin: 4px 0 14px; }
+  .atabs { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; gap: 4px; margin-bottom: 12px; }
+  .atabs button { flex: 1; padding: 9px; border-radius: 9px; font-weight: 700; color: var(--muted); }
+  .atabs button.on { background: #fff; color: var(--brand); box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .authbox input { width: 100%; padding: 13px 12px; border-radius: 13px; border: 1px solid var(--line); font: inherit; font-size: 15px; margin-bottom: 9px; outline: 0; }
+  .authbox input:focus { border-color: var(--brand); }
+  .authbox .btn { width: 100%; margin-top: 4px; }
+  .aerr { color: var(--danger); font-size: 13px; min-height: 18px; margin: 2px 0 4px; }
+  .alink { display: block; margin: 12px auto 0; color: var(--brand); font-weight: 600; font-size: 14px; }
+  .prof { display: flex; align-items: center; gap: 12px; }
+  .prof .av { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--brand), var(--brand2)); flex: none; }
+  .prof b { font-size: 18px; display: block; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; text-align: center; }
+  .stats div { background: var(--bg); border-radius: 14px; padding: 10px 4px; }
+  .stats b { display: block; font-size: 22px; color: var(--brand); }
+  .stats span { font-size: 11.5px; color: var(--muted); }
+  #map { height: 260px; border-radius: 16px; overflow: hidden; margin: 8px 0 10px; background: #e8edf5; z-index: 1; }
+  .vrow { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 4px; border-bottom: 1px solid var(--line); }
+  .vrow b { flex: 1; font-size: 14px; }
+  .rw { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .rw .ric { width: 42px; height: 42px; flex: none; border-radius: 12px; background: var(--soft); display: grid; place-items: center; font-size: 22px; }
+  .rw div { flex: 1; } .rw b { display: block; font-size: 14px; } .rw .btn { padding: 8px 12px; font-size: 13px; }
+  .gift { background: #fff8e1; border-radius: 12px; padding: 9px 12px; font-size: 13.5px; font-weight: 600; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .sheet .askf .btn { width: auto; margin-top: 0; }
   .toast { position: fixed; bottom: calc(96px + var(--safe-b)); left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 14px; font-size: 13px; z-index: 70; max-width: 90%; text-align: center; animation: fade .2s; }
   .fadein { animation: fade .3s; }
 </style>
@@ -212,7 +273,7 @@
   <header>
     <div class="brand">
       <div class="logo">T</div>
-      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v3.4</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
+      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v4.0</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
     </div>
     <div class="hdr-r">
       <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
@@ -234,6 +295,7 @@
       <input type="text" id="searchIn" data-ph="search_ph" autocomplete="off" enterkeyhint="search" />
       <button class="btn btn-primary" data-i="search"></button>
     </form>
+    <button class="callcard" type="button" data-call><span class="cic">📞</span><div><b data-i="call"></b><span data-i="call_home_s"></span></div><span class="go">›</span></button>
     <div id="recentWrap" class="hidden">
       <h2><span data-i="recent"></span><button data-go="hist" data-i="see_all"></button></h2>
       <div class="recent" id="recent"></div>
@@ -269,10 +331,11 @@
       <div id="pMore"></div>
     </div>
     <div class="card hidden" id="askCard">
-      <h2 style="margin:0 0 6px" data-i="ask_t"></h2>
+      <div class="askh"><h2 data-i="ask_t"></h2><button class="btn btn-ghost" type="button" data-call>📞 <span data-i="call_short"></span></button></div>
       <div class="chips" id="suggest"></div>
       <div class="chat" id="chat"></div>
       <form class="askf" id="askForm">
+        <button type="button" class="mic" id="micBtn" aria-label="Mic">🎤</button>
         <input type="text" id="askIn" data-ph="ask_ph" autocomplete="off" enterkeyhint="send" />
         <button class="btn btn-primary" id="askBtn">➤</button>
       </form>
@@ -283,6 +346,32 @@
   <section id="v-hist" class="hidden fadein">
     <h2 style="margin-top:4px"><span data-i="history"></span></h2>
     <div class="hist" id="hist"></div>
+  </section>
+
+  <!-- ACCOUNT -->
+  <section id="v-acct" class="hidden fadein">
+    <div class="card">
+      <div class="prof"><div class="av" id="acAv">K</div><div style="flex:1;min-width:0"><b id="acName"></b><span class="muted" id="acEmail"></span></div></div>
+      <div class="stats">
+        <div><b id="stPts">0</b><span>⭐ <span data-i="points"></span></span></div>
+        <div><b id="stVis">0</b><span data-i="visited"></span></div>
+        <div><b id="stCi">0</b><span data-i="checkins"></span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="margin:0" data-i="visited"></h2>
+      <div id="map"></div>
+      <div id="visList"></div>
+    </div>
+    <div class="card">
+      <h2 style="margin:0 0 2px;justify-content:flex-start;gap:6px">🎁 <span data-i="rewards"></span></h2>
+      <p class="muted" data-i="pts_rule"></p>
+      <div id="rewards"></div>
+      <div id="giftsWrap" class="hidden"><h2 style="margin:14px 0 4px;font-size:15px" data-i="my_gifts"></h2><div id="gifts"></div></div>
+      <p class="muted" style="margin-top:10px;font-size:11.5px" data-i="demo_note"></p>
+    </div>
+    <p class="muted" style="text-align:center;margin:4px 0 10px;font-size:11.5px" data-i="acc_note"></p>
+    <button class="btn btn-ghost" id="logoutBtn" style="width:100%" data-i="logout"></button>
   </section>
 
   <!-- SOS -->
@@ -309,11 +398,39 @@
   <button data-go="home" class="on"><span class="ic">🏠</span><span data-i="nav_home"></span></button>
   <button data-go="hist"><span class="ic">🗺️</span><span data-i="nav_hist"></span></button>
   <label class="fab"><input type="file" accept="image/*" class="fileIn" /><span class="ic">📷</span></label>
-  <button id="navLang"><span class="ic">🌐</span><span data-i="nav_lang"></span></button>
+  <button data-go="acct"><span class="ic"><i class="navav" id="navAvatar">👤</i></span><span data-i="nav_acct"></span></button>
   <button data-go="sos" class="sosn"><span class="ic">🆘</span><span data-i="nav_sos"></span></button>
 </div></nav>
 
 <div class="viewer hidden" id="viewer"><button id="vClose" aria-label="Close">✕</button><img id="vImg" alt="" /><a id="vSrc" target="_blank" rel="noopener">Wikimedia Commons</a></div>
+
+<!-- Đăng ký / đăng nhập -->
+<div class="auth hidden" id="auth">
+  <form class="authbox" id="authForm" autocomplete="on">
+    <div class="logo">T</div>
+    <h1 data-i="auth_t"></h1>
+    <p class="muted" data-i="auth_s"></p>
+    <div class="atabs"><button type="button" id="aTabReg" data-i="reg"></button><button type="button" id="aTabLog" data-i="login"></button></div>
+    <input type="text" id="aName" data-ph="f_name" autocomplete="name" />
+    <input type="email" id="aEmail" data-ph="f_email" autocomplete="email" />
+    <input type="password" id="aPass" data-ph="f_pass" autocomplete="current-password" />
+    <div class="aerr" id="aErr"></div>
+    <button class="btn btn-primary" id="aSubmit"></button>
+    <button type="button" class="alink" id="aSwitch"></button>
+    <button type="button" class="alink" id="aLang" style="font-weight:500;color:var(--muted)">🌐 Language / Ngôn ngữ</button>
+  </form>
+</div>
+
+<!-- Cuộc gọi với hướng dẫn viên AI -->
+<div class="call hidden" id="call" data-state="connecting">
+  <div class="cav"><div class="ring"></div><div class="face">🧑‍💼</div></div>
+  <h3>TravelAI</h3>
+  <div id="cStatus"></div><div id="cTimer">00:00</div>
+  <div class="ccap" id="cCap"></div>
+  <button class="cptt hidden" id="cPtt" type="button" data-i="call_ptt"></button>
+  <div class="cbtns"><button id="cMute" type="button">🎙️</button><button id="cEnd" class="end" type="button">📞</button></div>
+  <p class="muted" data-i="call_tip"></p>
+</div>
 
 <!-- Language & settings -->
 <div class="sheetbg hidden" id="langSheet"><div class="sheet">
@@ -321,6 +438,11 @@
   <h3 data-i="lang_t"></h3>
   <p class="muted" data-i="lang_s"></p>
   <div class="langs" id="langs"></div>
+  <button class="btn btn-ghost" type="button" id="langMoreBtn" style="width:100%;margin:2px 0 8px">🌍 <span data-i="lang_more"></span></button>
+  <div id="langMore" class="hidden">
+    <div class="langs" id="langsX" style="margin-top:0"></div>
+    <form class="askf" id="langOtherForm" style="margin-bottom:10px"><input type="text" id="langOther" data-ph="lang_other_ph" autocomplete="off" /><button class="btn btn-primary">OK</button></form>
+  </div>
   <div class="setrow" style="display:block"><b data-i="voice_style"></b><span class="muted" style="display:block" data-i="voice_ai_s"></span><div class="seg" id="voiceSeg"></div></div>
   <div class="setrow" style="display:block"><b data-i="len"></b><div class="seg" id="lenSeg"><button data-len="short" data-i="len_short"></button><button data-len="standard" data-i="len_full"></button></div></div>
   <div class="setrow"><div><b data-i="focus"></b><span class="muted" data-i="focus_s"></span></div><button class="switch" id="swFocus"></button></div>
@@ -403,6 +525,20 @@
       dnd: "🎧 Nhớ bật Không làm phiền nhé", no_vi_voice: "Máy chưa có giọng tiếng Việt, hãy bật Giọng đọc AI.",
       key_t: "Nhập API key Gemini", key_s: "Key chỉ lưu trên trình duyệt của máy này.", key_save: "Lưu key", key_later: "Để sau",
       thinking: "Đang trả lời…",
+      nav_acct: "Tài khoản", call: "Gọi hướng dẫn viên AI", call_short: "Gọi", call_home_s: "Nói chuyện trực tiếp, hỏi gì cũng được, mọi thứ tiếng",
+      call_connecting: "Đang kết nối…", call_listening: "Đang nghe bạn nói…", call_speaking: "Hướng dẫn viên đang nói…", call_ptt: "Nhấn giữ để nói",
+      call_tip: "Dùng tai nghe để cuộc gọi rõ hơn. Bạn có thể nói chen ngang bất cứ lúc nào.",
+      ask_ph: "Gõ câu hỏi hoặc bấm 🎤 để nói", mic_rec: "Đang nghe… nói xong sẽ tự gửi", mic_denied: "Chưa được phép dùng micro. Hãy cho phép trong cài đặt trình duyệt.",
+      auth_t: "Chào mừng đến TravelAI", auth_s: "Đăng ký để lưu hành trình, tích điểm check-in và đổi quà.", reg: "Đăng ký", login: "Đăng nhập",
+      f_name: "Họ và tên", f_email: "Email", f_pass: "Mật khẩu (ít nhất 6 ký tự)", have_acc: "Đã có tài khoản? Đăng nhập", no_acc: "Chưa có tài khoản? Đăng ký",
+      e_fill: "Vui lòng nhập đủ thông tin hợp lệ.", e_exists: "Email này đã được đăng ký, hãy đăng nhập.", e_wrong: "Sai email hoặc mật khẩu.",
+      acc_note: "Tài khoản được lưu an toàn trên thiết bị này.", points: "Điểm", visited: "Địa điểm đã đến", checkins: "Check-in",
+      visited_empty: "Chưa có địa điểm nào. Hãy đi tham quan và chụp ảnh check-in!", rewards: "Đổi quà", redeem: "Đổi", need_pts: "Chưa đủ điểm",
+      redeemed: "Đổi quà thành công! Mã:", my_gifts: "Quà đã đổi", logout: "Đăng xuất",
+      r1: "Huy hiệu Nhà thám hiểm", r2: "Giảm 10% vé tham quan", r3: "Voucher cà phê miễn phí", r4: "Quà lưu niệm Việt Nam",
+      demo_note: "Danh sách quà mang tính minh hoạ (demo).", pts_rule: "Đến tận nơi một địa danh và chụp ảnh check-in để nhận 1 điểm (mỗi nơi 1 lần).",
+      ci_ok: "🎉 Check-in thành công! +1 điểm", ci_far: "📍 Hãy đến tận nơi để check-in nhận điểm", ci_done: "Bạn đã check-in nơi này rồi", ci_nogps: "Bật định vị để check-in nhận điểm",
+      arrived: "Bạn đã đến", you_are_here: "Bạn đang ở đây", lang_more: "Tuỳ chọn ngôn ngữ khác", lang_other_ph: "Gõ ngôn ngữ của bạn, ví dụ: Polski", lang_translating: "Đang dịch giao diện…",
       voice_err: "Giọng đọc đang bận, chạm ↻ để thử lại", photos: "Hình ảnh", directions: "Chỉ đường", credit: "Ảnh: Wikipedia / Wikimedia Commons", voice_ai_s: "Giọng AI truyền cảm như hướng dẫn viên thật",
     },
     en: {
@@ -442,6 +578,20 @@
       dnd: "🎧 Turn on Do Not Disturb", no_vi_voice: "No voice for this language on your device. Turn on the AI voice.",
       key_t: "Enter your Gemini API key", key_s: "The key is stored only in this browser.", key_save: "Save key", key_later: "Later",
       thinking: "Answering…",
+      nav_acct: "Account", call: "Call your AI guide", call_short: "Call", call_home_s: "Talk live, ask anything, in any language",
+      call_connecting: "Connecting…", call_listening: "Listening…", call_speaking: "Your guide is speaking…", call_ptt: "Hold to talk",
+      call_tip: "Use earphones for a clearer call. You can interrupt at any time.",
+      ask_ph: "Type a question or tap 🎤 to speak", mic_rec: "Listening… it sends when you stop", mic_denied: "Microphone not allowed. Enable it in your browser settings.",
+      auth_t: "Welcome to TravelAI", auth_s: "Sign up to save your journey, earn check-in points and redeem gifts.", reg: "Sign up", login: "Log in",
+      f_name: "Full name", f_email: "Email", f_pass: "Password (at least 6 characters)", have_acc: "Already have an account? Log in", no_acc: "No account yet? Sign up",
+      e_fill: "Please fill in valid details.", e_exists: "This email is already registered. Please log in.", e_wrong: "Wrong email or password.",
+      acc_note: "Your account is stored securely on this device.", points: "Points", visited: "Places visited", checkins: "Check-ins",
+      visited_empty: "No places yet. Go explore and take a check-in photo!", rewards: "Rewards", redeem: "Redeem", need_pts: "Not enough points",
+      redeemed: "Redeemed! Code:", my_gifts: "My rewards", logout: "Log out",
+      r1: "Explorer badge", r2: "10% off entrance tickets", r3: "Free coffee voucher", r4: "Vietnam souvenir",
+      demo_note: "Rewards are for demonstration (demo).", pts_rule: "Visit a landmark in person and take a check-in photo to earn 1 point (once per place).",
+      ci_ok: "🎉 Checked in! +1 point", ci_far: "📍 Be at the place in person to earn check-in points", ci_done: "You already checked in here", ci_nogps: "Turn on location to earn check-in points",
+      arrived: "You've arrived at", you_are_here: "You are here", lang_more: "More languages", lang_other_ph: "Type your language, e.g. Polski", lang_translating: "Translating the app…",
       voice_err: "Voice is busy, tap ↻ to retry", photos: "Photos", directions: "Directions", credit: "Photos: Wikipedia / Wikimedia Commons", voice_ai_s: "Expressive AI voice, like a real tour guide",
     },
     ja: {
@@ -571,6 +721,18 @@
     ko: { label: "한국어", flag: "🇰🇷", code: "ko-KR", name: "Korean (한국어)" },
     fr: { label: "Français", flag: "🇫🇷", code: "fr-FR", name: "French (Français)" },
   };
+  const MAIN_LANGS = Object.keys(LANGS);
+  // Tuỳ chọn ngôn ngữ cho khách quốc tế (giao diện được AI dịch tự động)
+  const EXTRA = {
+    zh: ["中文", "🇨🇳", "cmn-CN", "Simplified Chinese (简体中文)"], th: ["ไทย", "🇹🇭", "th-TH", "Thai"], de: ["Deutsch", "🇩🇪", "de-DE", "German"],
+    es: ["Español", "🇪🇸", "es-ES", "Spanish"], ru: ["Русский", "🇷🇺", "ru-RU", "Russian"], it: ["Italiano", "🇮🇹", "it-IT", "Italian"],
+    pt: ["Português", "🇧🇷", "pt-BR", "Portuguese"], id: ["Bahasa Indonesia", "🇮🇩", "id-ID", "Indonesian"], hi: ["हिन्दी", "🇮🇳", "hi-IN", "Hindi"],
+    nl: ["Nederlands", "🇳🇱", "nl-NL", "Dutch"], pl: ["Polski", "🇵🇱", "pl-PL", "Polish"], tr: ["Türkçe", "🇹🇷", "tr-TR", "Turkish"],
+    ms: ["Bahasa Melayu", "🇲🇾", "ms-MY", "Malay"], km: ["ខ្មែរ", "🇰🇭", "km-KH", "Khmer"], lo: ["ລາວ", "🇱🇦", "lo-LA", "Lao"], sv: ["Svenska", "🇸🇪", "sv-SE", "Swedish"],
+  };
+  Object.entries(EXTRA).forEach(([k, [label, flag, code, name]]) => (LANGS[k] = { label, flag, code, name, extra: true }));
+  Object.entries(store.get("customLangs", {})).forEach(([k, v]) => (LANGS[k] = v));
+  const dynT = store.get("dynT", {});
   const VOICES = { warm_f: "Sulafat", bright_f: "Laomedeia", warm_m: "Algieba", lively_m: "Sadachbia" };
   const POPULAR = [
     ["⛰️", "Vịnh Hạ Long", "Ha Long Bay"], ["🏮", "Phố cổ Hội An", "Hoi An Ancient Town"],
@@ -583,17 +745,17 @@
   let voiceStyle = store.get("voice", "warm_f"); if (!VOICES[voiceStyle]) voiceStyle = "warm_f";
   let len = store.get("len", "standard");
   let focus = store.get("focus", false);
-  const t = (k) => (T[lang] && T[lang][k]) || T.en[k] || T.vi[k] || k;
+  const t = (k) => (T[lang] && T[lang][k]) || (dynT[lang] && dynT[lang][k]) || T.en[k] || T.vi[k] || k;
 
   /* ================= AI: Google Gemini ================= */
   const API = "https://generativelanguage.googleapis.com/v1beta/models";
   const getKey = () => GEMINI_KEY || store.get("key", "");
   const verNum = (n) => { const m = n.match(/gemini-(\d+(?:\.\d+)?)/); return m ? parseFloat(m[1]) : 0; };
   // Mô hình: MODEL cho nhận diện ảnh (chính xác), FAST cho chữ & hỏi đáp (nhanh nhất), có cache 24 giờ
-  let M = Object.assign({ MODEL: "gemini-3.8-flash", FAST: "gemini-3.8-flash-lite", TTS: "", ALTS: ["gemini-3.8-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash-lite"] }, (store.get("models", {}).d) || {});
+  let M = Object.assign({ MODEL: "gemini-3.8-flash", FAST: "gemini-3.8-flash-lite", TTS: "", ALTS: ["gemini-3.8-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash-lite"] }, (store.get("models2", {}).d) || {});
   let modelsReady = null;
   function resolveModels() {
-    const c = store.get("models", null);
+    const c = store.get("models2", null);
     if (c && Date.now() - c.t < 864e5) return Promise.resolve();
     if (modelsReady) return modelsReady;
     modelsReady = (async () => {
@@ -602,13 +764,17 @@
         if (!r.ok) return;
         const j = await r.json();
         const ms = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes("generateContent")).map((m) => m.name.replace("models/", ""));
+        // Mô hình gọi thoại trực tiếp (Live API)
+        const live = (j.models || []).filter((m) => (m.supportedGenerationMethods || []).includes("bidiGenerateContent")).map((m) => m.name.replace("models/", ""))
+          .sort((a, b) => (/native-audio/.test(b) - /native-audio/.test(a)) || (verNum(b) - verNum(a)));
+        M.LIVE = live[0] || "";
         const by = (re) => ms.filter((n) => re.test(n)).sort((a, b) => verNum(b) - verNum(a));
         const flash = by(/^gemini-[\d.]+-flash$/), lite = by(/^gemini-[\d.]+-flash-lite$/), tts = by(/tts/);
         if (flash.length) M.MODEL = flash[0];
         M.FAST = lite.length && verNum(lite[0]) >= verNum(M.MODEL) - 0.5 ? lite[0] : M.MODEL;
         if (tts.length) M.TTS = tts.find((n) => /flash/.test(n)) || tts[0];
         M.ALTS = [...lite, ...flash].filter((x, i, a) => a.indexOf(x) === i);
-        store.set("models", { t: Date.now(), d: M });
+        store.set("models2", { t: Date.now(), d: M });
       } catch {}
     })();
     return modelsReady;
@@ -693,7 +859,7 @@
     if (e && e.code === "rate_limited") return t("err_rate");
     if (e && e.code === "network") return t("err_net") + (e.message ? "\n(" + e.message + ")" : "");
     if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
-    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v3.4 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v4.0 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
   }
 
   /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
@@ -705,6 +871,7 @@ ${hasImage ? `Identify the tourist place in the photo. ${ctx}` : `The tourist wa
 Reply IMMEDIATELY in exactly this format, no preamble, no markdown:
 @@NAME: <official name of the place, in its original language>
 @@PLACE: <city/province>, <country>
+@@COORD: <approximate latitude>, <longitude> of the place
 @@CONF: <recognition confidence 0-1>
 @@TITLE: <place name written in ${L}>
 @@NARRATION
@@ -721,7 +888,8 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     const ni = s.indexOf("@@NARRATION"), ei = s.indexOf("@@EXTRA");
     let narration = ni >= 0 ? s.slice(ni + 11, ei >= 0 ? ei : undefined) : "";
     narration = narration.replace(/@+[A-Z]*\s*$/, "").trim();
-    return { none: s.includes("@@NONE"), name: g("NAME"), place: g("PLACE"), conf: parseFloat(g("CONF")), title: g("TITLE"), narration, extra: ei >= 0 ? s.slice(ei + 7) : "" };
+    const co = (g("COORD").match(/(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/) || []);
+    return { lat: co[1] ? +co[1] : null, lng: co[2] ? +co[2] : null, none: s.includes("@@NONE"), name: g("NAME"), place: g("PLACE"), conf: parseFloat(g("CONF")), title: g("TITLE"), narration, extra: ei >= 0 ? s.slice(ei + 7) : "" };
   }
   function pcGet(k) { const c = store.get("gc", {}); const v = c[k]; return v && Date.now() - v.t < 7 * 864e5 ? v.d : null; }
   function pcSet(k, d) {
@@ -751,7 +919,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     let ex = {}; try { ex = parseJSON(p.extra); } catch {}
     const [city, ...rest] = (p.place || "").split(",");
     const place = {
-      name: p.name || o.name, city: (city || "").trim(), country: rest.join(",").trim(), category: ex.category || "",
+      name: p.name || o.name, city: (city || "").trim(), country: rest.join(",").trim(), category: ex.category || "", lat: p.lat, lng: p.lng,
       confidence: hasImage ? conf : 1, title: p.title || p.name || o.name, narration: p.narration,
       facts: ex.facts || [], tips: ex.tips || ex.visitor_tips || [], nearby: ex.nearby || [], questions: ex.questions || [], lang: o.lang, style: o.style,
     };
@@ -762,14 +930,29 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
 
   /* ================= Giọng đọc ================= */
   const audio = new Audio(); audio.preload = "auto";
+  // Làm sạch âm thanh: căn đúng byte, làm mượt đầu/cuối (hết tiếng "bụp"), giới hạn đỉnh (hết rè do quá to)
+  function pcmClean(b64, rate = 24000, fade = true) {
+    let bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    if (bytes.length % 2) bytes = bytes.slice(0, bytes.length - 1);
+    const src = new Int16Array(bytes.buffer, 0, bytes.length / 2), n = src.length, out = new Int16Array(n);
+    let peak = 1; for (let i = 0; i < n; i++) { const a = src[i] < 0 ? -src[i] : src[i]; if (a > peak) peak = a; }
+    const g = peak > 28000 ? 28000 / peak : 1, f = fade ? Math.min(Math.floor(n / 4), Math.round(rate * 0.012)) : 0;
+    for (let i = 0; i < n; i++) {
+      let v = src[i] * g;
+      if (f && i < f) v *= i / f; else if (f && i > n - f) v *= (n - i) / f;
+      out[i] = v;
+    }
+    return out;
+  }
   function pcmToWavUrl(b64, rate = 24000) {
-    const pcm = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    const buf = new ArrayBuffer(44 + pcm.length), v = new DataView(buf);
+    const pcm = pcmClean(b64, rate, true);
+    const pad = Math.round(rate * 0.08), total = pcm.length + pad; // thêm 80ms lặng ở cuối để không bị cắt cụt
+    const buf = new ArrayBuffer(44 + total * 2), v = new DataView(buf);
     const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-    w(0, "RIFF"); v.setUint32(4, 36 + pcm.length, true); w(8, "WAVE"); w(12, "fmt ");
+    w(0, "RIFF"); v.setUint32(4, 36 + total * 2, true); w(8, "WAVE"); w(12, "fmt ");
     v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
     v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-    w(36, "data"); v.setUint32(40, pcm.length, true); new Uint8Array(buf, 44).set(pcm);
+    w(36, "data"); v.setUint32(40, total * 2, true); new Int16Array(buf, 44, pcm.length).set(pcm);
     return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
   }
   // Mở khoá âm thanh trên iPhone ngay lần chạm đầu tiên
@@ -783,24 +966,24 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
 
   // Chỉ gửi đúng lời thuyết minh (không kèm câu chỉ dẫn) -> AI không đọc thừa câu nào
   const ttsCache = new Map();
-  let ttsLangCode = store.get("ttsLangCode", true);
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  function ttsUrl(text, lg) {
-    lg = lg || (cur && cur.lang) || lang;
-    const k = voiceStyle + "|" + lg + "|" + text;
+  const ttsBadCodes = store.get("ttsBadCodes", {}); // mã ngôn ngữ mà mô hình giọng không nhận
+  function ttsUrl(text, lg) { lg = lg || (cur && cur.lang) || lang; return ttsAudio(text, (LANGS[lg] && LANGS[lg].code) || ""); }
+  function ttsAudio(text, code) {
+    const k = voiceStyle + "|" + code + "|" + text;
     if (ttsCache.has(k)) return ttsCache.get(k);
     const p = (async () => {
       const body = (withCode) => ({
         contents: [{ parts: [{ text }] }],
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: {
           voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } },
-          ...(withCode ? { languageCode: LANGS[lg].code } : {}),
+          ...(withCode ? { languageCode: code } : {}),
         } },
       });
       const model = () => M.TTS || "gemini-2.5-flash-preview-tts";
       for (let attempt = 0; attempt < 3; attempt++) {
+        const useCode = !!code && !ttsBadCodes[code];
         try {
-          const r = await gem("tts", model(), body(ttsLangCode));
+          const r = await gem("tts", model(), body(useCode));
           const part = ((r.candidates && r.candidates[0] && r.candidates[0].content && r.candidates[0].content.parts) || []).find((x) => x.inlineData || x.inline_data);
           const d = part && (part.inlineData || part.inline_data);
           if (!d || !d.data) throw { code: "server" };
@@ -808,7 +991,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
           return pcmToWavUrl(d.data, rate);
         } catch (e) {
           if (e && e.code === "rate_limited") { await sleep(2500 * (attempt + 1)); continue; } // bận -> chờ rồi thử lại
-          if (ttsLangCode && attempt === 0) { ttsLangCode = false; store.set("ttsLangCode", false); continue; } // không nhận mã ngôn ngữ
+          if (useCode) { ttsBadCodes[code] = 1; store.set("ttsBadCodes", ttsBadCodes); continue; } // không nhận mã ngôn ngữ này
           break;
         }
       }
@@ -959,8 +1142,8 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   }
   function updateHistThumb(img) {
     if (!cur) return;
-    const h = store.get("hist", []); const x = h.find((y) => y.d.name === cur.name);
-    if (x && !x.thumb) { x.thumb = img; store.set("hist", h); renderRecent(); }
+    const h = ustore.get("hist", []); const x = h.find((y) => y.d.name === cur.name);
+    if (x && !x.thumb) { x.thumb = img; ustore.set("hist", h); renderRecent(); }
   }
   // Ảnh cho thẻ địa danh nổi bật (lưu 7 ngày)
   async function loadPopImages() {
@@ -973,7 +1156,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   }
 
   /* ================= Giao diện ================= */
-  const VIEWS = ["home", "place", "hist", "sos"];
+  const VIEWS = ["home", "place", "hist", "acct", "sos"];
   let view = "home";
   function go(v) {
     if (v !== "place" && view === "place") stopAudio();
@@ -983,6 +1166,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     window.scrollTo({ top: 0 });
     if (v === "hist") renderHist();
     if (v === "sos") locate();
+    if (v === "acct") renderAcct();
   }
   document.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(b.dataset.go)));
 
@@ -994,6 +1178,9 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     $("aiDot").className = "dot" + (getKey() ? "" : " off");
     $("langBtn").title = getKey() ? t("ai_on") : t("ai_off");
     renderPop(); renderRecent(); renderSettings(); renderPlayer();
+    if (!$("auth").classList.contains("hidden")) renderAuth();
+    if (view === "acct") renderAcct();
+    if (!rec) $("askIn").placeholder = t("ask_ph");
     if (view === "hist") renderHist();
   }
   let popImgs = {};
@@ -1012,13 +1199,12 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
 
   /* ---- Ngôn ngữ & cài đặt ---- */
   function renderSettings() {
+    const mk = (k, v) => { const b = el("button", "lang" + (k === lang ? " on" : "")); b.type = "button"; b.append(el("span", null, v.flag), el("span", null, v.label)); b.onclick = () => setLang(k); return b; };
     const ls = $("langs"); ls.innerHTML = "";
-    Object.entries(LANGS).forEach(([k, v]) => {
-      const b = el("button", "lang" + (k === lang ? " on" : "")); b.type = "button";
-      b.append(el("span", null, v.flag), el("span", null, v.label));
-      b.onclick = () => setLang(k);
-      ls.appendChild(b);
-    });
+    Object.entries(LANGS).filter(([k, v]) => !v.extra && !v.custom).forEach(([k, v]) => ls.appendChild(mk(k, v)));
+    const lx = $("langsX"); lx.innerHTML = "";
+    Object.entries(LANGS).filter(([k, v]) => v.extra || v.custom).forEach(([k, v]) => lx.appendChild(mk(k, v)));
+    if (LANGS[lang].extra || LANGS[lang].custom) $("langMore").classList.remove("hidden");
     const vs = $("voiceSeg"); vs.innerHTML = "";
     Object.keys(VOICES).forEach((k) => {
       const b = el("button", k === voiceStyle ? "on" : "", t("v_" + k)); b.type = "button";
@@ -1030,20 +1216,28 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   }
   function setLang(k) {
     if (k === lang) return;
-    lang = k; store.set("lang", k); applyI18n();
+    lang = k; store.set("lang", k); applyI18n(); ensureUI(k);
     // Đang xem một địa điểm -> thuyết minh lại bằng ngôn ngữ mới
     if (view === "place" && cur && cur.lang !== k) runGuide({ name: cur.name, photo: curPhoto });
   }
   const openSheet = (id) => $(id).classList.remove("hidden");
   const closeSheet = (id) => $(id).classList.add("hidden");
   document.querySelectorAll(".sheetbg").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s) s.classList.add("hidden"); }));
-  $("langBtn").onclick = $("navLang").onclick = () => openSheet("langSheet");
+  $("langBtn").onclick = () => openSheet("langSheet");
+  $("langMoreBtn").onclick = () => $("langMore").classList.toggle("hidden");
+  // Khách gõ bất kỳ ngôn ngữ nào -> AI dùng ngôn ngữ đó cho toàn bộ app
+  $("langOtherForm").onsubmit = (e) => {
+    e.preventDefault(); const name = $("langOther").value.trim(); if (!name) return;
+    const k = "x-" + name.toLowerCase().replace(/[^a-z0-9\u00c0-\uffff]+/g, "-").slice(0, 24);
+    const cl = store.get("customLangs", {}); cl[k] = { label: name, flag: "🌐", code: "", name, custom: true }; store.set("customLangs", cl);
+    LANGS[k] = cl[k]; $("langOther").value = ""; setLang(k); renderSettings();
+  };
   $("langDone").onclick = () => closeSheet("langSheet");
   $("swFocus").onclick = () => { focus = !focus; store.set("focus", focus); renderSettings(); };
   $("lenSeg").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; len = b.dataset.len; store.set("len", len); renderSettings(); };
 
   function openKey() { $("keyIn").value = store.get("key", ""); openSheet("keySheet"); }
-  $("keySave").onclick = () => { store.set("key", $("keyIn").value.trim()); store.set("models", null); modelsReady = null; closeSheet("keySheet"); applyI18n(); };
+  $("keySave").onclick = () => { store.set("key", $("keyIn").value.trim()); store.set("models2", null); modelsReady = null; closeSheet("keySheet"); applyI18n(); };
   $("keyLater").onclick = () => closeSheet("keySheet");
 
   /* ---- Ảnh ---- */
@@ -1124,6 +1318,8 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
       if (!res.ok) return showNotFound(res.landmark);
       showPlace(res.place, true);
       saveHistory(res.place, curThumb);
+      rememberPlace(res.place);
+      if (o.imageBase64) checkIn(res.place); // chụp ảnh tại chỗ -> check-in tích điểm
     } catch (e) {
       if (my !== runId) return;
       setScanning(false); status("");
@@ -1199,7 +1395,6 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   /* ---- Hướng dẫn viên AI: trả lời dạng stream ---- */
   $("askForm").onsubmit = (e) => { e.preventDefault(); const q = $("askIn").value.trim(); if (q) ask(q); };
   async function ask(q) {
-    if (!cur) return;
     $("askIn").value = "";
     $("chat").appendChild(el("div", "msg me", q));
     const bubble = el("div", "msg ai", t("thinking")); $("chat").appendChild(bubble);
@@ -1211,7 +1406,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     const needSearch = /giá|vé|giờ|mở cửa|đóng cửa|hôm nay|bây giờ|thời tiết|sự kiện|price|ticket|open|hour|weather|today|料金|時間|가격|시간|prix|horaire/i.test(q);
     try {
       const r = await gem("text", M.FAST, {
-        systemInstruction: { parts: [{ text: `You are a friendly, witty local tour guide in Vietnam. The tourist is at: ${cur.name}${cur.city ? ", " + cur.city : ""}. What you already told them: ${cur.narration.slice(0, 500)}
+        systemInstruction: { parts: [{ text: `You are a friendly, witty local tour guide in Vietnam. ${placeCtx()}
 Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist writes in another language), 1-4 short sentences, conversational, plain text, no markdown. If unsure about prices or hours, say to check on site.` }] },
         contents, generationConfig: { temperature: 0.7 },
         ...(needSearch ? { tools: [{ google_search: {} }] } : {}),
@@ -1224,9 +1419,9 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
 
   /* ---- Lịch sử ---- */
   function saveHistory(d, thumb) {
-    const h = store.get("hist", []).filter((x) => x.d.name !== d.name);
+    const h = ustore.get("hist", []).filter((x) => x.d.name !== d.name);
     h.unshift({ d, thumb: thumb || null, t: Date.now() });
-    store.set("hist", h.slice(0, 20)); renderRecent();
+    ustore.set("hist", h.slice(0, 20)); renderRecent();
   }
   function openHist(x) {
     if (x.d.lang === lang && x.d.style === len) { stopAudio(); go("place"); runId++; imgStarted = ""; $("pGal").innerHTML = ""; $("pGalWrap").classList.add("hidden"); curPhoto = null; curThumb = x.thumb; setHero(x.thumb); setScanning(false); status(""); chatLog = []; $("pNF").classList.add("hidden"); showPlace(x.d, false); }
@@ -1234,12 +1429,12 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
   }
   function histImg(x, cls) { const d = el("div", cls); if (x.thumb) d.style.backgroundImage = `url("${x.thumb}")`; else d.textContent = "🏛️"; return d; }
   function renderRecent() {
-    const h = store.get("hist", []); $("recentWrap").classList.toggle("hidden", !h.length);
+    const h = ustore.get("hist", []); $("recentWrap").classList.toggle("hidden", !h.length);
     const box = $("recent"); box.innerHTML = "";
     h.slice(0, 8).forEach((x) => { const b = el("button", "rc"); b.type = "button"; b.append(histImg(x, "img"), el("b", null, x.d.title || x.d.name)); b.onclick = () => openHist(x); box.appendChild(b); });
   }
   function renderHist() {
-    const h = store.get("hist", []), box = $("hist"); box.innerHTML = "";
+    const h = ustore.get("hist", []), box = $("hist"); box.innerHTML = "";
     if (!h.length) { box.appendChild(el("p", "muted", t("hist_empty"))); return; }
     h.forEach((x) => {
       const b = el("button", "hi"); b.type = "button";
@@ -1256,7 +1451,7 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
     if (!navigator.geolocation) { $("coords").textContent = t("loc_na"); return; }
     navigator.geolocation.getCurrentPosition((p) => {
       const la = p.coords.latitude.toFixed(5), lo = p.coords.longitude.toFixed(5);
-      lastPos = { lat: la, lng: lo };
+      lastPos = { lat: +la, lng: +lo };
       $("coords").textContent = `${la}, ${lo}`;
       const m = $("mapLink"); m.href = `https://www.google.com/maps?q=${la},${lo}`; m.classList.remove("hidden");
       $("copyLoc").classList.remove("hidden");
@@ -1268,8 +1463,430 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
     try { await navigator.clipboard.writeText(txt); toast(t("copied")); } catch { toast(txt); }
   };
 
+  /* ================= Âm thanh: ghi âm micro (PCM 16 kHz) ================= */
+  function i16ToB64(a) {
+    const u = new Uint8Array(a.buffer, a.byteOffset, a.byteLength); let s = "";
+    for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  function down16(f32, inRate) {
+    const ratio = inRate / 16000, n = Math.floor(f32.length / ratio), out = new Int16Array(n);
+    for (let i = 0; i < n; i++) {
+      const a = Math.floor(i * ratio), b = Math.min(f32.length, Math.floor((i + 1) * ratio)); let sum = 0;
+      for (let j = a; j < b; j++) sum += f32[j];
+      const v = sum / Math.max(1, b - a); out[i] = Math.max(-1, Math.min(1, v)) * 0x7fff;
+    }
+    return out;
+  }
+  const newCtx = () => { const C = window.AudioContext || window.webkitAudioContext; const c = new C(); try { c.resume(); } catch {} return c; };
+  // ctx phải được tạo NGAY trong lúc chạm (iPhone), rồi mới mở micro
+  async function micOpen(ctx, onData) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+    try { await ctx.resume(); } catch {}
+    const src = ctx.createMediaStreamSource(stream);
+    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const mute = ctx.createGain(); mute.gain.value = 0;
+    proc.onaudioprocess = (e) => onData(down16(e.inputBuffer.getChannelData(0), ctx.sampleRate), e.inputBuffer.getChannelData(0));
+    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+    return { close() { try { proc.disconnect(); src.disconnect(); } catch {} stream.getTracks().forEach((x) => x.stop()); } };
+  }
+  const level = (f32) => { let m = 0; for (let i = 0; i < f32.length; i += 16) m = Math.max(m, Math.abs(f32[i])); return m; };
+
+  /* ================= Hỏi bằng giọng nói (hiểu mọi thứ tiếng) ================= */
+  let rec = null;
+  async function micToggle() {
+    if (rec) return micStop();
+    const ctx = newCtx();
+    const chunks = []; let silentSince = 0, heard = false;
+    try {
+      const m = await micOpen(ctx, (d, f) => {
+        chunks.push(d);
+        const lv = level(f);
+        if (lv > 0.06) { heard = true; silentSince = 0; } else if (heard && !silentSince) silentSince = Date.now();
+        $("micBtn").style.setProperty("--lv", Math.min(1, lv * 4).toFixed(2));
+        if (heard && silentSince && Date.now() - silentSince > 1600) micStop(); // im lặng 1,6 giây -> tự gửi
+      });
+      rec = { m, ctx, chunks, t0: Date.now(), timer: setTimeout(() => micStop(), 30000) };
+      $("micBtn").classList.add("rec"); $("askIn").placeholder = t("mic_rec"); $("askIn").value = "";
+      stopAudio();
+    } catch { try { ctx.close(); } catch {} toast(t("mic_denied")); }
+  }
+  function micStop() {
+    if (!rec) return;
+    const r = rec; rec = null; clearTimeout(r.timer); r.m.close(); try { r.ctx.close(); } catch {}
+    $("micBtn").classList.remove("rec"); $("askIn").placeholder = t("ask_ph");
+    const total = r.chunks.reduce((a, c) => a + c.length, 0);
+    if (total < 16000 * 0.4) return; // quá ngắn
+    const all = new Int16Array(total); let o = 0; r.chunks.forEach((c) => { all.set(c, o); o += c.length; });
+    askVoice(wavB64(all, 16000));
+  }
+  function wavB64(i16, rate) {
+    const buf = new ArrayBuffer(44 + i16.byteLength), v = new DataView(buf);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, "RIFF"); v.setUint32(4, 36 + i16.byteLength, true); w(8, "WAVE"); w(12, "fmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true);
+    v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, i16.byteLength, true);
+    new Uint8Array(buf, 44).set(new Uint8Array(i16.buffer, i16.byteOffset, i16.byteLength));
+    let s = ""; const u = new Uint8Array(buf);
+    for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  const placeCtx = () => cur ? `The traveller is at: ${cur.name}${cur.city ? ", " + cur.city : ""}. What you already told them: ${cur.narration.slice(0, 400)}` : (lastPos ? `The traveller is in Vietnam near GPS ${lastPos.lat}, ${lastPos.lng}.` : "The traveller is visiting Vietnam.");
+  async function askVoice(b64) {
+    const me = el("div", "msg me", "🎤 …"); $("chat").appendChild(me);
+    const bubble = el("div", "msg ai", t("thinking")); $("chat").appendChild(bubble);
+    bubble.scrollIntoView({ behavior: "smooth", block: "center" });
+    const contents = [];
+    chatLog.slice(-6).forEach((h) => { contents.push({ role: "user", parts: [{ text: h.q }] }); contents.push({ role: "model", parts: [{ text: h.a }] }); });
+    contents.push({ role: "user", parts: [{ inline_data: { mime_type: "audio/wav", data: b64 } }, { text: "(Voice question from the traveller — answer it.)" }] });
+    try {
+      const r = await gem("text", M.FAST, {
+        systemInstruction: { parts: [{ text: `You are a friendly, witty local tour guide in Vietnam. ${placeCtx()}
+The traveller asks by VOICE, in ANY language (Vietnamese, English, Chinese, Korean, Thai, French, Spanish...). Understand it whatever the language or accent.
+Reply in exactly this format:
+@@Q: <exact transcript of what they said, in the language they spoke>
+@@LANG: <BCP-47 code of the language they spoke, e.g. vi-VN, en-US, ko-KR>
+@@A: <answer in THE SAME language they spoke, 1-4 short conversational sentences, plain text>` }] },
+        contents, generationConfig: { temperature: 0.6 },
+      }, (s) => {
+        const q = (s.match(/@@Q:[ \t]*(.*)/) || [])[1]; if (q) me.textContent = "🎤 " + q.trim();
+        const a = s.split("@@A:")[1]; if (a) bubble.textContent = a.trim();
+      });
+      const q = ((r.text.match(/@@Q:[ \t]*(.*)/) || [])[1] || "").trim();
+      const code = ((r.text.match(/@@LANG:[ \t]*([A-Za-z-]+)/) || [])[1] || "").trim();
+      const a = (r.text.split("@@A:")[1] || r.text).trim();
+      me.textContent = "🎤 " + (q || "…"); bubble.textContent = a;
+      chatLog.push({ q: q || "(voice)", a });
+      sayText(a, code); // đọc câu trả lời bằng đúng thứ tiếng khách vừa nói
+    } catch (e) { bubble.textContent = errText(e); }
+  }
+  async function sayText(text, code) {
+    stopAudio(); const my = R.token;
+    const url = await ttsAudio(text, code || "");
+    if (!url || my !== R.token) return;
+    audio.onended = audio.ontimeupdate = audio.onerror = null; audio.src = url; audio.play().catch(() => {});
+  }
+
+  /* ================= Gọi hướng dẫn viên AI (thời gian thực) ================= */
+  let call = null;
+  function callUI(state) {
+    $("call").classList.remove("hidden");
+    $("cStatus").textContent = t({ connecting: "call_connecting", listening: "call_listening", speaking: "call_speaking", ptt: "call_ptt" }[state] || "call_connecting");
+    $("call").dataset.state = state;
+  }
+  function callSys() {
+    return `You are "TravelAI", a warm, witty, knowledgeable local tour guide in Vietnam, talking with a traveller on a live phone call. ${placeCtx()}
+Speak naturally like a real person on the phone: short sentences, friendly, lively, never read lists. Keep each reply under 3 sentences unless asked for more.
+Default language: ${LANGS[lang].name}. If the traveller speaks another language, switch to the language they speak and keep using it. Never mix two languages in one reply.`;
+  }
+  async function startCall() {
+    if (call) return;
+    unlockAudio(); stopAudio();
+    const ctx = newCtx();
+    call = { ctx, ws: null, mic: null, playT: 0, srcs: [], muted: false, t0: Date.now(), live: false, log: [] };
+    $("cCap").textContent = ""; $("cMute").textContent = "🎙️"; $("cPtt").classList.add("hidden");
+    callUI("connecting");
+    call.tick = setInterval(() => { if (!call) return; const s = Math.floor((Date.now() - call.t0) / 1000); $("cTimer").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }, 500);
+    try { await resolveModels(); } catch {}
+    if (M.LIVE) { try { await liveConnect(); return; } catch {} }
+    if (call) pttMode();
+  }
+  function liveConnect() {
+    return new Promise((ok, fail) => {
+      const ws = new WebSocket("wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=" + encodeURIComponent(getKey()));
+      call.ws = ws; let ready = false;
+      const to = setTimeout(() => { if (!ready) { try { ws.close(); } catch {} fail(new Error("timeout")); } }, 9000);
+      ws.onopen = () => ws.send(JSON.stringify({ setup: {
+        model: "models/" + M.LIVE,
+        generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } } } },
+        systemInstruction: { parts: [{ text: callSys() }] },
+        outputAudioTranscription: {},
+      } }));
+      ws.onerror = () => { if (!ready) { clearTimeout(to); fail(new Error("ws")); } };
+      ws.onclose = () => { if (!ready) { clearTimeout(to); fail(new Error("closed")); } else if (call && call.ws === ws) endCall(); };
+      ws.onmessage = async (ev) => {
+        let m; try { m = JSON.parse(typeof ev.data === "string" ? ev.data : await ev.data.text()); } catch { return; }
+        if (m.setupComplete && !ready) {
+          ready = true; clearTimeout(to); call.live = true; ok();
+          callUI("listening");
+          ws.send(JSON.stringify({ clientContent: { turns: [{ role: "user", parts: [{ text: `(The call just connected. Greet the traveller warmly in ${LANGS[lang].name} in one short sentence and ask how you can help.)` }] }], turnComplete: true } }));
+          try {
+            call.mic = await micOpen(call.ctx, (d) => {
+              if (!call || call.muted || ws.readyState !== 1) return;
+              ws.send(JSON.stringify({ realtimeInput: { audio: { data: i16ToB64(d), mimeType: "audio/pcm;rate=16000" } } }));
+            });
+          } catch { toast(t("mic_denied")); }
+          return;
+        }
+        const sc = m.serverContent; if (!sc) return;
+        if (sc.interrupted) stopCallAudio(); // khách nói chen -> AI dừng ngay, như người thật
+        ((sc.modelTurn && sc.modelTurn.parts) || []).forEach((p) => { const d = p.inlineData || p.inline_data; if (d && d.data) playPcm(d.data, +((d.mimeType || "").match(/rate=(\d+)/) || [0, 24000])[1]); });
+        if (sc.outputTranscription && sc.outputTranscription.text) { $("cCap").textContent = ($("cCap").textContent + sc.outputTranscription.text).slice(-220); }
+        if (sc.turnComplete) setTimeout(() => { if (call && !call.srcs.length) { callUI("listening"); } }, 50);
+      };
+    });
+  }
+  // Phát giọng AI liền mạch, có làm mượt đầu/cuối từng đoạn để không bị rè
+  function playPcm(b64, rate) {
+    if (!call) return;
+    const pcm = pcmClean(b64, rate, false); if (!pcm.length) return;
+    const ctx = call.ctx, buf = ctx.createBuffer(1, pcm.length, rate), ch = buf.getChannelData(0);
+    for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
+    const s = ctx.createBufferSource(); s.buffer = buf; s.connect(ctx.destination);
+    const at = Math.max(ctx.currentTime + 0.06, call.playT); s.start(at); call.playT = at + buf.duration;
+    call.srcs.push(s); callUI("speaking");
+    s.onended = () => { if (!call) return; call.srcs = call.srcs.filter((x) => x !== s); if (!call.srcs.length) callUI(call.live ? "listening" : "ptt"); };
+  }
+  function stopCallAudio() { if (!call) return; call.srcs.forEach((s) => { try { s.stop(); } catch {} }); call.srcs = []; call.playT = 0; }
+  // Dự phòng khi không có mô hình gọi trực tiếp: nhấn giữ để nói
+  function pttMode() {
+    if (!call) return;
+    call.live = false; callUI("ptt"); $("cPtt").classList.remove("hidden");
+    $("cCap").textContent = "";
+  }
+  let pttRec = null;
+  async function pttDown() {
+    if (!call || pttRec) return;
+    stopCallAudio();
+    const chunks = [];
+    try { pttRec = { chunks, m: await micOpen(call.ctx, (d) => chunks.push(d)) }; $("cPtt").classList.add("rec"); callUI("listening"); }
+    catch { toast(t("mic_denied")); }
+  }
+  async function pttUp() {
+    if (!pttRec) return;
+    const r = pttRec; pttRec = null; r.m.close(); $("cPtt").classList.remove("rec");
+    const total = r.chunks.reduce((a, c) => a + c.length, 0); if (total < 16000 * 0.4) { callUI("ptt"); return; }
+    const all = new Int16Array(total); let o = 0; r.chunks.forEach((c) => { all.set(c, o); o += c.length; });
+    $("cStatus").textContent = t("thinking");
+    try {
+      const contents = [];
+      call.log.slice(-6).forEach((h) => { contents.push({ role: "user", parts: [{ text: h.q }] }); contents.push({ role: "model", parts: [{ text: h.a }] }); });
+      contents.push({ role: "user", parts: [{ inline_data: { mime_type: "audio/wav", data: wavB64(all, 16000) } }, { text: "(Voice message on the call.)" }] });
+      const r2 = await gem("text", M.FAST, { systemInstruction: { parts: [{ text: callSys() + `\nReply in this format:\n@@Q: <transcript of what they said>\n@@LANG: <BCP-47 code of the language they spoke>\n@@A: <your spoken reply>` }] }, contents, generationConfig: { temperature: 0.7 } });
+      if (!call) return;
+      const tx = textOf(r2);
+      const q = ((tx.match(/@@Q:[ \t]*(.*)/) || [])[1] || "").trim(), code = ((tx.match(/@@LANG:[ \t]*([A-Za-z-]+)/) || [])[1] || "").trim();
+      const a = (tx.split("@@A:")[1] || tx).trim();
+      call.log.push({ q, a }); $("cCap").textContent = a;
+      const url = await ttsAudio(a, code);
+      if (!call) return;
+      if (!url) { callUI("ptt"); return; }
+      const ab = await (await fetch(url)).arrayBuffer();
+      call.ctx.decodeAudioData(ab, (buf) => {
+        if (!call) return;
+        const s = call.ctx.createBufferSource(); s.buffer = buf; s.connect(call.ctx.destination); s.start();
+        call.srcs.push(s); callUI("speaking"); s.onended = () => { if (call) { call.srcs = call.srcs.filter((x) => x !== s); callUI("ptt"); } };
+      });
+    } catch (e) { if (call) { callUI("ptt"); toast(errText(e).split("\n")[0]); } }
+  }
+  function endCall() {
+    if (!call) return;
+    const c = call; call = null;
+    clearInterval(c.tick);
+    try { c.ws && c.ws.close(); } catch {}
+    try { c.mic && c.mic.close(); } catch {}
+    if (pttRec) { try { pttRec.m.close(); } catch {} pttRec = null; }
+    c.srcs.forEach((s) => { try { s.stop(); } catch {} });
+    try { c.ctx.close(); } catch {}
+    $("call").classList.add("hidden");
+  }
+  $("cEnd").onclick = endCall;
+  $("cMute").onclick = () => { if (!call) return; call.muted = !call.muted; $("cMute").textContent = call.muted ? "🔇" : "🎙️"; $("cMute").classList.toggle("off", call.muted); };
+  ["pointerdown"].forEach((ev) => $("cPtt").addEventListener(ev, (e) => { e.preventDefault(); pttDown(); }));
+  ["pointerup", "pointercancel", "pointerleave"].forEach((ev) => $("cPtt").addEventListener(ev, () => pttUp()));
+  document.querySelectorAll("[data-call]").forEach((b) => b.addEventListener("click", startCall));
+  $("micBtn").onclick = micToggle;
+
+  /* ================= Tài khoản (lưu trên thiết bị) ================= */
+  let user = null;
+  const uk = (k) => "u:" + (user ? user.email : "_") + ":" + k;
+  const ustore = { get: (k, d) => store.get(uk(k), d), set: (k, v) => store.set(uk(k), v) };
+  async function hashPw(pw, salt) {
+    const data = new TextEncoder().encode(salt + ":" + pw);
+    if (window.crypto && crypto.subtle) { const b = await crypto.subtle.digest("SHA-256", data); return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join(""); }
+    let h = 5381; for (const x of data) h = ((h << 5) + h + x) >>> 0; return "d" + h.toString(16);
+  }
+  let authMode = "reg";
+  function renderAuth() {
+    const reg = authMode === "reg";
+    $("aName").classList.toggle("hidden", !reg);
+    $("aSubmit").textContent = reg ? t("reg") : t("login");
+    $("aSwitch").textContent = reg ? t("have_acc") : t("no_acc");
+    $("aTabReg").classList.toggle("on", reg); $("aTabLog").classList.toggle("on", !reg);
+    $("aErr").textContent = "";
+  }
+  $("aTabReg").onclick = () => { authMode = "reg"; renderAuth(); };
+  $("aTabLog").onclick = () => { authMode = "log"; renderAuth(); };
+  $("aSwitch").onclick = () => { authMode = authMode === "reg" ? "log" : "reg"; renderAuth(); };
+  $("authForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const name = $("aName").value.trim(), email = $("aEmail").value.trim().toLowerCase(), pw = $("aPass").value;
+    const users = store.get("users", {});
+    if (!/^\S+@\S+\.\S+$/.test(email) || pw.length < 6 || (authMode === "reg" && !name)) { $("aErr").textContent = t("e_fill"); return; }
+    if (authMode === "reg") {
+      if (users[email]) { $("aErr").textContent = t("e_exists"); return; }
+      const salt = Math.random().toString(36).slice(2);
+      users[email] = { name, salt, hash: await hashPw(pw, salt), created: Date.now() };
+      store.set("users", users);
+      // chuyển lịch sử cũ (trước khi có tài khoản) sang tài khoản đầu tiên
+      const old = store.get("hist", null); if (old && Object.keys(users).length === 1) { store.set("u:" + email + ":hist", old); store.set("hist", null); }
+    } else {
+      const u = users[email];
+      if (!u || (await hashPw(pw, u.salt)) !== u.hash) { $("aErr").textContent = t("e_wrong"); return; }
+    }
+    store.set("session", email); signIn(email);
+  };
+  function signIn(email) {
+    const u = store.get("users", {})[email]; if (!u) return showAuth();
+    user = { email, name: u.name, created: u.created };
+    $("auth").classList.add("hidden"); $("aPass").value = "";
+    renderRecent(); updateAvatar(); startTracking();
+  }
+  function showAuth() { user = null; $("auth").classList.remove("hidden"); renderAuth(); }
+  function logout() { store.set("session", null); stopTracking(); go("home"); showAuth(); }
+  function updateAvatar() { $("navAvatar").textContent = user ? user.name.trim().charAt(0).toUpperCase() : "👤"; }
+
+  /* ================= Địa điểm đã đến + bản đồ tự cập nhật ================= */
+  const KNOWN = [
+    ["Vịnh Hạ Long", 20.9101, 107.1839], ["Phố cổ Hội An", 15.877, 108.326], ["Chùa Một Cột", 21.0359, 105.8336],
+    ["Đại Nội Huế", 16.4698, 107.5786], ["Nhà thờ Đức Bà Sài Gòn", 10.7798, 106.699], ["Cầu Rồng Đà Nẵng", 16.0612, 108.227],
+    ["Tràng An, Ninh Bình", 20.255, 105.8903], ["Đỉnh Fansipan", 22.3033, 103.775], ["Hồ Hoàn Kiếm", 21.0287, 105.8524],
+    ["Văn Miếu – Quốc Tử Giám", 21.0293, 105.8355], ["Lăng Chủ tịch Hồ Chí Minh", 21.0368, 105.8346], ["Chợ Bến Thành", 10.7725, 106.698],
+    ["Dinh Độc Lập", 10.777, 106.6953], ["Bà Nà Hills", 15.9977, 107.988], ["Cầu Vàng", 15.9951, 107.9966], ["Chùa Thiên Mụ", 16.4533, 107.5446],
+  ].map(([name, lat, lng]) => ({ name, lat, lng }));
+  const knownAll = () => KNOWN.concat(store.get("knownPlaces", []));
+  function km(a, b) {
+    const R2 = 6371, dLa = ((b.lat - a.lat) * Math.PI) / 180, dLo = ((b.lng - a.lng) * Math.PI) / 180;
+    const x = Math.sin(dLa / 2) ** 2 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLo / 2) ** 2;
+    return 2 * R2 * Math.asin(Math.sqrt(x));
+  }
+  function addVisit(p, via) {
+    if (!user) return false;
+    const v = ustore.get("visits", []);
+    const ex = v.find((x) => x.name.toLowerCase() === p.name.toLowerCase());
+    if (ex) { if (via === "checkin") { ex.checkin = true; ustore.set("visits", v); } return false; }
+    v.unshift({ name: p.name, lat: +p.lat, lng: +p.lng, t: Date.now(), checkin: via === "checkin" });
+    ustore.set("visits", v.slice(0, 200));
+    if (view === "acct") renderAcct();
+    return true;
+  }
+  let watchId = null;
+  function startTracking() {
+    if (!navigator.geolocation || watchId !== null) return;
+    watchId = navigator.geolocation.watchPosition((p) => {
+      lastPos = { lat: +p.coords.latitude.toFixed(5), lng: +p.coords.longitude.toFixed(5) };
+      knownAll().forEach((k) => { if (km(lastPos, k) < 0.35 && addVisit(k, "gps")) toast("📍 " + t("arrived") + " " + k.name); });
+      if (view === "acct" && map) drawMap();
+    }, () => {}, { enableHighAccuracy: false, maximumAge: 60000, timeout: 20000 });
+  }
+  function stopTracking() { if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; } }
+
+  // Check-in: chụp ảnh tại đúng địa danh (cách ≤ 2 km) -> +1 điểm, mỗi nơi 1 lần
+  function checkIn(d) {
+    if (!user || !d.lat) return;
+    if (!lastPos || !lastPos.lat) { toast(t("ci_nogps")); return; }
+    if (km(lastPos, d) > 2) { toast(t("ci_far")); return; }
+    const ci = ustore.get("checkins", {}), k = d.name.toLowerCase();
+    if (ci[k]) { toast(t("ci_done")); return; }
+    ci[k] = Date.now(); ustore.set("checkins", ci);
+    ustore.set("points", ustore.get("points", 0) + 1);
+    addVisit(d, "checkin"); toast(t("ci_ok"));
+  }
+  function rememberPlace(d) {
+    if (!d.lat) return;
+    const k = store.get("knownPlaces", []).filter((x) => x.name !== d.name);
+    k.unshift({ name: d.name, lat: +d.lat, lng: +d.lng }); store.set("knownPlaces", k.slice(0, 150));
+  }
+
+  let map = null, mapLayer = null;
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve();
+    return new Promise((ok, no) => {
+      const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(l);
+      const s = document.createElement("script"); s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; s.onload = ok; s.onerror = no; document.head.appendChild(s);
+    });
+  }
+  async function drawMap() {
+    try { await loadLeaflet(); } catch { return; }
+    if (!map) {
+      map = L.map("map", { zoomControl: false, attributionControl: true }).setView([16.2, 106.5], 5);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18, attribution: "© OpenStreetMap" }).addTo(map);
+      mapLayer = L.layerGroup().addTo(map);
+    }
+    mapLayer.clearLayers();
+    const pts = [];
+    ustore.get("visits", []).forEach((v) => {
+      if (!v.lat) return;
+      L.circleMarker([v.lat, v.lng], { radius: 8, color: "#fff", weight: 2, fillColor: v.checkin ? "#f5b301" : "#e5383b", fillOpacity: 1 }).bindPopup((v.checkin ? "⭐ " : "📍 ") + v.name).addTo(mapLayer);
+      pts.push([v.lat, v.lng]);
+    });
+    if (lastPos && lastPos.lat) {
+      L.circleMarker([lastPos.lat, lastPos.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#0b5ed7", fillOpacity: 1 }).bindPopup(t("you_are_here")).addTo(mapLayer);
+      pts.push([lastPos.lat, lastPos.lng]);
+    }
+    if (pts.length > 1) map.fitBounds(pts, { padding: [30, 30], maxZoom: 14 }); else if (pts.length) map.setView(pts[0], 13);
+    setTimeout(() => map.invalidateSize(), 120);
+  }
+
+  /* ================= Đổi quà ================= */
+  const REWARDS = [{ id: "r1", cost: 3, ic: "🏅" }, { id: "r2", cost: 5, ic: "🎟️" }, { id: "r3", cost: 10, ic: "☕" }, { id: "r4", cost: 20, ic: "🎁" }];
+  function redeem(r) {
+    const pts = ustore.get("points", 0);
+    if (pts < r.cost) { toast(t("need_pts")); return; }
+    const code = "TRV-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+    ustore.set("points", pts - r.cost);
+    const g = ustore.get("gifts", []); g.unshift({ id: r.id, code, t: Date.now() }); ustore.set("gifts", g);
+    toast(t("redeemed") + " " + code); renderAcct();
+  }
+  function renderAcct() {
+    if (!user) return;
+    $("acName").textContent = user.name; $("acEmail").textContent = user.email; $("acAv").textContent = user.name.trim().charAt(0).toUpperCase();
+    const v = ustore.get("visits", []), pts = ustore.get("points", 0), ci = Object.keys(ustore.get("checkins", {})).length;
+    $("stPts").textContent = pts; $("stVis").textContent = v.length; $("stCi").textContent = ci;
+    const vl = $("visList"); vl.innerHTML = "";
+    if (!v.length) vl.appendChild(el("p", "muted", t("visited_empty")));
+    v.slice(0, 30).forEach((x) => {
+      const row = el("button", "vrow"); row.type = "button";
+      row.append(el("span", null, x.checkin ? "⭐" : "📍"), el("b", null, x.name), el("span", "muted", new Date(x.t).toLocaleDateString(LANGS[lang].code || "en")));
+      row.onclick = () => searchPlace(x.name); vl.appendChild(row);
+    });
+    const rw = $("rewards"); rw.innerHTML = "";
+    REWARDS.forEach((r) => {
+      const row = el("div", "rw");
+      const b = el("button", "btn " + (pts >= r.cost ? "btn-primary" : "btn-ghost"), pts >= r.cost ? t("redeem") : t("need_pts")); b.type = "button"; b.onclick = () => redeem(r);
+      const tx = el("div"); tx.append(el("b", null, t(r.id)), el("span", "muted", "⭐ " + r.cost));
+      row.append(el("span", "ric", r.ic), tx, b); rw.appendChild(row);
+    });
+    const gl = $("gifts"); gl.innerHTML = "";
+    ustore.get("gifts", []).forEach((g) => gl.appendChild(el("div", "gift", "🎁 " + t(g.id) + " · " + g.code)));
+    $("giftsWrap").classList.toggle("hidden", !ustore.get("gifts", []).length);
+    drawMap();
+  }
+  $("logoutBtn").onclick = logout;
+  $("aLang").onclick = () => openSheet("langSheet");
+
+  /* ================= Tuỳ chọn ngôn ngữ: dịch giao diện bằng AI ================= */
+  async function ensureUI(lg) {
+    if (lg === "vi" || lg === "en") return;
+    const have = Object.assign({}, T[lg] || {}, dynT[lg] || {});
+    const missing = Object.keys(T.en).filter((k) => !have[k]);
+    if (!missing.length) return;
+    const src = {}; missing.forEach((k) => (src[k] = T.en[k]));
+    toast(t("lang_translating"));
+    try {
+      const r = await gem("text", M.FAST, {
+        contents: [{ role: "user", parts: [{ text: `Translate the JSON values from English into ${LANGS[lg].name} for a mobile travel app UI. Keep the keys unchanged. Keep emoji, symbols (↻ ▶ · ⭐ ~) and numbers. Natural, short UI wording. Return ONLY the JSON object.\n${JSON.stringify(src)}` }] }],
+        generationConfig: { temperature: 0.2 },
+      });
+      const j = parseJSON(textOf(r));
+      dynT[lg] = Object.assign(dynT[lg] || {}, j); store.set("dynT", dynT);
+      if (lang === lg) applyI18n();
+    } catch {}
+  }
+
   /* ---- Khởi động ---- */
-  applyI18n();
+  applyI18n(); ensureUI(lang);
+  { const sess = store.get("session", null); if (sess && store.get("users", {})[sess]) signIn(sess); else showAuth(); }
   loadPopImages().then((d) => { popImgs = d; paintPop(); }).catch(() => {});
   // Mở trong trình xem file / khung xem trước (không phải web thật) -> AI bị chặn, báo rõ cho người dùng
   if (!/^https?:$/.test(location.protocol) || /claude|claudeusercontent|anthropic/i.test(location.hostname) || window.claude) {
