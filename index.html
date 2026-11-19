@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0b5ed7" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="TravelAI" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="description" content="Chụp một địa danh, nghe hướng dẫn viên AI thuyết minh. Du lịch Việt Nam thông minh hơn." />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" type="image/png" href="icon-192.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
 <title>TravelAI – Hướng dẫn viên AI</title>
 <link rel="preconnect" href="https://generativelanguage.googleapis.com" crossorigin />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -33,6 +40,8 @@
   .brand b { font-size: 19px; letter-spacing: .4px; display: block; line-height: 1.1; }
   .brand b span { color: var(--brand); }
   .brand small { font-size: 9px; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; }
+  .brand small { white-space: nowrap; }
+  @media (max-width: 400px) { .brand small { letter-spacing: .4px; font-size: 8.5px; } .brand b { font-size: 17px; } }
   .hdr-r { display: flex; gap: 8px; align-items: center; }
   .langbtn { display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 99px; padding: 7px 11px; font-size: 13px; font-weight: 700; box-shadow: var(--shadow); }
   .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 4px rgba(18, 161, 80, .15); }
@@ -273,7 +282,7 @@
   <header>
     <div class="brand">
       <div class="logo">T</div>
-      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v4.0</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
+      <div><b>TRAVEL<span>AI</span> <sup style="font-size:9px;color:var(--muted);font-weight:600">v4.2</sup></b><small>YOUR SMART TRAVEL COMPANION</small></div>
     </div>
     <div class="hdr-r">
       <button class="langbtn" id="langBtn" aria-label="Language"><i class="dot" id="aiDot"></i><span id="langFlag">🇻🇳</span><span id="langCode">VI</span></button>
@@ -372,6 +381,8 @@
     </div>
     <p class="muted" style="text-align:center;margin:4px 0 10px;font-size:11.5px" data-i="acc_note"></p>
     <button class="btn btn-ghost" id="logoutBtn" style="width:100%" data-i="logout"></button>
+    <button class="btn" id="delAccBtn" style="width:100%;margin-top:8px;color:var(--danger);background:#fdecec" data-i="del_acc"></button>
+    <p style="text-align:center;margin-top:12px"><a href="privacy.html" target="_blank" rel="noopener" class="muted" data-i="privacy"></a></p>
   </section>
 
   <!-- SOS -->
@@ -525,6 +536,8 @@
       dnd: "🎧 Nhớ bật Không làm phiền nhé", no_vi_voice: "Máy chưa có giọng tiếng Việt, hãy bật Giọng đọc AI.",
       key_t: "Nhập API key Gemini", key_s: "Key chỉ lưu trên trình duyệt của máy này.", key_save: "Lưu key", key_later: "Để sau",
       thinking: "Đang trả lời…",
+      kind_landmark: "Địa danh", kind_food: "Món ăn & đồ uống", kind_object: "Đồ vật", find_food: "Tìm quán gần đây", find_shop: "Tìm nơi bán", near_food: "Món tương tự · chạm để nghe", near_obj: "Liên quan · chạm để nghe", mic_none: "Chưa nghe rõ, bạn nói lại gần micro hơn nhé",
+      del_acc: "Xoá tài khoản", del_confirm: "Nhấn lần nữa để xoá vĩnh viễn", deleted: "Đã xoá tài khoản và dữ liệu", privacy: "Chính sách quyền riêng tư",
       nav_acct: "Tài khoản", call: "Gọi hướng dẫn viên AI", call_short: "Gọi", call_home_s: "Nói chuyện trực tiếp, hỏi gì cũng được, mọi thứ tiếng",
       call_connecting: "Đang kết nối…", call_listening: "Đang nghe bạn nói…", call_speaking: "Hướng dẫn viên đang nói…", call_ptt: "Nhấn giữ để nói",
       call_tip: "Dùng tai nghe để cuộc gọi rõ hơn. Bạn có thể nói chen ngang bất cứ lúc nào.",
@@ -578,6 +591,8 @@
       dnd: "🎧 Turn on Do Not Disturb", no_vi_voice: "No voice for this language on your device. Turn on the AI voice.",
       key_t: "Enter your Gemini API key", key_s: "The key is stored only in this browser.", key_save: "Save key", key_later: "Later",
       thinking: "Answering…",
+      kind_landmark: "Landmark", kind_food: "Food & drink", kind_object: "Object", find_food: "Find places nearby", find_shop: "Where to buy", near_food: "Similar dishes · tap to listen", near_obj: "Related · tap to listen", mic_none: "Didn't catch that, please speak closer to the mic",
+      del_acc: "Delete account", del_confirm: "Tap again to delete permanently", deleted: "Account and data deleted", privacy: "Privacy policy",
       nav_acct: "Account", call: "Call your AI guide", call_short: "Call", call_home_s: "Talk live, ask anything, in any language",
       call_connecting: "Connecting…", call_listening: "Listening…", call_speaking: "Your guide is speaking…", call_ptt: "Hold to talk",
       call_tip: "Use earphones for a clearer call. You can interrupt at any time.",
@@ -859,29 +874,41 @@
     if (e && e.code === "rate_limited") return t("err_rate");
     if (e && e.code === "network") return t("err_net") + (e.message ? "\n(" + e.message + ")" : "");
     if (e && (e.code === "badkey" || e.code === "nokey")) return t("err_key");
-    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v4.0 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
+    return t("err_gen") + (e && e.message ? "\n(" + String(e.message).slice(0, 160) + ")" : "") + "\n[v4.2 · " + (M.FAST || "") + " · t" + thinkIdx + "]";
   }
 
   /* ---- Thuyết minh: 1 lần gọi, stream, ưu tiên Việt Nam ---- */
   function guidePrompt({ name, hasImage, ctx, lg, style }) {
     const L = LANGS[lg].name;
     const words = style === "short" ? "70-90 words" : "160-190 words";
-    return `You are a charismatic, highly knowledgeable Vietnamese tour guide. This app is used by tourists in VIETNAM, so strongly prefer Vietnamese landmarks.
-${hasImage ? `Identify the tourist place in the photo. ${ctx}` : `The tourist wants to hear about: "${name}".`}
+    return `You are a charismatic, highly knowledgeable Vietnamese tour guide for travellers in VIETNAM.
+${hasImage ? `Look at the photo VERY carefully and first decide what it MAINLY shows:
+- "landmark": a tourist place, building, monument, street, temple, landscape you can actually see.
+- "food": a dish, drink, dessert, fruit or snack.
+- "object": anything else (an item, product, souvenir, handicraft, plant, animal, vehicle, toy...).
+A close-up of an item or food (on a table, in a hand, on a plate) is NEVER a landmark. Only answer "landmark" when a place/building/landscape is clearly the subject.
+${ctx ? ctx + " Use GPS ONLY as a hint for landmarks. Never use it to turn an object or food photo into a landmark." : ""}` : `The traveller typed: "${name}". Decide whether it is a landmark, a food/drink, or an object.`}
+For FOOD/DRINK: identify the exact dish and say where it comes from: if Vietnamese, which province/region it is a specialty of (e.g. "Đặc sản Huế"); if foreign, which country's cuisine.
+For OBJECTS: identify exactly what it is, its origin/craft village/brand type if recognisable, and what it is used for.
 Reply IMMEDIATELY in exactly this format, no preamble, no markdown:
-@@NAME: <official name of the place, in its original language>
-@@PLACE: <city/province>, <country>
-@@COORD: <approximate latitude>, <longitude> of the place
+@@KIND: <landmark | food | object>
+@@NAME: <landmark: official name in its original language; food: dish name in its original language (e.g. "Bún bò Huế", "Sushi"); object: its common name>
+@@ORIGIN: <food: specialty of which province/region, or which country's cuisine; object: origin/maker/craft village if known; landmark: leave empty> (written in ${L})
+@@PLACE: <landmark only: city/province, country>
+@@COORD: <landmark only: approximate latitude, longitude>
 @@CONF: <recognition confidence 0-1>
-@@TITLE: <place name written in ${L}>
+@@TITLE: <name written in ${L}>
 @@NARRATION
-<narration in ${L}, ${words}, written to be spoken aloud by a lively guide: a captivating hook, history, cultural meaning, one surprising detail, a warm closing line. Short sentences. No lists.>
+<in ${L}, ${words}, spoken aloud by a lively guide, short sentences, no lists.
+landmark: captivating hook, history, cultural meaning, one surprising detail, warm closing line.
+food: what it is, where it comes from (Vietnamese specialty of which region, or foreign dish), key ingredients and flavour, how locals eat it, a fun story, where/when to enjoy it.
+object: what it is, what it is used for, its origin or cultural meaning in Vietnam if any, an interesting fact, a tip (e.g. as a souvenir).>
 @@EXTRA
-{"category":"","facts":["3-4 short facts"],"tips":["3 short visitor tips; say ticket prices/hours may change"],"nearby":["2-3 nearby attraction names"],"questions":["3 short questions a tourist would ask"]}
-${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, reply only:
+{"category":"","facts":["3-4 short facts"],"tips":["3 short tips (landmark: visiting tips, say prices/hours may change; food: how to eat, where to find, typical price; object: buying/using tips)"],"nearby":["landmark: 2-3 nearby attractions; food: 2-3 similar dishes to try; object: 2-3 related items"],"questions":["3 short questions a traveller would ask"]}
+${hasImage ? `ONLY if the photo is blurry/empty and you truly cannot tell what it is, reply only:
 @@NONE
-{"is_landmark":false,"alternatives":["possible places, if any"]}
-` : ""}Everything except @@NAME must be in ${L} ONLY. Never mix in words from other languages (no Vietnamese, English or Chinese words unless ${L} is that language). When a Vietnamese proper name appears in non-Vietnamese text, write it the way ${L} speakers normally write it (without Vietnamese diacritics, e.g. "Hoi An", "Hue"). The narration will be read aloud by a ${L} voice, so it must sound 100% natural in ${L}. State only facts you are sure of; never invent numbers.`;
+{"is_landmark":false,"alternatives":["possible answers, if any"]}
+` : ""}Everything except @@NAME must be in ${L} ONLY. Never mix in words from other languages (no Vietnamese, English or Chinese words unless ${L} is that language). When a Vietnamese proper name appears in non-Vietnamese text, write it the way ${L} speakers normally write it (without Vietnamese diacritics, e.g. "Hoi An", "Hue", "pho"). The narration will be read aloud by a ${L} voice, so it must sound 100% natural in ${L}. State only facts you are sure of; never invent numbers.`;
   }
   function parseStream(s) {
     const g = (k) => { const m = s.match(new RegExp("@@" + k + ":[ \\t]*(.*)")); return m ? m[1].trim() : ""; };
@@ -889,7 +916,8 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     let narration = ni >= 0 ? s.slice(ni + 11, ei >= 0 ? ei : undefined) : "";
     narration = narration.replace(/@+[A-Z]*\s*$/, "").trim();
     const co = (g("COORD").match(/(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/) || []);
-    return { lat: co[1] ? +co[1] : null, lng: co[2] ? +co[2] : null, none: s.includes("@@NONE"), name: g("NAME"), place: g("PLACE"), conf: parseFloat(g("CONF")), title: g("TITLE"), narration, extra: ei >= 0 ? s.slice(ei + 7) : "" };
+    const kd = (g("KIND").toLowerCase().match(/landmark|food|object/) || ["landmark"])[0];
+    return { kind: kd, origin: g("ORIGIN"), lat: co[1] ? +co[1] : null, lng: co[2] ? +co[2] : null, none: s.includes("@@NONE"), name: g("NAME"), place: g("PLACE"), conf: parseFloat(g("CONF")), title: g("TITLE"), narration, extra: ei >= 0 ? s.slice(ei + 7) : "" };
   }
   function pcGet(k) { const c = store.get("gc", {}); const v = c[k]; return v && Date.now() - v.t < 7 * 864e5 ? v.d : null; }
   function pcSet(k, d) {
@@ -917,9 +945,11 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     const conf = isNaN(p.conf) ? (hasImage ? 0.7 : 1) : p.conf;
     if (hasImage && conf < 0.35) return { ok: false, landmark: { is_landmark: true, alternatives: [p.name].filter(Boolean) } };
     let ex = {}; try { ex = parseJSON(p.extra); } catch {}
-    const [city, ...rest] = (p.place || "").split(",");
+    const isL = p.kind === "landmark";
+    const [city, ...rest] = (isL ? p.place || "" : "").split(",");
     const place = {
-      name: p.name || o.name, city: (city || "").trim(), country: rest.join(",").trim(), category: ex.category || "", lat: p.lat, lng: p.lng,
+      kind: p.kind, origin: p.origin,
+      name: p.name || o.name, city: (city || "").trim(), country: rest.join(",").trim(), category: ex.category || "", lat: isL ? p.lat : null, lng: isL ? p.lng : null,
       confidence: hasImage ? conf : 1, title: p.title || p.name || o.name, narration: p.narration,
       facts: ex.facts || [], tips: ex.tips || ex.visitor_tips || [], nearby: ex.nearby || [], questions: ex.questions || [], lang: o.lang, style: o.style,
     };
@@ -928,8 +958,18 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     return { ok: true, place };
   }
 
-  /* ================= Giọng đọc ================= */
-  const audio = new Audio(); audio.preload = "auto";
+  /* ================= Giọng đọc (Web Audio: tự phát được trên iPhone, kêu cả khi gạt im lặng) ================= */
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {}
+  let actx = null;
+  const ac = () => { if (!actx) { const C = window.AudioContext || window.webkitAudioContext; actx = new C(); } return actx; };
+  // Mỗi lần chạm: đánh thức bộ âm thanh (iPhone chỉ cho phép trong lúc chạm) -> lời thuyết minh sau đó tự phát
+  function unlockAudio() {
+    try {
+      const c = ac(); if (c.state !== "running") c.resume().catch(() => {});
+      const b = c.createBuffer(1, 1, 22050), s = c.createBufferSource(); s.buffer = b; s.connect(c.destination); s.start(0);
+    } catch {}
+  }
+  ["touchend", "click", "keydown"].forEach((ev) => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
   // Làm sạch âm thanh: căn đúng byte, làm mượt đầu/cuối (hết tiếng "bụp"), giới hạn đỉnh (hết rè do quá to)
   function pcmClean(b64, rate = 24000, fade = true) {
     let bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -944,25 +984,12 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     }
     return out;
   }
-  function pcmToWavUrl(b64, rate = 24000) {
-    const pcm = pcmClean(b64, rate, true);
-    const pad = Math.round(rate * 0.08), total = pcm.length + pad; // thêm 80ms lặng ở cuối để không bị cắt cụt
-    const buf = new ArrayBuffer(44 + total * 2), v = new DataView(buf);
-    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-    w(0, "RIFF"); v.setUint32(4, 36 + total * 2, true); w(8, "WAVE"); w(12, "fmt ");
-    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-    v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-    w(36, "data"); v.setUint32(40, total * 2, true); new Int16Array(buf, 44, pcm.length).set(pcm);
-    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  function pcmToClip(b64, rate) {
+    const pcm = pcmClean(b64, rate, true), pad = Math.round(rate * 0.06), f32 = new Float32Array(pcm.length + pad);
+    for (let i = 0; i < pcm.length; i++) f32[i] = pcm[i] / 32768;
+    return { f32, rate };
   }
-  // Mở khoá âm thanh trên iPhone ngay lần chạm đầu tiên
-  const SILENT = pcmToWavUrl(btoa("\0".repeat(2400)));
-  let unlocked = false;
-  function unlockAudio() {
-    if (unlocked) return; unlocked = true;
-    try { audio.src = SILENT; audio.play().catch(() => {}); } catch {}
-  }
-  ["touchend", "click"].forEach((ev) => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
+  function toBuf(a, ctx = ac()) { const b = ctx.createBuffer(1, a.f32.length, a.rate); b.getChannelData(0).set(a.f32); return b; }
 
   // Chỉ gửi đúng lời thuyết minh (không kèm câu chỉ dẫn) -> AI không đọc thừa câu nào
   const ttsCache = new Map();
@@ -988,7 +1015,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
           const d = part && (part.inlineData || part.inline_data);
           if (!d || !d.data) throw { code: "server" };
           const rate = +((d.mimeType || d.mime_type || "").match(/rate=(\d+)/) || [0, 24000])[1];
-          return pcmToWavUrl(d.data, rate);
+          return pcmToClip(d.data, rate);
         } catch (e) {
           if (e && e.code === "rate_limited") { await sleep(2500 * (attempt + 1)); continue; } // bận -> chờ rồi thử lại
           if (useCode) { ttsBadCodes[code] = 1; store.set("ttsBadCodes", ttsBadCodes); continue; } // không nhận mã ngôn ngữ này
@@ -1010,7 +1037,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     return out.map((c) => ({ ...c, text: sents.slice(c.from, c.to).join(" ") }));
   }
 
-  const R = { sents: [], chunks: [], state: "idle", hl: -1, token: 0, resumeAt: 0 };
+  const R = { sents: [], chunks: [], state: "idle", hl: -1, token: 0, resumeAt: 0, src: null, buf: null, ch: null, t0: 0, pend: null, res: null };
   function setHL(i) {
     R.hl = i;
     document.querySelectorAll("#pNarr .s").forEach((e, k) => e.classList.toggle("on", k === i));
@@ -1029,54 +1056,85 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
 
   async function play(fromSent = 0) {
     const my = ++R.token;
+    stopSrc(); stopChat();
     if (focus) toast(t("dnd"));
-    audio.pause();
     if (!R.sents.length) return;
     setState("loading");
     for (let ci = 0; ci < R.chunks.length; ci++) {
       const c = R.chunks[ci];
       if (c.to <= fromSent) continue;
-      const url = await ttsUrl(c.text);
+      const a = await ttsUrl(c.text);
       if (R.chunks[ci + 1]) ttsUrl(R.chunks[ci + 1].text); // chuẩn bị đoạn sau trong lúc đọc
       if (my !== R.token) return;
-      if (!url) { R.resumeAt = c.from; setState("error"); return; }
-      const ok = await playUrl(url, c, my);
+      if (!a) { R.resumeAt = c.from; setState("error"); return; }
+      const ok = await playClip(a, c, my);
       if (my !== R.token) return;
       if (!ok) { R.resumeAt = c.from; setState("error"); return; }
     }
     if (my === R.token) { setState("idle"); setHL(-1); R.resumeAt = 0; }
   }
-  function playUrl(url, c, my) {
+  function startSrc(buf, offset, ch, res) {
+    const c = ac(), s = c.createBufferSource();
+    s.buffer = buf; s.connect(c.destination);
+    s.onended = () => { if (R.src !== s) return; R.src = null; res(true); };
+    R.src = s; R.buf = buf; R.ch = ch; R.res = res; R.t0 = c.currentTime - offset;
+    s.start(0, offset); setState("playing");
+  }
+  function playClip(a, ch, my) {
     return new Promise((res) => {
-      const lens = R.sents.slice(c.from, c.to).map((s) => s.length), tot = lens.reduce((a, b) => a + b, 0) || 1;
-      audio.onended = () => res(true);
-      audio.onerror = () => res(false);
-      audio.ontimeupdate = () => {
-        if (my !== R.token || !audio.duration) return;
-        const target = (audio.currentTime / audio.duration) * tot;
-        let acc = 0, k = 0; while (k < lens.length - 1 && acc + lens[k] < target) { acc += lens[k]; k++; }
-        if (R.hl !== c.from + k) { setHL(c.from + k); R.resumeAt = c.from + k; }
-      };
-      audio.src = url;
       R.onStop = () => res(false);
-      R.resumeAt = c.from;
-      // Nếu trình duyệt chặn tự phát: chờ khách bấm ▶ rồi phát tiếp đúng chỗ
-      audio.play().then(() => { if (my === R.token) { setState("playing"); setHL(c.from); } })
-        .catch(() => { if (my === R.token) setState("paused"); });
+      R.resumeAt = ch.from; setHL(ch.from);
+      const c = ac(), buf = toBuf(a);
+      const go = () => { if (my === R.token && !R.src) { R.pend = null; startSrc(buf, 0, ch, res); } };
+      if (c.state === "running") return go();
+      // Bộ âm thanh đang ngủ (máy vừa khoá màn hình...): thử đánh thức, nếu không được thì chờ khách chạm ▶
+      R.pend = { buf, offset: 0, ch, res }; setState("paused");
+      c.resume().then(go).catch(() => {});
     });
   }
-  function pause() { audio.pause(); setState("paused"); }
+  // Tô sáng câu đang đọc theo đúng thời gian phát
+  setInterval(() => {
+    if (!R.src || R.state !== "playing" || !R.ch) return;
+    const c = ac(), ch = R.ch, lens = R.sents.slice(ch.from, ch.to).map((x) => x.length), tot = lens.reduce((a, b) => a + b, 0) || 1;
+    const target = Math.min(1, (c.currentTime - R.t0) / R.buf.duration) * tot;
+    let acc = 0, k = 0; while (k < lens.length - 1 && acc + lens[k] < target) { acc += lens[k]; k++; }
+    if (R.hl !== ch.from + k) { setHL(ch.from + k); R.resumeAt = ch.from + k; }
+  }, 150);
+  function stopSrc() { if (R.src) { const s = R.src; R.src = null; try { s.onended = null; s.stop(); } catch {} } R.pend = null; }
+  function pause() {
+    if (!R.src) { setState("paused"); return; }
+    const off = ac().currentTime - R.t0, p = { buf: R.buf, offset: off, ch: R.ch, res: R.res };
+    stopSrc(); R.pend = p; setState("paused");
+  }
   function resume() {
-    if (audio.src && audio.src !== SILENT && !audio.ended) {
-      audio.play().then(() => { setState("playing"); if (R.hl < 0) setHL(R.resumeAt); }).catch(() => play(R.resumeAt || 0));
+    if (R.pend) {
+      const p = R.pend; R.pend = null; const c = ac();
+      const go = () => startSrc(p.buf, Math.max(0, Math.min(p.offset, p.buf.duration - 0.05)), p.ch, p.res);
+      if (c.state !== "running") c.resume().then(go).catch(go); else go();
       return;
     }
     play(R.resumeAt || 0);
   }
   function stopAudio() {
     R.token++; if (R.onStop) R.onStop();
-    audio.pause();
+    stopSrc(); stopChat();
     R.resumeAt = 0; setState("idle"); setHL(-1);
+  }
+  // Đọc câu trả lời của hướng dẫn viên (hỏi bằng micro): phát nối tiếp từng đoạn, đoạn đầu phát ngay
+  let chatSrc = null, chatTok = 0;
+  function stopChat() { chatTok++; if (chatSrc) { try { chatSrc.onended = null; chatSrc.stop(); } catch {} chatSrc = null; } }
+  async function sayChunks(parts, code) {
+    stopAudio(); const my = ++chatTok;
+    const jobs = parts.filter(Boolean).map((p) => ttsAudio(p, code));
+    for (const j of jobs) {
+      const a = await j; if (my !== chatTok || !a) return;
+      await new Promise((res) => {
+        const c = ac(); if (c.state !== "running") c.resume().catch(() => {});
+        const s = c.createBufferSource(); s.buffer = toBuf(a); s.connect(c.destination);
+        s.onended = () => res(); chatSrc = s; s.start();
+      });
+    }
+    if (my === chatTok) chatSrc = null;
   }
   $("pPlay").onclick = () => {
     if (R.state === "playing") pause();
@@ -1132,11 +1190,15 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
   $("vClose").onclick = () => $("viewer").classList.add("hidden");
   $("viewer").onclick = (e) => { if (e.target.id === "viewer") $("viewer").classList.add("hidden"); };
   let imgStarted = "";
-  function startImages(name, city, my) {
+  const KIND_IC = { landmark: "📍", food: "🍜", object: "🎁" };
+  const locLine = (kind, txt) => { kind = kind || "landmark"; return KIND_IC[kind] + " " + t("kind_" + kind) + (txt ? " · " + txt : ""); };
+  function startImages(name, city, my, kind) {
     if (!name || imgStarted === name) return;
-    imgStarted = name;
+    imgStarted = name; kind = kind || "landmark";
     const q = [name, city].filter(Boolean).join(", ");
+    // địa danh: chỉ đường; món ăn: tìm quán gần đây; đồ vật: tìm nơi bán
     $("pMap").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+    $("pMap").innerHTML = { landmark: "🗺️ " + t("directions"), food: "🍜 " + t("find_food"), object: "🛍️ " + t("find_shop") }[kind];
     $("pLinks").classList.remove("hidden");
     loadImages(name, city).then((r) => applyImages(r, my)).catch(() => {});
   }
@@ -1302,7 +1364,11 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
       const res = await fastGuide({ ...o, lang, style: len }, (p) => {
         if (my !== runId) return;
         if (p.title || p.name) $("pTitle").textContent = p.title || p.name;
-        if (p.place) { $("pLoc").textContent = "📍 " + p.place; startImages(p.name, p.place.split(",")[0].trim(), my); } // tên đã đủ -> tải ảnh song song
+        const nameDone = p.name && (p.origin || p.place || p.title || p.narration); // dòng tên đã viết xong
+        if (nameDone) {
+          $("pLoc").textContent = locLine(p.kind, p.kind === "landmark" ? p.place : p.origin);
+          startImages(p.name, p.kind === "landmark" ? (p.place || "").split(",")[0].trim() : "", my, p.kind); // tên đã đủ -> tải ảnh song song
+        }
         if (p.narration) {
           setScanning(false); status(t("writing"));
           n.classList.add("typing"); n.textContent = p.narration;
@@ -1344,10 +1410,11 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
 
   function showPlace(d, autoplay) {
     cur = d;
-    startImages(d.name, d.city, runId);
+    const kind = d.kind || "landmark", isL = kind === "landmark";
+    startImages(d.name, d.city, runId, kind);
     $("pTitle").textContent = d.title || d.name;
-    const loc = [d.name !== d.title ? d.name : "", d.city, d.country].filter(Boolean).join(" · ");
-    $("pLoc").textContent = loc ? "📍 " + loc + (d.category ? "  ·  " + d.category : "") : "";
+    const loc = isL ? [d.name !== d.title ? d.name : "", d.city, d.country].filter(Boolean).join(" · ") : [d.name !== d.title ? d.name : "", d.origin].filter(Boolean).join(" · ");
+    $("pLoc").textContent = locLine(kind, loc) + (d.category && isL ? "  ·  " + d.category : "");
     if (d.confidence && d.confidence < 1) { $("pBadge").textContent = Math.round(d.confidence * 100) + "% " + t("match"); $("pBadge").classList.remove("hidden"); }
     const n = $("pNarr"); n.className = "narr"; n.innerHTML = "";
     prepareReader(d.narration);
@@ -1358,8 +1425,8 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
     if (d.facts.length) { const s = el("div", "sec"); s.appendChild(el("h4", null, t("facts"))); const f = el("div", "facts"); d.facts.forEach((x) => f.appendChild(el("div", null, x))); s.appendChild(f); more.appendChild(s); }
     if (d.tips.length) { const s = el("div", "sec"); s.appendChild(el("h4", null, t("tips"))); const u = el("ul"); d.tips.forEach((x) => u.appendChild(el("li", null, x))); s.appendChild(u); more.appendChild(s); }
     if (d.nearby.length) {
-      const s = el("div", "sec"); s.appendChild(el("h4", null, t("nearby"))); const c = el("div", "chips");
-      d.nearby.forEach((x) => { const b = el("button", "chip go", "📍 " + x); b.type = "button"; b.onclick = () => searchPlace(x + (d.city ? ", " + d.city : "")); c.appendChild(b); });
+      const s = el("div", "sec"); s.appendChild(el("h4", null, t(isL ? "nearby" : kind === "food" ? "near_food" : "near_obj"))); const c = el("div", "chips");
+      d.nearby.forEach((x) => { const b = el("button", "chip go", KIND_IC[kind] + " " + x); b.type = "button"; b.onclick = () => searchPlace(x + (isL && d.city ? ", " + d.city : "")); c.appendChild(b); });
       s.appendChild(c); more.appendChild(s);
     }
     const lv = el("div", "sec");
@@ -1382,7 +1449,7 @@ ${hasImage ? `If the photo is NOT a tourist place or you cannot recognise it, re
         }
       } catch (e) { lb.disabled = false; lb.textContent = "🔄 " + t("retry"); toast(errText(e).split("\n")[0]); }
     };
-    lv.appendChild(lb); more.appendChild(lv);
+    lv.appendChild(lb); if (isL) more.appendChild(lv); // giờ mở cửa, giá vé: chỉ dành cho địa danh
     more.appendChild(el("div", "disc", t("disc")));
 
     $("askCard").classList.remove("hidden"); $("chat").innerHTML = "";
@@ -1480,14 +1547,31 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
   }
   const newCtx = () => { const C = window.AudioContext || window.webkitAudioContext; const c = new C(); try { c.resume(); } catch {} return c; };
   // ctx phải được tạo NGAY trong lúc chạm (iPhone), rồi mới mở micro
+  // Micro: lọc tiếng ù/gió, tăng độ nhạy cho giọng nhỏ, cổng chặn tiếng ồn tự thích nghi với môi trường
   async function micOpen(ctx, onData) {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: { ideal: 48000 } } });
     try { await ctx.resume(); } catch {}
     const src = ctx.createMediaStreamSource(stream);
-    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 90; hp.Q.value = 0.7;   // bỏ tiếng ù, gió, xe
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 7600;                     // bỏ tiếng rít cao
+    const comp = ctx.createDynamicsCompressor();                                                           // nâng giọng nhỏ, ghìm tiếng to
+    comp.threshold.value = -42; comp.knee.value = 18; comp.ratio.value = 5; comp.attack.value = 0.004; comp.release.value = 0.2;
+    const gain = ctx.createGain(); gain.gain.value = 1.9;                                                   // độ nhạy micro
+    const proc = ctx.createScriptProcessor(2048, 1, 1);
     const mute = ctx.createGain(); mute.gain.value = 0;
-    proc.onaudioprocess = (e) => onData(down16(e.inputBuffer.getChannelData(0), ctx.sampleRate), e.inputBuffer.getChannelData(0));
-    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+    let floor = 0.01, openUntil = 0;
+    proc.onaudioprocess = (e) => {
+      const x = e.inputBuffer.getChannelData(0); let sum = 0;
+      for (let i = 0; i < x.length; i++) sum += x[i] * x[i];
+      const rms = Math.sqrt(sum / x.length), now = performance.now();
+      if (rms < floor * 1.6) floor = floor * 0.97 + rms * 0.03; else floor = Math.min(0.15, floor * 1.002); // học mức ồn nền
+      if (rms > Math.max(0.012, floor * 2.6)) openUntil = now + 380;                                          // có người nói
+      const speaking = now < openUntil;
+      let y = x;
+      if (!speaking) { y = new Float32Array(x.length); for (let i = 0; i < x.length; i++) y[i] = x[i] * 0.1; } // ngoài lời nói: giảm ồn 90%
+      onData(down16(y, ctx.sampleRate), { rms, speaking });
+    };
+    src.connect(hp); hp.connect(lp); lp.connect(comp); comp.connect(gain); gain.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
     return { close() { try { proc.disconnect(); src.disconnect(); } catch {} stream.getTracks().forEach((x) => x.stop()); } };
   }
   const level = (f32) => { let m = 0; for (let i = 0; i < f32.length; i += 16) m = Math.max(m, Math.abs(f32[i])); return m; };
@@ -1499,14 +1583,13 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
     const ctx = newCtx();
     const chunks = []; let silentSince = 0, heard = false;
     try {
-      const m = await micOpen(ctx, (d, f) => {
+      const m = await micOpen(ctx, (d, info) => {
         chunks.push(d);
-        const lv = level(f);
-        if (lv > 0.06) { heard = true; silentSince = 0; } else if (heard && !silentSince) silentSince = Date.now();
-        $("micBtn").style.setProperty("--lv", Math.min(1, lv * 4).toFixed(2));
-        if (heard && silentSince && Date.now() - silentSince > 1600) micStop(); // im lặng 1,6 giây -> tự gửi
+        if (info.speaking) { heard = true; silentSince = 0; if (rec) rec.heard = true; } else if (heard && !silentSince) silentSince = Date.now();
+        $("micBtn").style.setProperty("--lv", Math.min(1, info.rms * 6).toFixed(2));
+        if (heard && silentSince && Date.now() - silentSince > 900) micStop(); // ngừng nói 0,9 giây -> gửi ngay
       });
-      rec = { m, ctx, chunks, t0: Date.now(), timer: setTimeout(() => micStop(), 30000) };
+      rec = { m, ctx, chunks, t0: Date.now(), heard: false, timer: setTimeout(() => micStop(), 30000) };
       $("micBtn").classList.add("rec"); $("askIn").placeholder = t("mic_rec"); $("askIn").value = "";
       stopAudio();
     } catch { try { ctx.close(); } catch {} toast(t("mic_denied")); }
@@ -1516,7 +1599,7 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
     const r = rec; rec = null; clearTimeout(r.timer); r.m.close(); try { r.ctx.close(); } catch {}
     $("micBtn").classList.remove("rec"); $("askIn").placeholder = t("ask_ph");
     const total = r.chunks.reduce((a, c) => a + c.length, 0);
-    if (total < 16000 * 0.4) return; // quá ngắn
+    if (total < 16000 * 0.4 || !r.heard) { toast(t("mic_none")); return; } // chưa nghe thấy lời nói
     const all = new Int16Array(total); let o = 0; r.chunks.forEach((c) => { all.set(c, o); o += c.length; });
     askVoice(wavB64(all, 16000));
   }
@@ -1533,6 +1616,7 @@ Answer ONLY in ${LANGS[lang].name} (never mix languages, even if the tourist wri
   }
   const placeCtx = () => cur ? `The traveller is at: ${cur.name}${cur.city ? ", " + cur.city : ""}. What you already told them: ${cur.narration.slice(0, 400)}` : (lastPos ? `The traveller is in Vietnam near GPS ${lastPos.lat}, ${lastPos.lng}.` : "The traveller is visiting Vietnam.");
   async function askVoice(b64) {
+    let first = "";
     const me = el("div", "msg me", "🎤 …"); $("chat").appendChild(me);
     const bubble = el("div", "msg ai", t("thinking")); $("chat").appendChild(bubble);
     bubble.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1551,20 +1635,18 @@ Reply in exactly this format:
       }, (s) => {
         const q = (s.match(/@@Q:[ \t]*(.*)/) || [])[1]; if (q) me.textContent = "🎤 " + q.trim();
         const a = s.split("@@A:")[1]; if (a) bubble.textContent = a.trim();
+        // câu đầu vừa xong -> tạo giọng đọc ngay trong lúc AI viết tiếp
+        const cd = ((s.match(/@@LANG:[ \t]*([A-Za-z-]+)/) || [])[1] || "").trim();
+        if (a && !first) { const ss = splitS(a.trim()); if (ss.length >= 2) { first = ss[0]; ttsAudio(first, cd); } }
       });
       const q = ((r.text.match(/@@Q:[ \t]*(.*)/) || [])[1] || "").trim();
       const code = ((r.text.match(/@@LANG:[ \t]*([A-Za-z-]+)/) || [])[1] || "").trim();
       const a = (r.text.split("@@A:")[1] || r.text).trim();
       me.textContent = "🎤 " + (q || "…"); bubble.textContent = a;
       chatLog.push({ q: q || "(voice)", a });
-      sayText(a, code); // đọc câu trả lời bằng đúng thứ tiếng khách vừa nói
+      // đọc câu trả lời bằng đúng thứ tiếng khách vừa nói: câu đầu phát ngay, phần còn lại nối tiếp
+      if (first && a.startsWith(first)) sayChunks([first, a.slice(first.length).trim()], code); else sayChunks([a], code);
     } catch (e) { bubble.textContent = errText(e); }
-  }
-  async function sayText(text, code) {
-    stopAudio(); const my = R.token;
-    const url = await ttsAudio(text, code || "");
-    if (!url || my !== R.token) return;
-    audio.onended = audio.ontimeupdate = audio.onerror = null; audio.src = url; audio.play().catch(() => {});
   }
 
   /* ================= Gọi hướng dẫn viên AI (thời gian thực) ================= */
@@ -1588,10 +1670,13 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
     callUI("connecting");
     call.tick = setInterval(() => { if (!call) return; const s = Math.floor((Date.now() - call.t0) / 1000); $("cTimer").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }, 500);
     try { await resolveModels(); } catch {}
-    if (M.LIVE) { try { await liveConnect(); return; } catch {} }
+    if (M.LIVE) {
+      try { await liveConnect(true); return; } catch {}            // nhạy cao + trả lời ngay khi ngừng nói
+      if (call) { try { await liveConnect(false); return; } catch {} } // mô hình không nhận cài đặt -> kết nối thường
+    }
     if (call) pttMode();
   }
-  function liveConnect() {
+  function liveConnect(fast) {
     return new Promise((ok, fail) => {
       const ws = new WebSocket("wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=" + encodeURIComponent(getKey()));
       call.ws = ws; let ready = false;
@@ -1601,6 +1686,10 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
         generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voiceStyle] } } } },
         systemInstruction: { parts: [{ text: callSys() }] },
         outputAudioTranscription: {},
+        ...(fast ? { realtimeInputConfig: { automaticActivityDetection: {
+          startOfSpeechSensitivity: "START_SENSITIVITY_HIGH", endOfSpeechSensitivity: "END_SENSITIVITY_HIGH",
+          prefixPaddingMs: 40, silenceDurationMs: 450,
+        } } } : {}),
       } }));
       ws.onerror = () => { if (!ready) { clearTimeout(to); fail(new Error("ws")); } };
       ws.onclose = () => { if (!ready) { clearTimeout(to); fail(new Error("closed")); } else if (call && call.ws === ws) endCall(); };
@@ -1668,15 +1757,11 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
       const q = ((tx.match(/@@Q:[ \t]*(.*)/) || [])[1] || "").trim(), code = ((tx.match(/@@LANG:[ \t]*([A-Za-z-]+)/) || [])[1] || "").trim();
       const a = (tx.split("@@A:")[1] || tx).trim();
       call.log.push({ q, a }); $("cCap").textContent = a;
-      const url = await ttsAudio(a, code);
+      const clip = await ttsAudio(a, code);
       if (!call) return;
-      if (!url) { callUI("ptt"); return; }
-      const ab = await (await fetch(url)).arrayBuffer();
-      call.ctx.decodeAudioData(ab, (buf) => {
-        if (!call) return;
-        const s = call.ctx.createBufferSource(); s.buffer = buf; s.connect(call.ctx.destination); s.start();
-        call.srcs.push(s); callUI("speaking"); s.onended = () => { if (call) { call.srcs = call.srcs.filter((x) => x !== s); callUI("ptt"); } };
-      });
+      if (!clip) { callUI("ptt"); return; }
+      const sN = call.ctx.createBufferSource(); sN.buffer = toBuf(clip, call.ctx); sN.connect(call.ctx.destination); sN.start();
+      call.srcs.push(sN); callUI("speaking"); sN.onended = () => { if (call) { call.srcs = call.srcs.filter((x) => x !== sN); callUI("ptt"); } };
     } catch (e) { if (call) { callUI("ptt"); toast(errText(e).split("\n")[0]); } }
   }
   function endCall() {
@@ -1783,7 +1868,7 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
 
   // Check-in: chụp ảnh tại đúng địa danh (cách ≤ 2 km) -> +1 điểm, mỗi nơi 1 lần
   function checkIn(d) {
-    if (!user || !d.lat) return;
+    if (!user || !d.lat || (d.kind && d.kind !== "landmark")) return; // chỉ check-in tại địa danh
     if (!lastPos || !lastPos.lat) { toast(t("ci_nogps")); return; }
     if (km(lastPos, d) > 2) { toast(t("ci_far")); return; }
     const ci = ustore.get("checkins", {}), k = d.name.toLowerCase();
@@ -1793,7 +1878,7 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
     addVisit(d, "checkin"); toast(t("ci_ok"));
   }
   function rememberPlace(d) {
-    if (!d.lat) return;
+    if (!d.lat || (d.kind && d.kind !== "landmark")) return;
     const k = store.get("knownPlaces", []).filter((x) => x.name !== d.name);
     k.unshift({ name: d.name, lat: +d.lat, lng: +d.lng }); store.set("knownPlaces", k.slice(0, 150));
   }
@@ -1863,6 +1948,16 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
     drawMap();
   }
   $("logoutBtn").onclick = logout;
+  // Xoá tài khoản: nhấn 2 lần để xác nhận (xoá toàn bộ dữ liệu của tài khoản trên máy)
+  let delArm = 0;
+  $("delAccBtn").onclick = () => {
+    if (!user) return;
+    if (Date.now() - delArm > 4000) { delArm = Date.now(); $("delAccBtn").textContent = t("del_confirm"); return; }
+    const pre = "tai_u:" + user.email + ":";
+    try { Object.keys(localStorage).filter((k) => k.startsWith(pre)).forEach((k) => localStorage.removeItem(k)); } catch {}
+    const users = store.get("users", {}); delete users[user.email]; store.set("users", users);
+    delArm = 0; $("delAccBtn").textContent = t("del_acc"); logout(); toast(t("deleted"));
+  };
   $("aLang").onclick = () => openSheet("langSheet");
 
   /* ================= Tuỳ chọn ngôn ngữ: dịch giao diện bằng AI ================= */
@@ -1884,6 +1979,8 @@ Default language: ${LANGS[lang].name}. If the traveller speaks another language,
     } catch {}
   }
 
+  // Cài như app: đăng ký service worker (chỉ trên web thật https)
+  if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
   /* ---- Khởi động ---- */
   applyI18n(); ensureUI(lang);
   { const sess = store.get("session", null); if (sess && store.get("users", {})[sess]) signIn(sess); else showAuth(); }
