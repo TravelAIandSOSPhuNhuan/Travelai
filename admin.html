@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#0b5ed7" />
+<link rel="manifest" href="admin.webmanifest" /><link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-title" content="TravelAI Admin" /><meta name="mobile-web-app-capable" content="yes" />
+<link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin /><link rel="preconnect" href="https://unpkg.com" crossorigin /><link rel="preconnect" href="https://firestore.googleapis.com" crossorigin />
+<title>TravelAI · Trang quản trị</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg: #f2f5fb; --card: #fff; --ink: #0f1b2d; --muted: #61708a; --line: #e4e9f2; --brand: #0b5ed7; --brand2: #12b5a5; --soft: #e9f1fe; --danger: #e5383b; --ok: #12a150; --warn: #c27c00; --r: 18px; --shadow: 0 4px 18px rgba(15,27,45,.06); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: "Be Vietnam Pro", system-ui, -apple-system, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 0; background: none; }
+  a { color: var(--brand); }
+  .hidden { display: none !important; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .logo { width: 40px; height: 40px; border-radius: 13px; background: linear-gradient(135deg, var(--brand), var(--brand2)); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 19px; flex: none; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 14px; border-radius: 12px; font-weight: 600; font-size: 14px; transition: .15s; white-space: nowrap; }
+  .btn:disabled { opacity: .55; cursor: default; }
+  .btn-primary { background: var(--brand); color: #fff; }
+  .btn-ghost { background: var(--soft); color: var(--brand); }
+  .btn-danger { background: #fdecec; color: var(--danger); }
+  .btn-ok { background: #e7f6ef; color: #0f7a4a; }
+  .btn-sm { padding: 6px 10px; font-size: 13px; border-radius: 10px; }
+  input[type=text], input[type=password], input[type=number], input[type=search], select, textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; outline: 0; font-size: 15px; }
+  input:focus, select:focus, textarea:focus { border-color: var(--brand); }
+  .card { background: var(--card); border-radius: var(--r); padding: 16px; box-shadow: var(--shadow); }
+  h2 { font-size: 17px; margin-bottom: 10px; }
+  .pill { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: var(--soft); color: var(--brand); white-space: nowrap; display: inline-block; }
+  .pill.new { background: #fff4d6; color: #8a5a00; } .pill.seen { background: var(--soft); color: var(--brand); } .pill.handling { background: #e7f6ef; color: #0f7a4a; } .pill.done { background: #eceff3; color: #5b6472; }
+  .pill.bad { background: #fdecec; color: var(--danger); } .pill.live { background: #e7f6ef; color: #0f7a4a; }
+
+  /* ---- đăng nhập ---- */
+  .login { min-height: 100vh; display: grid; place-items: center; padding: 20px; background: radial-gradient(120% 70% at 100% 0%, rgba(18,181,165,.35), transparent 60%), linear-gradient(160deg, #0b5ed7, #0a3f94); }
+  .lbox { width: 100%; max-width: 420px; background: #fff; border-radius: 24px; padding: 24px 20px; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+  .lbox .logo { margin: 0 auto 10px; width: 54px; height: 54px; font-size: 26px; }
+  .lbox h1 { text-align: center; font-size: 21px; }
+  .lbox > p { text-align: center; margin: 2px 0 16px; }
+  .lbox label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+  .lbox .btn { width: 100%; margin-top: 14px; padding: 13px; }
+  .err { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 8px; }
+  .alink { display: block; margin: 12px auto 0; color: var(--brand); font-weight: 600; font-size: 13.5px; }
+  pre.rules { background: #0f1b2d; color: #d7e3ff; border-radius: 12px; padding: 12px; font-size: 11.5px; overflow: auto; max-height: 300px; white-space: pre; margin-top: 10px; }
+  ol.steps { margin: 10px 0 0 18px; font-size: 14px; } ol.steps li { margin: 4px 0; }
+
+  /* ---- khung chính ---- */
+  .top { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); padding: calc(env(safe-area-inset-top) + 10px) 16px 0; }
+  .topin { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+  .topin .t { flex: 1; min-width: 0; } .topin .t b { display: block; font-size: 16px; } .topin .t span { font-size: 12px; color: var(--muted); }
+  .tabs { max-width: 1280px; margin: 8px auto 0; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { padding: 10px 12px; font-weight: 600; font-size: 14px; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; position: relative; }
+  .tabs button.on { color: var(--brand); border-color: var(--brand); }
+  .badge { background: var(--danger); color: #fff; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 1px 6px; margin-left: 4px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 16px 16px 60px; }
+  .grid { display: grid; gap: 14px; }
+  .kpis { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .kpi { padding: 14px 16px; }
+  .kpi b { display: block; font-size: 28px; font-weight: 800; line-height: 1.1; margin-top: 4px; }
+  .kpi span { font-size: 13px; color: var(--muted); }
+  .kpi.alert b { color: var(--danger); }
+  .two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-top: 14px; }
+  .bars { display: flex; align-items: flex-end; gap: 4px; height: 150px; padding-top: 10px; }
+  .bars div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; font-size: 10px; color: var(--muted); }
+  .bars i { display: block; width: 100%; background: linear-gradient(180deg, var(--brand2), var(--brand)); border-radius: 6px 6px 2px 2px; min-height: 2px; }
+  .bars em { font-style: normal; font-weight: 700; color: var(--ink); font-size: 11px; }
+  .hbar { display: grid; grid-template-columns: minmax(0, 1fr) 2fr 34px; gap: 8px; align-items: center; font-size: 13px; margin: 6px 0; }
+  .hbar span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hbar i { display: block; height: 10px; border-radius: 6px; background: linear-gradient(90deg, var(--brand), var(--brand2)); }
+  .hbar b { text-align: right; }
+  .feed > div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .feed > div:first-child { border-top: 0; }
+
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .toolbar input[type=search] { flex: 1; min-width: 180px; }
+  .toolbar select { width: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  td { padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tbody tr { cursor: pointer; } tbody tr:hover { background: #f7f9fd; }
+  td .n { font-weight: 700; } td .e { font-size: 12px; color: var(--muted); }
+  .tablewrap { overflow-x: auto; }
+  @media (max-width: 760px) {
+    table.resp thead { display: none; }
+    table.resp tr { display: block; border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; padding: 6px 4px; background: #fff; }
+    table.resp td { display: flex; justify-content: space-between; gap: 10px; border: 0; padding: 5px 10px; }
+    table.resp td::before { content: attr(data-l); color: var(--muted); font-size: 12px; }
+    table.resp td:first-child::before { content: none; }
+  }
+  #bigmap { height: calc(100vh - 220px); min-height: 380px; border-radius: var(--r); }
+  .mini { height: 200px; border-radius: 14px; margin-top: 8px; }
+
+  .sos { border-left: 5px solid var(--line); }
+  .sos.new { border-left-color: var(--danger); animation: glow 1.6s infinite; }
+  .sos.seen { border-left-color: var(--brand); } .sos.handling { border-left-color: var(--ok); } .sos.done { opacity: .75; }
+  @keyframes glow { 0%,100% { box-shadow: var(--shadow) } 50% { box-shadow: 0 0 0 4px rgba(229,56,59,.18) } }
+  .sosh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .sosh b { font-size: 16px; }
+  .sosgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-top: 10px; }
+  @media (max-width: 860px) { .sosgrid { grid-template-columns: 1fr; } }
+  .thread { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow: auto; padding: 4px 0; }
+  .m { padding: 8px 12px; border-radius: 14px; font-size: 14px; max-width: 90%; white-space: pre-line; }
+  .m.u { background: var(--bg); align-self: flex-start; } .m.a { background: var(--brand); color: #fff; align-self: flex-end; }
+  .m small { display: block; font-size: 11px; opacity: .7; }
+  .reply { display: flex; gap: 8px; margin-top: 8px; }
+  .reply input { flex: 1; min-width: 0; }
+  .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  audio { width: 100%; margin-top: 6px; }
+  .kv { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 4px 10px; font-size: 14px; }
+  .kv span { color: var(--muted); }
+  .dist { margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: #e9f1fe; color: #0b4fb3; font-weight: 700; font-size: 14px; }
+
+  .drawer { position: fixed; inset: 0; z-index: 90; background: rgba(15,27,45,.45); display: flex; justify-content: flex-end; }
+  .dpanel { width: min(560px, 100%); height: 100%; background: var(--bg); overflow-y: auto; padding: calc(env(safe-area-inset-top) + 14px) 16px 40px; }
+  .dpanel .card { margin-top: 12px; }
+  .dhead { display: flex; align-items: center; gap: 10px; }
+  .av { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--brand), var(--brand2)); color: #fff; font-weight: 800; font-size: 20px; display: grid; place-items: center; flex: none; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .list > div { display: flex; justify-content: space-between; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .list > div:first-child { border-top: 0; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #0f1b2d; color: #fff; padding: 10px 16px; border-radius: 12px; font-size: 14px; z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: 92vw; }
+  .alertbar { background: var(--danger); color: #fff; padding: 10px 16px; font-weight: 700; text-align: center; cursor: pointer; }
+  .empty { text-align: center; color: var(--muted); padding: 30px 10px; }
+  .rem { display: flex !important; align-items: center; gap: 8px; font-weight: 500 !important; color: var(--muted); margin-top: 12px !important; }
+  .rem input { width: 18px; height: 18px; accent-color: var(--brand); }
+  .inbox { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 14px; height: calc(100vh - 150px); min-height: 460px; }
+  .inbox .card { display: flex; flex-direction: column; min-height: 0; }
+  #chatList { overflow-y: auto; flex: 1; }
+  .ci { display: flex; gap: 10px; align-items: center; padding: 10px 8px; border-radius: 12px; cursor: pointer; }
+  .ci:hover, .ci.on { background: var(--soft); }
+  .ci .av { width: 42px; height: 42px; font-size: 17px; }
+  .ci .tx { flex: 1; min-width: 0; } .ci .tx b { display: block; font-size: 14.5px; } .ci .tx span { display: block; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ci .tm { font-size: 11.5px; color: var(--muted); text-align: right; white-space: nowrap; }
+  .ci.unread .tx span { color: var(--ink); font-weight: 700; }
+  .vhead { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .vhead .tx { flex: 1; min-width: 0; } .vhead .tx b { display: block; } .vhead .tx span { font-size: 12.5px; color: var(--muted); }
+  .vmsgs { flex: 1; overflow-y: auto; padding: 10px 2px; display: flex; flex-direction: column; gap: 6px; }
+  .cb { max-width: 78%; padding: 8px 12px 5px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; white-space: pre-line; word-wrap: break-word; }
+  .cb.me { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 6px; }
+  .cb.them { align-self: flex-start; background: var(--bg); border-bottom-left-radius: 6px; }
+  .cb small { display: block; font-size: 10.5px; opacity: .7; text-align: right; margin-top: 2px; }
+  .cb img, .cb video { display: block; max-width: 100%; width: 260px; max-height: 340px; object-fit: cover; border-radius: 12px; margin: 2px 0 4px; background: #0002; cursor: pointer; }
+  .cb.sosb { background: #fff1f1; color: #8a1c1e; border: 1px solid #f6c8c9; }
+  .cday { align-self: center; font-size: 11.5px; color: var(--muted); background: #eef1f7; padding: 2px 10px; border-radius: 999px; margin: 6px 0; }
+  .vload { display: block; width: 240px; padding: 26px 10px; border-radius: 12px; background: #0002; font-weight: 700; margin: 2px 0 4px; }
+  .vform { display: flex; gap: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .vform input[type=text] { flex: 1; min-width: 0; }
+  .sosthread { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px 0; }
+  .imgview { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.9); display: grid; place-items: center; }
+  .imgview img { max-width: 96vw; max-height: 92vh; border-radius: 8px; }
+  @media (max-width: 860px) {
+    .inbox { grid-template-columns: 1fr; height: auto; }
+    .inbox.open .ilist { display: none; } .inbox:not(.open) .iview { display: none; }
+    .inbox .iview { height: calc(100vh - 140px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ ĐĂNG NHẬP ============ -->
+<div class="login" id="loginView">
+  <form class="lbox" id="loginForm" autocomplete="off">
+    <div class="logo">T</div>
+    <h1 id="lTitle">Trang quản trị TravelAI</h1>
+    <p class="muted" id="lSub">Chỉ dành cho chủ server</p>
+    <label for="lUser">Tên tài khoản</label>
+    <input type="text" id="lUser" name="username" autocomplete="username" />
+    <label for="lPass">Mật khẩu</label>
+    <input type="password" id="lPass" name="password" autocomplete="current-password" />
+    <label for="lCode">Mã xác minh đăng nhập</label>
+    <input type="password" id="lCode" inputmode="numeric" autocomplete="one-time-code" />
+    <div class="err" id="lErr"></div>
+    <label class="rem"><input type="checkbox" id="lRemember" /> Ghi nhớ trên thiết bị này (giữ đăng nhập 7 ngày)</label>
+    <button class="btn btn-primary" id="lBtn">Đăng nhập</button>
+    <button type="button" class="alink" id="lSetup">Lần đầu sử dụng? Khởi tạo tài khoản chủ server</button>
+  </form>
+  <div class="lbox hidden" id="rulesBox">
+    <div class="logo">🔐</div>
+    <h1>Bước cuối: cấp quyền chủ server</h1>
+    <p class="muted">Dán đoạn Rules dưới đây vào Firebase để tài khoản này xem được toàn bộ người dùng và yêu cầu SOS.</p>
+    <ol class="steps">
+      <li>Mở <b>Firebase → Firestore Database → Rules</b>.</li>
+      <li>Xoá hết nội dung cũ, dán đoạn bên dưới.</li>
+      <li>Bấm <b>Publish</b>, đợi khoảng 30 giây.</li>
+    </ol>
+    <pre class="rules" id="rulesPre"></pre>
+    <button class="btn btn-ghost" id="rulesCopy" style="width:100%;margin-top:10px">📋 Sao chép Rules</button>
+    <button class="btn btn-primary" id="rulesDone">Tôi đã Publish, vào trang quản trị</button>
+    <div class="err" id="rErr"></div>
+  </div>
+</div>
+
+<!-- ============ KHUNG CHÍNH ============ -->
+<div id="app" class="hidden">
+  <div class="alertbar hidden" id="alertBar"></div>
+  <header class="top">
+    <div class="topin">
+      <div class="logo">T</div>
+      <div class="t"><b>TravelAI · Quản trị <span id="dndTop" class="hidden" title="Đang Không làm phiền">🔕</span></b><span id="lastUp">Đang tải…</span></div>
+      <button class="btn btn-ghost btn-sm" id="refBtn" title="Tải lại">↻</button>
+      <button class="btn btn-ghost btn-sm" id="outBtn">Đăng xuất</button>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button data-tab="ov" class="on">📊 Tổng quan</button>
+      <button data-tab="us">👥 Người dùng</button>
+      <button data-tab="mp">🗺️ Bản đồ</button>
+      <button data-tab="sos">🆘 SOS<span class="badge hidden" id="sosBadge"></span></button>
+      <button data-tab="msg">💬 Tin nhắn<span class="badge hidden" id="msgBadge"></span></button>
+      <button data-tab="gf">🎁 Quà tặng</button>
+      <button data-tab="st">⚙️ Cài đặt</button>
+    </nav>
+  </header>
+  <main>
+    <!-- Tổng quan -->
+    <section id="t-ov">
+      <div class="grid kpis" id="kpis"></div>
+      <div class="grid two">
+        <div class="card"><h2>Người dùng mới 14 ngày qua</h2><div class="bars" id="chSign"></div></div>
+        <div class="card"><h2>Địa điểm được ghé nhiều nhất</h2><div id="chPlaces"></div></div>
+        <div class="card"><h2>Ngôn ngữ người dùng</h2><div id="chLang"></div></div>
+        <div class="card"><h2>Hoạt động gần đây</h2><div class="feed" id="feed"></div></div>
+      </div>
+    </section>
+
+    <!-- Người dùng -->
+    <section id="t-us" class="hidden">
+      <div class="toolbar">
+        <input type="search" id="uq" placeholder="Tìm theo tên, email…" />
+        <select id="usort">
+          <option value="active">Hoạt động gần nhất</option>
+          <option value="new">Mới đăng ký</option>
+          <option value="pts">Điểm cao nhất</option>
+          <option value="vis">Ghé nhiều nơi nhất</option>
+        </select>
+        <select id="ufilter">
+          <option value="all">Tất cả</option>
+          <option value="loc">Đang chia sẻ vị trí</option>
+          <option value="blocked">Đã khoá</option>
+        </select>
+        <button class="btn btn-ghost" id="csvBtn">⬇️ Xuất CSV</button>
+      </div>
+      <div class="card tablewrap">
+        <table class="resp">
+          <thead><tr><th>Người dùng</th><th>Ngày tạo</th><th>Hoạt động</th><th>Ngôn ngữ</th><th>Điểm</th><th>Địa điểm</th><th>Check-in</th><th>Vị trí</th><th>Trạng thái</th></tr></thead>
+          <tbody id="utb"></tbody>
+        </table>
+        <div class="empty hidden" id="uempty">Chưa có người dùng nào.</div>
+      </div>
+    </section>
+
+    <!-- Bản đồ -->
+    <section id="t-mp" class="hidden">
+      <div class="toolbar">
+        <label class="row"><input type="checkbox" id="mpU" checked /> 🔵 Người dùng (vị trí gần nhất)</label>
+        <label class="row"><input type="checkbox" id="mpS" checked /> 🔴 SOS đang mở</label>
+        <span class="muted" id="mpInfo"></span>
+      </div>
+      <div id="bigmap"></div>
+    </section>
+
+    <!-- SOS -->
+    <section id="t-sos" class="hidden">
+      <div class="toolbar">
+        <select id="sf"><option value="open">Đang mở</option><option value="all">Tất cả</option><option value="done">Đã hoàn tất</option></select>
+        <button class="btn btn-ghost" id="notifBtn">🔔 Bật thông báo trên máy</button>
+        <span class="muted">Tự cập nhật mỗi 15 giây. Có SOS mới sẽ phát chuông.</span>
+      </div>
+      <div class="grid" id="sosList"></div>
+    </section>
+
+    <!-- Tin nhắn -->
+    <section id="t-msg" class="hidden">
+      <div class="inbox" id="inbox">
+        <div class="card ilist"><div class="toolbar" style="margin:0 0 8px"><input type="search" id="cq" placeholder="Tìm người dùng…" /></div><div id="chatList"></div></div>
+        <div class="card iview" id="chatView"><div class="empty">Chọn một cuộc trò chuyện ở bên trái.</div></div>
+      </div>
+    </section>
+
+    <!-- Quà tặng -->
+    <section id="t-gf" class="hidden">
+      <div class="card">
+        <h2>Kiểm tra mã quà</h2>
+        <form class="row" id="gForm"><input type="text" id="gCode" placeholder="Nhập mã, ví dụ TRV-AB12CD" style="flex:1;min-width:180px;text-transform:uppercase" /><button class="btn btn-primary">Kiểm tra</button></form>
+        <div id="gRes" style="margin-top:12px"></div>
+      </div>
+      <div class="card tablewrap" style="margin-top:14px">
+        <h2>Tất cả quà đã đổi</h2>
+        <table class="resp"><thead><tr><th>Mã</th><th>Phần quà</th><th>Người dùng</th><th>Ngày đổi</th><th>Trạng thái</th></tr></thead><tbody id="gtb"></tbody></table>
+        <div class="empty hidden" id="gempty">Chưa có ai đổi quà.</div>
+      </div>
+    </section>
+
+    <!-- Cài đặt -->
+    <section id="t-st" class="hidden">
+      <div class="grid two" style="margin-top:0">
+        <div class="card">
+          <h2>Tài khoản chủ server</h2>
+          <div class="kv" id="admInfo"></div>
+        </div>
+        <div class="card">
+          <h2>Lưu ý vận hành</h2>
+          <ul style="margin-left:18px;font-size:14px">
+            <li>Danh sách chỉ gồm người đã xác nhận email và đăng nhập ít nhất 1 lần.</li>
+            <li>Muốn xoá hẳn tài khoản đăng nhập của ai đó: Firebase → Authentication → Users.</li>
+            <li>Khoá tài khoản ở đây sẽ tự đăng xuất người đó trong app.</li>
+            <li>Vị trí chỉ có khi người dùng bật "Chia sẻ vị trí với ban điều hành".</li>
+            <li>Không chia sẻ mật khẩu và mã xác minh cho ai khác.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>🔕 Không làm phiền</h2>
+        <p class="muted">Tạm tắt chuông và thông báo tin nhắn trên mọi thiết bị của chủ server. Tin nhắn vẫn được lưu.</p>
+        <div class="row" style="margin-top:8px" id="dndOpts"></div>
+        <label class="rem" style="margin-top:10px !important"><input type="checkbox" id="dndSos" checked /> Vẫn báo SOS khẩn cấp khi đang Không làm phiền</label>
+        <div class="muted" id="dndStat" style="margin-top:6px"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>🔔 Máy chủ thông báo (Cloudflare Worker)</h2>
+        <p class="muted">Dán địa chỉ Worker (dạng https://travelai-push.xxx.workers.dev) để thông báo hiện trên màn hình khoá, kể cả khi đã tắt app.</p>
+        <div class="row" style="margin-top:8px"><input type="text" id="pushIn" placeholder="https://travelai-push.ten-ban.workers.dev" style="flex:1;min-width:220px" /><button class="btn btn-primary" id="pushSave">Lưu</button><button class="btn btn-ghost" id="pushTest">Kiểm tra</button></div>
+        <div class="muted" id="pushStat" style="margin-top:8px"></div>
+        <button class="btn btn-ghost" id="pushDiag" style="margin-top:10px">🩺 Chẩn đoán thông báo</button>
+        <div class="list" id="diagOut" style="margin-top:8px"></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Rules Firestore hiện tại của hệ thống</h2>
+        <p class="muted">Nếu trang báo "Không có quyền", hãy dán lại đoạn này vào Firebase → Firestore → Rules rồi bấm Publish.</p>
+        <pre class="rules" id="rulesPre2"></pre>
+        <button class="btn btn-ghost" id="rulesCopy2" style="margin-top:10px">📋 Sao chép Rules</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Chi tiết người dùng -->
+<div class="drawer hidden" id="drawer"><div class="dpanel" id="dpanel"></div></div>
+
+<script>
+(() => {
+  "use strict";
+  const FB = { apiKey: "AIzaSyAp4cznN6PG5YZ_vGjPm3rgw3VttmWZp8c", projectId: "travelai-4108e" };
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const toast = (m) => { const e = el("div", "toast", m); document.body.appendChild(e); setTimeout(() => e.remove(), 3000); };
+  // phiên đăng nhập: mặc định mất khi đóng tab; chọn "Ghi nhớ" thì giữ 7 ngày trên thiết bị này
+  const keep = () => { try { return localStorage.getItem("tai_adm_keep") === "1"; } catch { return false; } };
+  const box = () => (keep() ? localStorage : sessionStorage);
+  const ss = { get: (k) => { try { return JSON.parse(box().getItem("tai_adm_" + k)); } catch { return null; } }, set: (k, v) => { try { box().setItem("tai_adm_" + k, JSON.stringify(v)); } catch {} } };
+  // tên tài khoản + mật khẩu được mã hoá bằng khoá chỉ nằm trong máy này; mã xác minh không bao giờ được lưu
+  const devKey = () => new Promise((ok, no) => {
+    try {
+      const r = indexedDB.open("travelai-admin-keys", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("k");
+      r.onerror = () => no(r.error);
+      r.onsuccess = () => { const db = r.result, q = db.transaction("k").objectStore("k").get("cred");
+        q.onsuccess = async () => { if (q.result) return ok(q.result); try { const k = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]); db.transaction("k", "readwrite").objectStore("k").put(k, "cred"); ok(k); } catch (e) { no(e); } };
+        q.onerror = () => no(q.error); };
+    } catch (e) { no(e); }
+  });
+  const b64e = (u8) => btoa(String.fromCharCode(...new Uint8Array(u8))), b64d = (x) => Uint8Array.from(atob(x), (c) => c.charCodeAt(0));
+  async function saveCred(u, pw) {
+    try {
+      if (!$("lRemember").checked) { localStorage.removeItem("tai_adm_cred"); return; }
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await devKey(), new TextEncoder().encode(JSON.stringify({ u, pw })));
+      localStorage.setItem("tai_adm_cred", JSON.stringify({ iv: b64e(iv), ct: b64e(ct) }));
+    } catch {}
+  }
+  async function fillCred() {
+    try {
+      const c = JSON.parse(localStorage.getItem("tai_adm_cred") || "null"); if (!c) return;
+      const p = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64d(c.iv) }, await devKey(), b64d(c.ct))));
+      $("lUser").value = p.u; $("lPass").value = p.pw; $("lRemember").checked = true; $("lCode").focus();
+    } catch {}
+  }
+  const REWARDS = { r1: ["Huy hiệu Nhà thám hiểm", 3], r2: ["Giảm 10% vé tham quan", 5], r3: ["Voucher cà phê miễn phí", 10], r4: ["Quà lưu niệm Việt Nam", 20] };
+  const HELP = { med: "🩺 Y tế", lost: "🧭 Lạc đường", doc: "🛂 Mất đồ / giấy tờ", danger: "⚠️ Nguy hiểm", other: "💬 Khác" };
+  const ST = { new: "Mới", seen: "Đã xem", handling: "Đang xử lý", done: "Hoàn tất" };
+  const LANGN = { vi: "Tiếng Việt", en: "English", ja: "日本語", ko: "한국어", fr: "Français", zh: "中文", th: "ไทย", de: "Deutsch", es: "Español", ru: "Русский", it: "Italiano", pt: "Português", id: "Indonesia", hi: "हिन्दी", nl: "Nederlands", pl: "Polski", tr: "Türkçe", ms: "Melayu", km: "ខ្មែរ", lo: "ລາວ", sv: "Svenska" };
+
+  /* ---------- Thời gian ---------- */
+  const fmtD = (ms) => ms ? new Date(ms).toLocaleDateString("vi-VN") : "—";
+  const fmtDT = (ms) => ms ? new Date(ms).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
+  function ago(ms) {
+    if (!ms) return "—";
+    const s = Math.max(0, (Date.now() - ms) / 1000);
+    if (s < 60) return "vừa xong"; if (s < 3600) return Math.floor(s / 60) + " phút trước";
+    if (s < 86400) return Math.floor(s / 3600) + " giờ trước"; if (s < 86400 * 30) return Math.floor(s / 86400) + " ngày trước";
+    return fmtD(ms);
+  }
+
+  /* ---------- Đăng nhập Firebase (REST) ---------- */
+  const fbErr = (msg, status) => { const e = new Error(msg || "HTTP " + status); e.code = String(msg || "").split(/[ :]/)[0]; return e; };
+  async function fbAuth(op, body) {
+    let r;
+    try { r = await fetch("https://identitytoolkit.googleapis.com/v1/accounts:" + op + "?key=" + FB.apiKey, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+    catch { throw fbErr("NETWORK"); }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw fbErr(j.error && j.error.message, r.status);
+    return j;
+  }
+  let tok = ss.get("tok");
+  const setTok = (j) => { tok = { idToken: j.idToken, refreshToken: j.refreshToken, exp: Date.now() + (+j.expiresIn || 3600) * 1000, uid: j.localId, at: (tok && tok.uid === j.localId && tok.at) || Date.now() }; ss.set("tok", tok); };
+  async function idToken() {
+    if (!tok) throw fbErr("NO_SESSION");
+    if (Date.now() - tok.at > (keep() ? 7 * 864e5 : 12 * 3600e3)) { logout(); throw fbErr("NO_SESSION"); } // phiên tối đa 12 giờ, hoặc 7 ngày nếu chọn ghi nhớ
+    if (Date.now() < tok.exp - 60000) return tok.idToken;
+    const r = await fetch("https://securetoken.googleapis.com/v1/token?key=" + FB.apiKey, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(tok.refreshToken) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw fbErr(j.error && j.error.message, r.status);
+    setTok({ idToken: j.id_token, refreshToken: j.refresh_token, expiresIn: j.expires_in, localId: j.user_id });
+    return tok.idToken;
+  }
+  // Tên tài khoản -> email nội bộ; mật khẩu + mã xác minh -> khoá đăng nhập (không lưu ở đâu trong file này)
+  const slug = (x) => x.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/gi, "d").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const adminEmail = (u) => "admin." + slug(u) + "@" + FB.projectId + ".firebaseapp.com";
+  async function adminSecret(pw, code) {
+    const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("TravelAI|" + pw + "|" + code.replace(/\s+/g, "")));
+    return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
+  }
+
+  /* ---------- Firestore (REST) ---------- */
+  const toV = (x) => x === null || x === undefined ? { nullValue: null } : typeof x === "boolean" ? { booleanValue: x } : typeof x === "number" ? (Number.isInteger(x) ? { integerValue: String(x) } : { doubleValue: x })
+    : typeof x === "string" ? { stringValue: x } : Array.isArray(x) ? { arrayValue: { values: x.map(toV) } } : { mapValue: { fields: toF(x) } };
+  const toF = (o) => { const f = {}; for (const k in o) f[k] = toV(o[k]); return f; };
+  const fromV = (v) => "stringValue" in v ? v.stringValue : "integerValue" in v ? +v.integerValue : "doubleValue" in v ? v.doubleValue : "booleanValue" in v ? v.booleanValue
+    : "arrayValue" in v ? (v.arrayValue.values || []).map(fromV) : "mapValue" in v ? fromF(v.mapValue.fields || {}) : "timestampValue" in v ? Date.parse(v.timestampValue) : null;
+  const fromF = (f) => { const o = {}; for (const k in f) o[k] = fromV(f[k]); return o; };
+  const BASE = () => "https://firestore.googleapis.com/v1/projects/" + FB.projectId + "/databases/(default)/documents/";
+  const maskQ = (fields) => fields.map((f) => "updateMask.fieldPaths=" + encodeURIComponent(f)).join("&");
+  async function fs(method, path, body, query) {
+    const r = await fetch(BASE() + path + (query ? "?" + query : ""), { method, headers: { Authorization: "Bearer " + (await idToken()), "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    if (method === "GET" && r.status === 404) return null;
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw fbErr(j.error && (j.error.status || j.error.message), r.status);
+    return j;
+  }
+  async function listAll(col) {
+    let out = [], page = "";
+    for (let i = 0; i < 50; i++) {
+      const j = await fs("GET", col, null, "pageSize=300" + (page ? "&pageToken=" + encodeURIComponent(page) : ""));
+      (j && j.documents || []).forEach((d) => out.push(Object.assign({ id: d.name.split("/").pop(), _ct: Date.parse(d.createTime), _ut: Date.parse(d.updateTime) }, fromF(d.fields || {}))));
+      page = j && j.nextPageToken; if (!page) break;
+    }
+    return out;
+  }
+  const patch = (path, obj) => fs("PATCH", path, { fields: toF(obj) }, maskQ(Object.keys(obj)));
+
+  /* ---------- Rules (có UID chủ server) ---------- */
+  function rulesText(uid) {
+    return `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() { return request.auth != null && request.auth.uid == '${uid}'; }
+    function verified() { return request.auth != null && request.auth.token.email_verified == true; }
+    function isOwner(uid) { return verified() && request.auth.uid == uid; }
+
+    // Người dùng: tự đọc/ghi dữ liệu của mình (trừ các trường do chủ server quản lý)
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid)
+        && !request.resource.data.keys().hasAny(['bonus', 'blocked', 'usedCodes', 'note']);
+      allow update: if isAdmin() || (isOwner(uid)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['bonus', 'blocked', 'usedCodes', 'note']));
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // Yêu cầu SOS: người dùng tạo và nhắn thêm, chủ server xem và xử lý
+    match /sos/{id} {
+      allow create: if verified() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'new';
+      allow read: if isAdmin() || (verified() && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin() || (verified() && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['msgs', 'updated']));
+      allow delete: if isAdmin();
+    }
+
+    // Cấu hình chung (địa chỉ máy chủ thông báo, nơi nhận thông báo của chủ server)
+    match /config/{doc} {
+      allow read: if verified() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Chat giữa người dùng và chủ server (tin nhắn, ảnh, video chia nhỏ)
+    match /chats/{uid} {
+      allow read, write: if isOwner(uid) || isAdmin();
+      match /msgs/{mid} {
+        allow read: if isOwner(uid) || isAdmin();
+        allow create: if (isOwner(uid) && request.resource.data.from == 'user')
+          || (isAdmin() && request.resource.data.from == 'admin');
+        allow delete: if isAdmin();
+        match /parts/{n} {
+          allow read, create: if isOwner(uid) || isAdmin();
+          allow delete: if isAdmin();
+        }
+      }
+    }
+  }
+}`;
+  }
+  const copy = async (txt) => { try { await navigator.clipboard.writeText(txt); toast("Đã sao chép"); } catch { toast("Hãy giữ tay vào khung để sao chép"); } };
+
+  /* ---------- Màn đăng nhập / khởi tạo ---------- */
+  let setupMode = false;
+  function renderLogin() {
+    $("lTitle").textContent = setupMode ? "Khởi tạo tài khoản chủ server" : "Trang quản trị TravelAI";
+    $("lSub").textContent = setupMode ? "Chỉ làm 1 lần. Ghi nhớ kỹ cả 3 thông tin này." : "Chỉ dành cho chủ server";
+    $("lBtn").textContent = setupMode ? "Tạo tài khoản chủ server" : "Đăng nhập";
+    $("lSetup").textContent = setupMode ? "← Quay lại đăng nhập" : "Lần đầu sử dụng? Khởi tạo tài khoản chủ server";
+    $("lErr").textContent = "";
+  }
+  $("lSetup").onclick = () => { setupMode = !setupMode; renderLogin(); };
+  const errMsg = (e) => {
+    const c = (e && e.code) || "";
+    if (/INVALID_LOGIN_CREDENTIALS|INVALID_PASSWORD|EMAIL_NOT_FOUND/.test(c)) return "Sai tên tài khoản, mật khẩu hoặc mã xác minh.";
+    if (c === "EMAIL_EXISTS") return "Tài khoản chủ server này đã được tạo. Hãy quay lại đăng nhập.";
+    if (/TOO_MANY_ATTEMPTS/.test(c)) return "Nhập sai quá nhiều lần. Đợi vài phút rồi thử lại.";
+    if (/PERMISSION_DENIED/.test(c)) return "Tài khoản chưa có quyền chủ server. Hãy dán Rules (tab Cài đặt hoặc màn hình này) vào Firebase.";
+    if (c === "NETWORK") return "Không kết nối được máy chủ. Kiểm tra mạng.";
+    return "Lỗi: " + (e && e.message || c);
+  };
+  $("loginForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const u = $("lUser").value.trim(), pw = $("lPass").value, code = $("lCode").value.trim();
+    if (!u || !pw || !code) { $("lErr").textContent = "Nhập đủ tên tài khoản, mật khẩu và mã xác minh."; return; }
+    $("lBtn").disabled = true; $("lErr").textContent = "";
+    try { localStorage.setItem("tai_adm_keep", $("lRemember").checked ? "1" : "0"); } catch {}
+    try {
+      const email = adminEmail(u), password = await adminSecret(pw, code);
+      setTok(await fbAuth(setupMode ? "signUp" : "signInWithPassword", { email, password, returnSecureToken: true }));
+      tok.at = Date.now(); ss.set("tok", tok); ss.set("name", u); saveCred(u, pw);
+      $("lPass").value = ""; $("lCode").value = "";
+      if (setupMode) { try { await fbAuth("update", { idToken: tok.idToken, displayName: u }); } catch {} showRules(); }
+      else await enter();
+    } catch (err) { $("lErr").textContent = errMsg(err); }
+    $("lBtn").disabled = false;
+  };
+  function showRules() {
+    $("loginForm").classList.add("hidden"); $("rulesBox").classList.remove("hidden");
+    $("rulesPre").textContent = rulesText(tok.uid); $("rErr").textContent = "";
+  }
+  $("rulesCopy").onclick = () => copy(rulesText(tok.uid));
+  $("rulesCopy2").onclick = () => copy(rulesText(tok.uid));
+  $("rulesDone").onclick = async () => { $("rulesDone").disabled = true; try { await enter(); } catch (err) { $("rErr").textContent = errMsg(err); } $("rulesDone").disabled = false; };
+  function logout() { tok = null; ss.set("tok", null); try { sessionStorage.removeItem("tai_adm_tok"); localStorage.removeItem("tai_adm_tok"); } catch {} setTimeout(fillCred, 0); clearInterval(timer); closeUser(); $("app").classList.add("hidden"); $("loginView").classList.remove("hidden"); $("rulesBox").classList.add("hidden"); $("loginForm").classList.remove("hidden"); setupMode = false; renderLogin(); }
+  $("outBtn").onclick = logout;
+
+  /* ---------- Dữ liệu ---------- */
+  let users = [], sos = [], timer = null, seenSos = new Set(ss.get("seenSos") || []), firstLoad = true;
+  const ptsOf = (u) => {
+    const ci = Object.keys(u.checkins || {}).length;
+    const spent = (u.gifts || []).reduce((s, g) => s + ((REWARDS[g.id] || [0, 0])[1]), 0);
+    return Math.max(0, ci - spent + (+u.bonus || 0));
+  };
+  const lastActive = (u) => Math.max(u.updated || 0, u._ut || 0, (u.loc && u.loc.t) || 0);
+  async function enter() {
+    await load(true); // lỗi quyền sẽ ném ra ở đây
+    $("loginView").classList.add("hidden"); $("app").classList.remove("hidden");
+    $("rulesPre2").textContent = rulesText(tok.uid);
+    const ai = $("admInfo"); ai.innerHTML = "";
+    [["Tên tài khoản", ss.get("name") || "—"], ["UID", tok.uid], ["Dự án Firebase", FB.projectId], ["Phiên đăng nhập", keep() ? "Ghi nhớ trên thiết bị này, tối đa 7 ngày" : "Tự đăng xuất khi đóng tab hoặc sau 12 giờ"]].forEach(([k, v]) => ai.append(el("span", null, k), el("b", null, v)));
+    clearInterval(timer); timer = setInterval(() => load(false).catch(() => {}), 10000);
+    regSW(); loadPushCfg().then(() => ensureAdminPush()); loadDnd(); startGeo();
+  }
+  // runQuery: chỉ lấy những bản ghi thay đổi sau lần kiểm tra trước (mỗi lần kiểm tra tốn rất ít lượt đọc)
+  async function runQ(col, field, after) {
+    const r = await fetch(BASE().replace(/\/$/, "") + ":runQuery", { method: "POST", headers: { Authorization: "Bearer " + (await idToken()), "Content-Type": "application/json" },
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: col }], where: { fieldFilter: { field: { fieldPath: field }, op: "GREATER_THAN", value: { integerValue: String(after) } } }, orderBy: [{ field: { fieldPath: field }, direction: "ASCENDING" }], limit: 300 } }) });
+    const j = await r.json().catch(() => []);
+    if (!r.ok) { const e0 = (Array.isArray(j) ? j[0] : j) || {}; throw fbErr(e0.error && (e0.error.status || e0.error.message), r.status); }
+    return (Array.isArray(j) ? j : []).filter((x) => x.document).map((x) => Object.assign({ id: x.document.name.split("/").pop() }, fromF(x.document.fields || {})));
+  }
+  const maxOf = (l, f) => l.reduce((m, x) => Math.max(m, +x[f] || 0), 0);
+  const merge = (list, add) => { add.forEach((x) => { const i = list.findIndex((y) => y.id === x.id); if (i >= 0) list[i] = Object.assign(list[i], x); else list.push(x); }); return list; };
+  let chats = [], lastFull = 0;
+  async function load(strict, full) {
+    try {
+      if (full || strict || Date.now() - lastFull > 180000) {
+        const [u, s, c] = await Promise.all([listAll("users"), listAll("sos"), listAll("chats").catch(() => [])]);
+        users = u; sos = s; chats = c; lastFull = Date.now();
+      } else {
+        const [s, c] = await Promise.all([runQ("sos", "updated", maxOf(sos, "updated")), runQ("chats", "lastT", maxOf(chats, "lastT")).catch(() => [])]);
+        merge(sos, s); merge(chats, c);
+        c.forEach((x) => { if (threads[x.id] || x.id === openChatUid) refreshThread(x.id); });
+      }
+    } catch (err) { if (strict) throw err; return; }
+    checkChats();
+    // SOS mới
+    const fresh = sos.filter((x) => x.status === "new" && !seenSos.has(x.id));
+    if (fresh.length && !firstLoad) alarm(fresh);
+    fresh.forEach((x) => seenSos.add(x.id)); ss.set("seenSos", [...seenSos]);
+    firstLoad = false;
+    $("lastUp").textContent = "Cập nhật " + new Date().toLocaleTimeString("vi-VN") + " · " + users.length + " người dùng";
+    const open = sos.filter((x) => x.status !== "done").length, nw = sos.filter((x) => x.status === "new").length;
+    $("sosBadge").textContent = nw || open; $("sosBadge").classList.toggle("hidden", !open);
+    document.title = (nw ? "(" + nw + " SOS) " : "") + "TravelAI · Quản trị";
+    const ab = $("alertBar"); ab.classList.toggle("hidden", !nw); ab.textContent = "🆘 Có " + nw + " yêu cầu SOS mới đang chờ xử lý. Bấm để xem.";
+    render();
+  }
+  $("alertBar").onclick = () => showTab("sos");
+  $("refBtn").onclick = () => load(false, true).then(() => toast("Đã tải lại"));
+
+  /* ---------- Chuông + thông báo khi có SOS mới ---------- */
+  let actx = null;
+  function beep() {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.35, 0.7].forEach((d) => { const o = actx.createOscillator(), g = actx.createGain(); o.type = "square"; o.frequency.value = 880; g.gain.value = 0.08; o.connect(g); g.connect(actx.destination); o.start(actx.currentTime + d); o.stop(actx.currentTime + d + 0.2); });
+    } catch {}
+  }
+  /* ---------- Thông báo đẩy (Web Push qua Cloudflare Worker) ---------- */
+  const PUSH_KEY = "BINNK9mH25T2n_ocXUl6oSLP9G1EPUnuoIF6G2ZpATgGAatY4rATGNjZbFbTf7M_-RIaom0NrmsdSCQ_HiKx0sU";
+  let pushUrl = "";
+  const appDir = () => location.href.split("#")[0].split("?")[0].replace(/[^/]*$/, "");
+  const ub64 = (s2) => Uint8Array.from(atob(s2.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s2.length + 3) % 4)), (c) => c.charCodeAt(0));
+  async function loadPushCfg() {
+    try { const d = await fs("GET", "config/app"); pushUrl = (d && d.fields ? fromF(d.fields).pushUrl : "") || ""; } catch {}
+    $("pushIn").value = pushUrl; pushStatus();
+  }
+  async function pushStatus() {
+    const st = $("pushStat");
+    const perm = window.Notification ? Notification.permission : "unsupported";
+    st.textContent = (pushUrl ? "✅ Đã có địa chỉ máy chủ." : "⚠️ Chưa có địa chỉ máy chủ thông báo.") + " Thông báo trên máy này: " + (perm === "granted" ? "đã bật" : perm === "denied" ? "bị chặn" : perm === "unsupported" ? "không hỗ trợ (trên iPhone: thêm trang vào Màn hình chính)" : "chưa bật, bấm 🔔 ở tab SOS");
+  }
+  $("pushSave").onclick = async () => {
+    const u = $("pushIn").value.trim().replace(/\/+$/, "");
+    if (u && !/^https:\/\/[^/]+\.workers\.dev$|^https:\/\//.test(u)) { toast("Địa chỉ phải bắt đầu bằng https://"); return; }
+    try { await patch("config/app", { pushUrl: u, updated: Date.now() }); pushUrl = u; toast("Đã lưu địa chỉ máy chủ thông báo"); pushStatus(); } catch (err) { toast(errMsg(err)); }
+  };
+  $("pushTest").onclick = async () => {
+    const u = $("pushIn").value.trim().replace(/\/+$/, ""); if (!u) { toast("Nhập địa chỉ trước"); return; }
+    try {
+      const j = await (await fetch(u)).json();
+      if (j.publicKey !== PUSH_KEY) { toast("❌ Máy chủ chạy nhưng khoá không khớp. Hãy dán lại đúng file worker.js."); return; }
+      toast("✅ Máy chủ thông báo hoạt động");
+      if (window.Notification && Notification.permission === "granted") { await ensureAdminPush(); await pushSend(await adminSubs(), "TravelAI · Quản trị", "Thông báo đẩy hoạt động 🎉", "test", appDir() + "admin.html"); }
+    } catch { toast("❌ Không kết nối được máy chủ. Kiểm tra lại địa chỉ."); }
+  };
+  // Kiểm tra từng mắt xích của thông báo đẩy trên máy này
+  $("pushDiag").onclick = async () => {
+    const box = $("diagOut"); box.innerHTML = "";
+    const line = (ok, k, v) => { const r = el("div"); r.append(el("span", null, (ok === true ? "✅ " : ok === false ? "❌ " : "⚠️ ") + k), el("b", null, v)); box.appendChild(r); return ok; };
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const sa = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+    line(ios ? !!sa : true, "Mở dạng app (Màn hình chính)", sa ? "Có" : ios ? "Không: hãy thêm vào Màn hình chính rồi mở từ biểu tượng" : "Không bắt buộc trên máy này");
+    if (!line(!!window.Notification, "Hỗ trợ thông báo", window.Notification ? "Có" : "Không")) return;
+    if (!line(Notification.permission === "granted", "Quyền thông báo", Notification.permission === "granted" ? "Đã cho phép" : Notification.permission === "denied" ? "Bị chặn: bật lại trong Cài đặt điện thoại" : "Chưa cho phép: bấm 🔔 ở tab SOS")) return;
+    let reg = null;
+    try { reg = swReg || (await navigator.serviceWorker.getRegistration()); } catch {}
+    if (!line(!!(reg && reg.active), "Service worker", reg && reg.active ? "Đang chạy" : "Chưa chạy: tải lại trang")) return;
+    let sub = null;
+    try { sub = await reg.pushManager.getSubscription(); if (!sub) { await ensureAdminPush(); sub = await reg.pushManager.getSubscription(); } } catch (e) { line(false, "Đăng ký nhận thông báo", String(e && e.message || e)); return; }
+    const ep = sub ? sub.endpoint || sub.toJSON().endpoint : "";
+    if (!line(!!sub, "Đăng ký nhận thông báo", sub ? (ep.split("/")[2] || "có") : "Không tạo được")) return;
+    let saved = [];
+    try { const d = await fs("GET", "config/adminPush"); saved = (d && d.fields ? fromF(d.fields).subs : []) || []; }
+    catch (e) { line(false, "Lưu lên Firebase", e.code === "PERMISSION_DENIED" ? "Bị chặn: dán lại Rules mới rồi Publish" : e.message); return; }
+    if (!saved.some((x) => x.endpoint === ep)) { await ensureAdminPush(); try { const d = await fs("GET", "config/adminPush"); saved = (d && d.fields ? fromF(d.fields).subs : []) || []; } catch {} }
+    if (!line(saved.some((x) => x.endpoint === ep), "Lưu lên Firebase", saved.length + " thiết bị đã lưu")) return;
+    if (!line(!!pushUrl, "Địa chỉ máy chủ", pushUrl || "Chưa có: dán địa chỉ Worker rồi bấm Lưu")) return;
+    try { const j = await (await fetch(pushUrl)).json(); if (!line(j.publicKey === PUSH_KEY, "Máy chủ Cloudflare", j.publicKey === PUSH_KEY ? "Hoạt động" : "Khoá không khớp: dán lại worker.js")) return; }
+    catch { line(false, "Máy chủ Cloudflare", "Không kết nối được: kiểm tra địa chỉ và công tắc workers.dev"); return; }
+    let res = null;
+    try { const r = await fetch(pushUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken: await idToken(), subs: [{ endpoint: ep, keys: sub.toJSON().keys }], title: "TravelAI · Chẩn đoán", body: "Nếu thấy thông báo này là mọi thứ đã chạy 🎉", tag: "diag", url: appDir() + "admin.html" }) }); res = await r.json(); if (r.status === 401) { line(false, "Gửi thử", "Máy chủ từ chối token: kiểm tra FIREBASE_PROJECT trong worker.js"); return; } }
+    catch (e) { line(false, "Gửi thử", "Lỗi: " + (e && e.message)); return; }
+    const st = res && res.results && res.results[0] ? res.results[0].status : 0;
+    const why = { 201: "Đã gửi tới Apple/Google", 200: "Đã gửi", 400: "Dịch vụ thông báo từ chối (400)", 403: "Chữ ký bị từ chối (403)", 404: "Đăng ký đã hết hạn (404): bấm 🔔 lại", 410: "Đăng ký đã hết hạn (410): bấm 🔔 lại", 413: "Nội dung quá dài", 0: "Không gửi được" }[st] || "Mã " + st;
+    line(st >= 200 && st < 300, "Gửi thử", why);
+    if (st >= 200 && st < 300) line(null, "Bước cuối", "Khoá màn hình, đợi vài giây xem thông báo có hiện không");
+  };
+  /* ---------- Không làm phiền (chủ server) ---------- */
+  const DND_FOREVER = 9e15;
+  let dnd = { until: 0, sos: true };
+  const dndActive = () => dnd.until > Date.now();
+  function renderDnd() {
+    const box = $("dndOpts"); box.innerHTML = "";
+    [["Tắt", 0], ["1 giờ", 1], ["8 giờ", 8], ["Đến 7:00 sáng", "m"], ["Đến khi tắt", "f"]].forEach(([l, v]) => {
+      const on = v === 0 ? !dndActive() : v === "f" ? dndActive() && dnd.until >= DND_FOREVER : false;
+      const b = el("button", "btn btn-sm " + (on ? "btn-primary" : "btn-ghost"), l); b.onclick = () => setDnd(v); box.appendChild(b);
+    });
+    $("dndSos").checked = dnd.sos !== false;
+    $("dndStat").textContent = !dndActive() ? "Đang tắt: nhận thông báo bình thường." : dnd.until >= DND_FOREVER ? "Đang bật cho đến khi bạn tắt." : "Đang bật đến " + fmtDT(dnd.until) + ".";
+    $("dndTop").classList.toggle("hidden", !dndActive());
+  }
+  async function loadDnd() { try { const d = await fs("GET", "config/adminPush"); const c = d && d.fields ? fromF(d.fields) : {}; dnd = { until: +c.dnd || 0, sos: c.dndSos !== false }; } catch {} renderDnd(); }
+  async function setDnd(v) {
+    let until = 0;
+    if (typeof v === "number" && v > 0) until = Date.now() + v * 3600e3;
+    if (v === "m") { const d = new Date(); d.setDate(d.getDate() + (d.getHours() >= 7 ? 1 : 0)); d.setHours(7, 0, 0, 0); until = d.getTime(); }
+    if (v === "f") until = DND_FOREVER;
+    try { await patch("config/adminPush", { dnd: until, dndSos: $("dndSos").checked }); dnd = { until, sos: $("dndSos").checked }; toast(until ? "🔕 Đã bật Không làm phiền" : "🔔 Đã tắt Không làm phiền"); }
+    catch (err) { toast(errMsg(err)); }
+    renderDnd();
+  }
+  $("dndSos").onchange = async () => { try { await patch("config/adminPush", { dndSos: $("dndSos").checked }); dnd.sos = $("dndSos").checked; renderDnd(); } catch (err) { toast(errMsg(err)); } };
+  setInterval(() => { if (tok) renderDnd(); }, 60000);
+  async function adminSubs() { try { const d = await fs("GET", "config/adminPush"); return (d && d.fields ? fromF(d.fields).subs : []) || []; } catch { return []; } }
+  async function ensureAdminPush() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !window.Notification || Notification.permission !== "granted") return false;
+    try {
+      const reg = swReg || (await Promise.race([navigator.serviceWorker.ready, new Promise((_, no) => setTimeout(() => no(new Error("timeout")), 6000))]));
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: ub64(PUSH_KEY) });
+      const j = sub.toJSON(), mine = { endpoint: j.endpoint, keys: j.keys };
+      const cur = await adminSubs();
+      if (!cur.some((s2) => s2.endpoint === mine.endpoint)) await patch("config/adminPush", { subs: [mine].concat(cur).slice(0, 5), updated: Date.now() });
+      return true;
+    } catch { return false; }
+  }
+  async function pushSend(subs, title, body, tag, url) {
+    if (!pushUrl || !subs || !subs.length) return null;
+    try {
+      const r = await fetch(pushUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken: await idToken(), subs, title, body, tag, url }) });
+      return await r.json();
+    } catch { return null; }
+  }
+  async function pushToUser(uid, doc) {
+    try {
+      const d = await fs("GET", "users/" + uid); const uf = d && d.fields ? fromF(d.fields) : {}; const subs = uf.push || [];
+      if (+uf.dnd > Date.now()) return; // khách đang Không làm phiền: tin nhắn vẫn lưu, không gửi thông báo
+      const res = await pushSend(subs, "💬 Ban điều hành TravelAI", preview(doc).slice(0, 200), "chat", appDir() + "#chat");
+      // bỏ các thiết bị đã gỡ app / hết hạn
+      const dead = ((res && res.results) || []).filter((x) => x.status === 404 || x.status === 410).map((x) => x.endpoint);
+      if (dead.length) await patch("users/" + uid, { push: subs.filter((s2) => !dead.includes(s2.endpoint)) });
+    } catch {}
+  }
+  let swReg = null;
+  function regSW() { if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").then((r) => (swReg = r)).catch(() => {}); }
+  if (navigator.serviceWorker) navigator.serviceWorker.addEventListener("message", (e) => {
+    const h = e.data && e.data.type === "open" ? e.data.hash : "";
+    if (h === "sos") showTab("sos"); else if (h.startsWith("msg-")) { showTab("msg"); openThread(h.slice(4)); }
+  });
+  async function pushNote(title, body, tag, hash) {
+    if (dndActive() && tag !== "test" && !(tag.startsWith("sos") && dnd.sos !== false)) { return; }
+    beep(); try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch {}
+    toast(title + (body ? ": " + body : ""));
+    if (!window.Notification || Notification.permission !== "granted") return;
+    const opt = { body, tag, renotify: true, icon: "icon-192.png", badge: "icon-192.png", requireInteraction: tag.startsWith("sos"), data: { url: location.href.split("#")[0] + "#" + hash } };
+    try { const r = swReg || (navigator.serviceWorker && (await navigator.serviceWorker.getRegistration())); if (r) { await r.showNotification(title, opt); return; } } catch {}
+    try { new Notification(title, opt); } catch {}
+  }
+  function alarm(list) {
+    const x = list[0];
+    pushNote("🆘 SOS mới · TravelAI", (HELP[x.type] || "") + " · " + (x.name || x.email || "") + (x.note ? " · " + x.note : ""), "sos-" + x.id, "sos");
+  }
+  // tin nhắn mới từ người dùng
+  let chatTold = JSON.parse(localStorage.getItem("tai_adm_told") || "{}"), chatsFirst = true;
+  function checkChats() {
+    let unread = 0;
+    chats.forEach((c) => {
+      const n = (c.nUser || 0) - (c.seenAdmin || 0); if (n > 0) unread += n;
+      if ((c.nUser || 0) > (chatTold[c.id] || 0)) {
+        const watching = tab === "msg" && openChatUid === c.id && !document.hidden;
+        if (!chatsFirst && c.lastFrom === "user" && !watching) pushNote("💬 " + (c.name || c.email || "Người dùng"), c.lastText || "Tin nhắn mới", "msg-" + c.id, "msg-" + c.id);
+        chatTold[c.id] = c.nUser || 0;
+      }
+    });
+    chatsFirst = false; localStorage.setItem("tai_adm_told", JSON.stringify(chatTold));
+    $("msgBadge").textContent = unread; $("msgBadge").classList.toggle("hidden", !unread);
+    try { const nw = sos.filter((x) => x.status === "new").length; navigator.setAppBadge && (unread + nw ? navigator.setAppBadge(unread + nw) : navigator.clearAppBadge()); } catch {}
+    if (tab === "msg") renderChatList();
+  }
+  $("notifBtn").onclick = async () => {
+    if (!window.Notification) { toast("Trình duyệt này không hỗ trợ thông báo"); return; }
+    const p = await Notification.requestPermission(); beep();
+    toast(p === "granted" ? "Đã bật thông báo SOS và tin nhắn" : "Thông báo bị chặn trong cài đặt trình duyệt");
+    if (p === "granted") { const ok2 = await ensureAdminPush(); pushNote("TravelAI · Quản trị", ok2 ? "Đã bật thông báo, kể cả khi đóng trang" : "Thông báo đã hoạt động", "test", ""); }
+    pushStatus();
+  };
+
+  /* ---------- Tab ---------- */
+  let tab = "ov";
+  function showTab(k) {
+    tab = k;
+    document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === k));
+    ["ov", "us", "mp", "sos", "msg", "gf", "st"].forEach((x) => $("t-" + x).classList.toggle("hidden", x !== k));
+    render();
+  }
+  document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showTab(b.dataset.tab)));
+  function render() {
+    if (tab === "ov") renderOv();
+    if (tab === "us") renderUsers();
+    if (tab === "mp") renderMap();
+    if (tab === "sos") renderSos();
+    if (tab === "gf") renderGifts();
+    if (tab === "msg") renderChatList();
+  }
+
+  /* ---------- Tổng quan ---------- */
+  function renderOv() {
+    const now = Date.now(), day = 864e5;
+    const visits = users.reduce((s, u) => s + (u.visits || []).length, 0);
+    const cis = users.reduce((s, u) => s + Object.keys(u.checkins || {}).length, 0);
+    const k = [
+      ["👥 Tổng người dùng", users.length],
+      ["🆕 Mới trong 7 ngày", users.filter((u) => (u.created || u._ct) > now - 7 * day).length],
+      ["⚡ Hoạt động 24 giờ", users.filter((u) => lastActive(u) > now - day).length],
+      ["📍 Đang chia sẻ vị trí", users.filter((u) => u.loc && u.loc.lat != null && u.loc.t > now - day).length],
+      ["🗺️ Lượt ghé địa điểm", visits],
+      ["⭐ Lượt check-in", cis],
+      ["🎁 Quà đã đổi", users.reduce((s, u) => s + (u.gifts || []).length, 0)],
+      ["🆘 SOS đang mở", sos.filter((x) => x.status !== "done").length, true],
+    ];
+    const box = $("kpis"); box.innerHTML = "";
+    k.forEach(([l, v, a]) => { const c = el("div", "card kpi" + (a && v ? " alert" : "")); c.append(el("span", null, l), el("b", null, v.toLocaleString("vi-VN"))); if (a) { c.style.cursor = "pointer"; c.onclick = () => showTab("sos"); } box.appendChild(c); });
+    // biểu đồ đăng ký 14 ngày
+    const days = []; for (let i = 13; i >= 0; i--) { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i); days.push(d.getTime()); }
+    const cnt = days.map((d) => users.filter((u) => { const c = u.created || u._ct; return c >= d && c < d + day; }).length);
+    const mx = Math.max(1, ...cnt), ch = $("chSign"); ch.innerHTML = "";
+    days.forEach((d, i) => { const w = el("div"); const bar = el("i"); bar.style.height = (cnt[i] / mx) * 100 + "%"; w.append(el("em", null, cnt[i] || ""), bar, el("span", null, new Date(d).getDate() + "/" + (new Date(d).getMonth() + 1))); ch.appendChild(w); });
+    // địa điểm nhiều nhất
+    const pc = {}; users.forEach((u) => (u.visits || []).forEach((v) => { if (v && v.name) pc[v.name] = (pc[v.name] || 0) + 1; }));
+    hbars($("chPlaces"), Object.entries(pc).sort((a, b) => b[1] - a[1]).slice(0, 10), "Chưa có lượt ghé nào.");
+    const lc = {}; users.forEach((u) => { const l = u.lang || "vi"; lc[l] = (lc[l] || 0) + 1; });
+    hbars($("chLang"), Object.entries(lc).sort((a, b) => b[1] - a[1]).map(([l, n]) => [LANGN[l] || l.replace(/^x-/, ""), n]), "Chưa có dữ liệu.");
+    const fd = $("feed"); fd.innerHTML = "";
+    const ev = [];
+    users.forEach((u) => { ev.push([u.created || u._ct, "🆕 " + (u.name || u.email) + " đăng ký tài khoản"]); (u.visits || []).slice(0, 3).forEach((v) => ev.push([v.t, (v.checkin ? "⭐ " : "📍 ") + (u.name || u.email) + (v.checkin ? " check-in tại " : " đã đến ") + v.name])); });
+    sos.forEach((x) => ev.push([x.t, "🆘 " + (x.name || x.email) + " gửi SOS: " + (HELP[x.type] || "")]));
+    ev.filter((x) => x[0]).sort((a, b) => b[0] - a[0]).slice(0, 12).forEach(([t, s]) => { const r = el("div"); r.append(el("span", null, s), el("span", "muted", ago(t))); fd.appendChild(r); });
+    if (!ev.length) fd.appendChild(el("div", "muted", "Chưa có hoạt động."));
+  }
+  function hbars(box, rows, empty) {
+    box.innerHTML = ""; if (!rows.length) { box.appendChild(el("p", "muted", empty)); return; }
+    const mx = Math.max(...rows.map((r) => r[1]));
+    rows.forEach(([n, v]) => { const r = el("div", "hbar"); const w = el("div"); const i = el("i"); i.style.width = (v / mx) * 100 + "%"; w.appendChild(i); r.append(el("span", null, n), w, el("b", null, v)); box.appendChild(r); });
+  }
+
+  /* ---------- Người dùng ---------- */
+  $("uq").oninput = renderUsers; $("usort").onchange = renderUsers; $("ufilter").onchange = renderUsers;
+  function filtered() {
+    const q = $("uq").value.trim().toLowerCase(), f = $("ufilter").value, so = $("usort").value;
+    let l = users.filter((u) => !q || ((u.name || "") + " " + (u.email || "") + " " + u.id).toLowerCase().includes(q));
+    if (f === "loc") l = l.filter((u) => u.loc && u.loc.lat != null);
+    if (f === "blocked") l = l.filter((u) => u.blocked);
+    const key = { active: lastActive, new: (u) => u.created || u._ct || 0, pts: ptsOf, vis: (u) => (u.visits || []).length }[so];
+    return l.sort((a, b) => key(b) - key(a));
+  }
+  function renderUsers() {
+    const tb = $("utb"); tb.innerHTML = ""; const l = filtered();
+    $("uempty").classList.toggle("hidden", !!l.length);
+    l.forEach((u) => {
+      const tr = el("tr");
+      const c0 = el("td"); c0.append(el("div", "n", u.name || "(chưa có tên)"), el("div", "e", u.email || u.id));
+      const cells = [
+        ["Ngày tạo", fmtD(u.created || u._ct)], ["Hoạt động", ago(lastActive(u))], ["Ngôn ngữ", LANGN[u.lang] || (u.lang || "vi").replace(/^x-/, "")],
+        ["Điểm", "⭐ " + ptsOf(u)], ["Địa điểm", (u.visits || []).length], ["Check-in", Object.keys(u.checkins || {}).length],
+      ];
+      tr.appendChild(c0);
+      cells.forEach(([l2, v]) => { const td = el("td", null, String(v)); td.dataset.l = l2; tr.appendChild(td); });
+      const tdl = el("td"); tdl.dataset.l = "Vị trí";
+      if (u.loc && u.loc.lat != null) { const a = el("a", null, "📍 " + ago(u.loc.t)); a.href = `https://www.google.com/maps?q=${u.loc.lat},${u.loc.lng}`; a.target = "_blank"; a.rel = "noopener"; a.onclick = (e) => e.stopPropagation(); tdl.appendChild(a); } else tdl.textContent = "—";
+      tr.appendChild(tdl);
+      const tds = el("td"); tds.dataset.l = "Trạng thái"; tds.appendChild(el("span", "pill " + (u.blocked ? "bad" : "live"), u.blocked ? "Đã khoá" : "Hoạt động")); tr.appendChild(tds);
+      tr.onclick = () => openUser(u.id);
+      tb.appendChild(tr);
+    });
+  }
+  $("csvBtn").onclick = () => {
+    const rows = [["UID", "Tên", "Email", "Ngày tạo", "Hoạt động gần nhất", "Ngôn ngữ", "Điểm", "Điểm thưởng", "Số địa điểm", "Số check-in", "Quà đã đổi", "Vĩ độ", "Kinh độ", "Thời điểm vị trí", "Đã khoá", "Ghi chú"]];
+    filtered().forEach((u) => rows.push([u.id, u.name, u.email, fmtDT(u.created || u._ct), fmtDT(lastActive(u)), u.lang, ptsOf(u), u.bonus || 0, (u.visits || []).length, Object.keys(u.checkins || {}).length, (u.gifts || []).map((g) => g.code).join(" "), u.loc && u.loc.lat, u.loc && u.loc.lng, u.loc && fmtDT(u.loc.t), u.blocked ? "có" : "", u.note || ""]));
+    const csv = "﻿" + rows.map((r) => r.map((x) => '"' + String(x == null ? "" : x).replace(/"/g, '""') + '"').join(",")).join("\r\n");
+    const a = el("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" })); a.download = "travelai-nguoi-dung-" + new Date().toISOString().slice(0, 10) + ".csv"; a.click();
+  };
+
+  /* ---------- Chi tiết người dùng ---------- */
+  let openUid = null;
+  $("drawer").onclick = (e) => { if (e.target.id === "drawer") closeUser(); };
+  function closeUser() { openUid = null; $("drawer").classList.add("hidden"); }
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && openUid) closeUser(); });
+  function openUser(uid) {
+    const u = users.find((x) => x.id === uid); if (!u) return;
+    openUid = uid; const p = $("dpanel"); p.innerHTML = ""; $("drawer").classList.remove("hidden");
+    const head = el("div", "dhead"); const tx = el("div"); tx.style.flex = "1"; tx.style.minWidth = "0";
+    tx.append(el("b", null, u.name || "(chưa có tên)"), el("div", "muted", u.email || ""));
+    const x = el("button", "btn btn-ghost btn-sm", "✕ Đóng"); x.onclick = closeUser;
+    head.append(el("div", "av", (u.name || u.email || "?").trim().charAt(0).toUpperCase()), tx, x); p.appendChild(head);
+
+    const info = el("div", "card"); info.appendChild(el("h2", null, "Thông tin"));
+    const kv = el("div", "kv");
+    [["UID", u.id], ["Ngày tạo", fmtDT(u.created || u._ct)], ["Hoạt động gần nhất", fmtDT(lastActive(u)) + " (" + ago(lastActive(u)) + ")"], ["Ngôn ngữ", LANGN[u.lang] || u.lang || "vi"],
+      ["Điểm hiện có", "⭐ " + ptsOf(u)], ["Check-in", Object.keys(u.checkins || {}).length], ["Địa điểm đã đến", (u.visits || []).length], ["Trạng thái", u.blocked ? "🔒 Đã khoá" : "✅ Hoạt động"]]
+      .forEach(([k, v]) => kv.append(el("span", null, k), el("b", null, String(v))));
+    info.appendChild(kv); p.appendChild(info);
+
+    const lc = el("div", "card"); lc.appendChild(el("h2", null, "📍 Vị trí gần nhất"));
+    if (u.loc && u.loc.lat != null) {
+      lc.appendChild(el("div", null, `${u.loc.lat}, ${u.loc.lng} · ${fmtDT(u.loc.t)} (${ago(u.loc.t)})`));
+      { const dd = el("div", "dist"); dd.dataset.dlat = u.loc.lat; dd.dataset.dlng = u.loc.lng; dd.textContent = distText(u.loc); lc.appendChild(dd); }
+      const r = el("div", "row"); r.style.marginTop = "8px";
+      const a1 = el("a", "btn btn-ghost btn-sm", "Mở Google Maps"); a1.href = `https://www.google.com/maps?q=${u.loc.lat},${u.loc.lng}`; a1.target = "_blank"; a1.rel = "noopener";
+      const a2 = el("a", "btn btn-ghost btn-sm", "Chỉ đường tới đây"); a2.href = `https://www.google.com/maps/dir/?api=1&destination=${u.loc.lat},${u.loc.lng}`; a2.target = "_blank"; a2.rel = "noopener";
+      r.append(a1, a2); lc.appendChild(r);
+      const m = el("div", "mini"); lc.appendChild(m); miniMap(m, [[u.loc.lat, u.loc.lng, u.name || u.email]]);
+    } else lc.appendChild(el("p", "muted", "Người dùng chưa chia sẻ vị trí."));
+    p.appendChild(lc);
+
+    const pc = el("div", "card"); pc.appendChild(el("h2", null, "⭐ Điểm thưởng"));
+    pc.appendChild(el("p", "muted", "Điểm = số check-in − điểm đã đổi quà + điểm thưởng. Điểm thưởng hiện tại: " + (+u.bonus || 0)));
+    const pr = el("div", "row"); pr.style.marginTop = "8px";
+    const inp = el("input"); inp.type = "number"; inp.value = "1"; inp.style.width = "90px";
+    const add = el("button", "btn btn-ok btn-sm", "+ Cộng"), sub = el("button", "btn btn-danger btn-sm", "− Trừ");
+    const setB = (d) => act(add, async () => { const n = parseInt(inp.value, 10) || 0; await patch("users/" + u.id, { bonus: (+u.bonus || 0) + d * n }); toast("Đã cập nhật điểm"); });
+    add.onclick = () => setB(1); sub.onclick = () => setB(-1);
+    pr.append(inp, add, sub); pc.appendChild(pr); p.appendChild(pc);
+
+    const gc = el("div", "card"); gc.appendChild(el("h2", null, "🎁 Quà đã đổi"));
+    const gl = el("div", "list"); const used = u.usedCodes || {};
+    (u.gifts || []).forEach((g) => {
+      const r = el("div"); const l = el("span", null, (REWARDS[g.id] ? REWARDS[g.id][0] : g.id) + " · " + g.code + " · " + fmtD(g.t));
+      const b = used[g.code] ? el("span", "pill done", "Đã trao " + fmtD(used[g.code])) : el("button", "btn btn-ok btn-sm", "Xác nhận đã trao");
+      if (!used[g.code]) b.onclick = () => act(b, async () => { await patch("users/" + u.id, { usedCodes: Object.assign({}, used, { [g.code]: Date.now() }) }); toast("Đã xác nhận trao quà"); });
+      r.append(l, b); gl.appendChild(r);
+    });
+    if (!(u.gifts || []).length) gl.appendChild(el("div", "muted", "Chưa đổi quà nào."));
+    gc.appendChild(gl); p.appendChild(gc);
+
+    const vc = el("div", "card"); vc.appendChild(el("h2", null, "🗺️ Địa điểm đã đến"));
+    const vl = el("div", "list");
+    (u.visits || []).slice(0, 50).forEach((v) => { const r = el("div"); r.append(el("span", null, (v.checkin ? "⭐ " : "📍 ") + v.name), el("span", "muted", fmtD(v.t))); vl.appendChild(r); });
+    if (!(u.visits || []).length) vl.appendChild(el("div", "muted", "Chưa có."));
+    vc.appendChild(vl); p.appendChild(vc);
+
+    const us = sos.filter((s2) => s2.uid === u.id);
+    if (us.length) {
+      const sc = el("div", "card"); sc.appendChild(el("h2", null, "🆘 Lịch sử SOS"));
+      const sl = el("div", "list");
+      us.sort((a, b) => b.t - a.t).forEach((s2) => { const r = el("div"); r.append(el("span", null, (HELP[s2.type] || "") + " · " + fmtDT(s2.t)), el("span", "pill " + s2.status, ST[s2.status] || s2.status)); r.style.cursor = "pointer"; r.onclick = () => { closeUser(); showTab("sos"); $("sf").value = "all"; renderSos(); setTimeout(() => { const c = $("sos-" + s2.id); c && c.scrollIntoView({ behavior: "smooth" }); }, 100); }; sl.appendChild(r); });
+      sc.appendChild(sl); p.appendChild(sc);
+    }
+
+    const nc = el("div", "card"); nc.appendChild(el("h2", null, "📝 Ghi chú nội bộ"));
+    const ta = el("textarea"); ta.rows = 3; ta.value = u.note || ""; ta.placeholder = "Chỉ chủ server nhìn thấy";
+    const sb = el("button", "btn btn-ghost btn-sm", "Lưu ghi chú"); sb.style.marginTop = "8px";
+    sb.onclick = () => act(sb, async () => { await patch("users/" + u.id, { note: ta.value.trim() }); toast("Đã lưu ghi chú"); });
+    nc.append(ta, sb); p.appendChild(nc);
+
+    const dc = el("div", "card"); dc.appendChild(el("h2", null, "⚠️ Quản lý tài khoản"));
+    const r = el("div", "row");
+    const bl = el("button", "btn " + (u.blocked ? "btn-ok" : "btn-danger"), u.blocked ? "🔓 Mở khoá tài khoản" : "🔒 Khoá tài khoản");
+    bl.onclick = () => { if (!u.blocked && !confirm("Khoá tài khoản " + (u.email || u.name) + "? Người này sẽ bị đăng xuất khỏi app.")) return; act(bl, async () => { await patch("users/" + u.id, { blocked: !u.blocked }); toast(u.blocked ? "Đã mở khoá" : "Đã khoá tài khoản"); }); };
+    const del = el("button", "btn btn-danger", "🗑️ Xoá dữ liệu người dùng");
+    del.onclick = () => { const c = prompt("Xoá toàn bộ điểm, địa điểm, quà của người này? Gõ XOA để xác nhận."); if (c !== "XOA") return; act(del, async () => { await fs("DELETE", "users/" + u.id); closeUser(); toast("Đã xoá dữ liệu"); }); };
+    r.append(bl, del); dc.appendChild(r);
+    dc.appendChild(el("p", "muted", "Xoá dữ liệu không xoá tài khoản đăng nhập. Để xoá hẳn: Firebase → Authentication → Users.")).style.marginTop = "8px";
+    p.appendChild(dc);
+  }
+  async function act(btn, fn) {
+    btn.disabled = true;
+    try { await fn(); await load(false, true); if (openUid) openUser(openUid); }
+    catch (err) { toast(errMsg(err)); }
+    btn.disabled = false;
+  }
+
+  /* ---------- Bản đồ ---------- */
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve();
+    return loadLeaflet.p || (loadLeaflet.p = new Promise((ok, no) => {
+      const l = document.createElement("link"); l.rel = "stylesheet"; l.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; l.crossOrigin = "anonymous"; document.head.appendChild(l);
+      const s = document.createElement("script"); s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; s.crossOrigin = "anonymous"; s.onload = ok; s.onerror = no; document.head.appendChild(s);
+    }));
+  }
+  function addTiles(m) {
+    // Bản đồ chính: OpenStreetMap (miễn phí, không cần key). Lỗi liên tục thì tự đổi sang bản đồ dự phòng Esri.
+    const SRC = [
+      ["https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }],
+      ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "© Esri, © OpenStreetMap" }],
+    ];
+    let i = 0, layer = null, bad = 0, good = 0;
+    const use = () => {
+      if (layer) m.removeLayer(layer);
+      bad = 0; good = 0;
+      layer = L.tileLayer(SRC[i][0], Object.assign({ crossOrigin: "anonymous", keepBuffer: 4, updateWhenZooming: false }, SRC[i][1]));
+      layer.on("tileload", () => good++);
+      layer.on("tileerror", () => { bad++; if (good === 0 && bad >= 3 && i < SRC.length - 1) { i++; use(); } });
+      layer.addTo(m);
+    };
+    use();
+    return m;
+  }
+  const tiles = (m) => addTiles(m);
+  /* ---------- Vị trí của chủ server: cập nhật liên tục để tính khoảng cách tới người cần giúp ---------- */
+  let me = null, geoWatch = null, geoErr = "";
+  const minis = []; // bản đồ nhỏ đang hiển thị: { m, target, adminMk, line }
+  function distKm(a1, b1) { const R = 6371, r = Math.PI / 180, dLa = (b1.lat - a1.lat) * r, dLo = (b1.lng - a1.lng) * r; const x = Math.sin(dLa / 2) ** 2 + Math.cos(a1.lat * r) * Math.cos(b1.lat * r) * Math.sin(dLo / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); }
+  function bearing(a1, b1) { const r = Math.PI / 180, y = Math.sin((b1.lng - a1.lng) * r) * Math.cos(b1.lat * r), x = Math.cos(a1.lat * r) * Math.sin(b1.lat * r) - Math.sin(a1.lat * r) * Math.cos(b1.lat * r) * Math.cos((b1.lng - a1.lng) * r); return (Math.atan2(y, x) / r + 360) % 360; }
+  const DIRS = ["Bắc", "Đông Bắc", "Đông", "Đông Nam", "Nam", "Tây Nam", "Tây", "Tây Bắc"];
+  function distText(tg) {
+    if (!tg || tg.lat == null) return "";
+    if (!me) return geoErr ? "📍 " + geoErr : "📍 Đang lấy vị trí của bạn…";
+    const d = distKm(me, tg), road = d * 1.35; // đường đi thực tế dài hơn đường chim bay
+    const km = d < 1 ? Math.round(d * 1000) + " m" : d.toFixed(d < 10 ? 1 : 0).replace(".", ",") + " km";
+    const mins = Math.max(1, Math.round((road / 25) * 60)); // xe máy trong phố ~25 km/h
+    return "🧭 Cách bạn " + km + " về phía " + DIRS[Math.round(bearing(me, tg) / 45) % 8] + " · khoảng " + (mins < 60 ? mins + " phút" : Math.floor(mins / 60) + " giờ " + (mins % 60) + " phút") + " đi xe máy" + (me.acc ? " (vị trí của bạn ±" + me.acc + " m)" : "");
+  }
+  function refreshDistances() {
+    document.querySelectorAll("[data-dlat]").forEach((n) => (n.textContent = distText({ lat: +n.dataset.dlat, lng: +n.dataset.dlng })));
+    minis.forEach((o) => {
+      if (!me || !o.m || !o.m._container || !o.m._container.isConnected) return;
+      const p = [me.lat, me.lng];
+      if (!o.adminMk) { o.adminMk = L.circleMarker(p, { radius: 8, color: "#fff", weight: 3, fillColor: "#0b5ed7", fillOpacity: 1 }).bindPopup("Bạn đang ở đây").addTo(o.m); o.line = L.polyline([p, o.target], { color: "#0b5ed7", weight: 3, dashArray: "6 6" }).addTo(o.m); if (!o.fit) { o.m.fitBounds([p, o.target], { padding: [30, 30], maxZoom: 16 }); o.fit = true; } }
+      else { o.adminMk.setLatLng(p); o.line.setLatLngs([p, o.target]); }
+    });
+    if (bmap && me) { if (!bmap._me) bmap._me = L.circleMarker([me.lat, me.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#12a150", fillOpacity: 1 }).bindPopup("Bạn đang ở đây").addTo(bmap); else bmap._me.setLatLng([me.lat, me.lng]); }
+  }
+  function startGeo() {
+    if (geoWatch !== null || !navigator.geolocation) { if (!navigator.geolocation) geoErr = "Thiết bị không hỗ trợ định vị"; return; }
+    geoWatch = navigator.geolocation.watchPosition((p) => { me = { lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) }; geoErr = ""; refreshDistances(); },
+      (e) => { geoErr = e.code === 1 ? "Hãy cho phép truy cập vị trí để biết khoảng cách" : "Chưa lấy được vị trí của bạn"; geoWatch = null; refreshDistances(); },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 });
+  }
+  async function miniMap(node, pts) {
+    try { await loadLeaflet(); } catch { return; }
+    const m = L.map(node, { zoomControl: true, attributionControl: false, preferCanvas: true, fadeAnimation: false }); tiles(m);
+    pts.forEach(([la, ln, n]) => L.circleMarker([la, ln], { radius: 9, color: "#fff", weight: 3, fillColor: "#e5383b", fillOpacity: 1 }).bindPopup(n || "").addTo(m));
+    m.setView([pts[0][0], pts[0][1]], 15); setTimeout(() => m.invalidateSize(), 150);
+    for (let i = minis.length - 1; i >= 0; i--) if (!minis[i].m._container.isConnected) minis.splice(i, 1);
+    minis.push({ m, target: [pts[0][0], pts[0][1]] }); refreshDistances();
+  }
+  let bmap = null, blayer = null, fitted = false;
+  $("mpU").onchange = renderMap; $("mpS").onchange = renderMap;
+  async function renderMap() {
+    try { await loadLeaflet(); } catch { $("mpInfo").textContent = "Không tải được bản đồ."; return; }
+    if (!bmap) { bmap = L.map("bigmap", { preferCanvas: true, fadeAnimation: false }).setView([16.2, 106.5], 5); tiles(bmap); blayer = L.layerGroup().addTo(bmap); }
+    blayer.clearLayers(); const pts = []; let nu = 0, ns = 0;
+    if ($("mpU").checked) users.forEach((u) => {
+      if (!u.loc || u.loc.lat == null) return; nu++;
+      const fresh = Date.now() - u.loc.t < 3600e3;
+      const mk = L.circleMarker([u.loc.lat, u.loc.lng], { radius: 8, color: "#fff", weight: 2, fillColor: "#0b5ed7", fillOpacity: fresh ? 1 : 0.45 });
+      const d = el("div"); d.append(el("b", null, u.name || u.email), el("div", null, u.email || ""), el("div", null, "Cập nhật " + ago(u.loc.t)));
+      const a = el("a", null, "Xem chi tiết →"); a.href = "#"; a.onclick = (e) => { e.preventDefault(); openUser(u.id); }; d.appendChild(a);
+      mk.bindPopup(d).addTo(blayer); pts.push([u.loc.lat, u.loc.lng]);
+    });
+    if ($("mpS").checked) sos.filter((x) => x.status !== "done" && x.lat != null).forEach((x) => {
+      ns++;
+      const mk = L.circleMarker([x.lat, x.lng], { radius: 12, color: "#fff", weight: 3, fillColor: "#e5383b", fillOpacity: 1 });
+      const d = el("div"); d.append(el("b", null, "🆘 " + (HELP[x.type] || "SOS")), el("div", null, (x.name || x.email || "") + " · " + ago(x.t)));
+      const a = el("a", null, "Mở yêu cầu →"); a.href = "#"; a.onclick = (e) => { e.preventDefault(); showTab("sos"); setTimeout(() => { const c = $("sos-" + x.id); c && c.scrollIntoView({ behavior: "smooth" }); }, 100); }; d.appendChild(a);
+      mk.bindPopup(d).addTo(blayer); pts.push([x.lat, x.lng]);
+    });
+    $("mpInfo").textContent = nu + " người dùng có vị trí · " + ns + " SOS đang mở" + (me ? " · 🟢 vị trí của bạn" : "");
+    if (bmap._me) { bmap.removeLayer(bmap._me); bmap._me = null; } refreshDistances();
+    if (pts.length && !fitted) { bmap.fitBounds(pts, { padding: [40, 40], maxZoom: 14 }); fitted = true; }
+    setTimeout(() => bmap.invalidateSize(), 150);
+  }
+
+  /* ---------- SOS ---------- */
+  $("sf").onchange = () => renderSos();
+  const drafts = {};
+  function renderSos() {
+    const box = $("sosList");
+    // giữ nội dung đang gõ dở
+    box.querySelectorAll("input[data-sid]").forEach((i) => (drafts[i.dataset.sid] = i.value));
+    const playing = [...box.querySelectorAll("audio,video")].some((a) => !a.paused);
+    if (playing) return; // không vẽ lại khi đang nghe ghi âm
+    box.innerHTML = "";
+    const f = $("sf").value, order = { new: 0, seen: 1, handling: 2, done: 3 };
+    const l = sos.filter((x) => f === "all" || (f === "done" ? x.status === "done" : x.status !== "done")).sort((a, b) => (order[a.status] - order[b.status]) || b.t - a.t);
+    if (!l.length) { box.appendChild(el("div", "card empty", f === "open" ? "✅ Không có yêu cầu SOS nào đang mở." : "Chưa có yêu cầu SOS.")); return; }
+    l.forEach((x) => {
+      const c = el("div", "card sos " + x.status); c.id = "sos-" + x.id;
+      const h = el("div", "sosh");
+      h.append(el("b", null, HELP[x.type] || "🆘 SOS"), el("span", "pill " + x.status, ST[x.status] || x.status), el("span", "muted", fmtDT(x.t) + " · " + ago(x.t)));
+      c.appendChild(h);
+      const g = el("div", "sosgrid");
+      const left = el("div");
+      const kv = el("div", "kv");
+      const u = users.find((y) => y.id === x.uid);
+      // vị trí mới nhất: lấy vị trí người dùng chia sẻ sau thời điểm gửi SOS (nếu có)
+      const live = u && u.loc && u.loc.lat != null && u.loc.t > (x.t || 0) ? u.loc : null;
+      const tg = live ? { lat: live.lat, lng: live.lng } : x.lat != null ? { lat: x.lat, lng: x.lng } : null;
+      [["Người gửi", (x.name || "") + (x.email ? " · " + x.email : "")], ["Ngôn ngữ", LANGN[x.lang] || x.lang || "—"],
+        ["Vị trí lúc gửi", x.lat != null ? `${x.lat}, ${x.lng}` + (x.acc ? ` (±${x.acc} m)` : "") : "Không lấy được vị trí"]].concat(live ? [["Vị trí mới nhất", `${live.lat}, ${live.lng} · ${ago(live.t)}`]] : [])
+        .forEach(([k2, v]) => kv.append(el("span", null, k2), el("b", null, v)));
+      left.appendChild(kv);
+      if (tg) { const dd = el("div", "dist"); dd.dataset.dlat = tg.lat; dd.dataset.dlng = tg.lng; dd.textContent = distText(tg); left.appendChild(dd); }
+      const r = el("div", "acts");
+      if (tg) {
+        const a1 = el("a", "btn btn-ghost btn-sm", "🗺️ Google Maps"); a1.href = `https://www.google.com/maps?q=${tg.lat},${tg.lng}`; a1.target = "_blank"; a1.rel = "noopener";
+        const a2 = el("a", "btn btn-ghost btn-sm", "🧭 Chỉ đường"); a2.href = `https://www.google.com/maps/dir/?api=1&destination=${tg.lat},${tg.lng}&travelmode=two-wheeler`; a2.target = "_blank"; a2.rel = "noopener";
+        r.append(a1, a2);
+      }
+      if (u) { const b = el("button", "btn btn-ghost btn-sm", "👤 Hồ sơ"); b.onclick = () => openUser(u.id); r.appendChild(b); }
+      left.appendChild(r);
+      if (x.voice) { left.appendChild(el("div", "muted", "🎙️ Lời nhắn ghi âm")).style.marginTop = "10px"; const au = el("audio"); au.controls = true; au.preload = "metadata"; au.src = x.voice; left.appendChild(au); }
+      if (tg) { const m = el("div", "mini"); left.appendChild(m); miniMap(m, [[tg.lat, tg.lng, x.name]]); }
+      const right = el("div");
+      const hd = el("div", "row"); hd.style.justifyContent = "space-between";
+      const ob = el("button", "btn btn-ghost btn-sm", "💬 Mở toàn bộ cuộc trò chuyện"); ob.onclick = () => { showTab("msg"); openThread(x.uid); };
+      hd.append(el("span", "muted", "Tin nhắn với người dùng"), ob); right.appendChild(hd);
+      if ((x.msgs || []).length) { const old = el("div", "thread"); (x.msgs || []).forEach((m) => { const d = el("div", "m " + (m.from === "admin" ? "a" : "u")); d.append(el("small", null, (m.from === "admin" ? "Ban điều hành" : (x.name || "Người dùng")) + " · " + fmtDT(m.t)), document.createTextNode(m.text)); old.appendChild(d); }); right.appendChild(old); }
+      const th = el("div", "sosthread"); th.id = "sth-" + x.uid; right.appendChild(th);
+      if (threads[x.uid]) fillMsgs(th, x.uid, threads[x.uid].msgs.slice(-8));
+      else { th.appendChild(el("div", "muted", "Đang tải tin nhắn…")); loadThread(x.uid).then((t2) => { const b2 = $("sth-" + x.uid); if (b2) fillMsgs(b2, x.uid, t2.msgs.slice(-8)); }).catch(() => { th.innerHTML = ""; }); }
+      const rf = el("form", "reply"); const inp = el("input"); inp.type = "text"; inp.placeholder = "Trả lời người dùng…"; inp.dataset.sid = x.id; inp.value = drafts[x.id] || "";
+      const sb = el("button", "btn btn-primary", "Gửi"); rf.append(inp, sb);
+      rf.onsubmit = (e) => { e.preventDefault(); const txt = inp.value.trim(); if (!txt) return; drafts[x.id] = ""; inp.value = ""; adminSend(x.uid, { kind: "text", text: txt }); if (x.status === "new" || x.status === "seen") sosAct(sb, x, { status: "handling" }); };
+      right.appendChild(rf);
+      const quick = el("div", "acts");
+      ["Chúng tôi đã nhận được yêu cầu, đang liên hệ hỗ trợ bạn.", "Bạn hãy ở yên tại chỗ, nhân viên đang đến.", "Hãy gọi ngay 115 (cấp cứu) hoặc 113 (công an)."].forEach((q) => { const b = el("button", "btn btn-ghost btn-sm", q.length > 34 ? q.slice(0, 32) + "…" : q); b.type = "button"; b.title = q; b.onclick = () => { inp.value = q; inp.focus(); }; quick.appendChild(b); });
+      right.appendChild(quick);
+      const st = el("div", "acts");
+      [["seen", "👁️ Đã xem"], ["handling", "🚑 Đang xử lý"], ["done", "✅ Hoàn tất"]].forEach(([k2, l2]) => { if (x.status === k2) return; const b = el("button", "btn btn-sm " + (k2 === "done" ? "btn-ok" : "btn-ghost"), l2); b.onclick = () => sosAct(b, x, { status: k2 }); st.appendChild(b); });
+      const del = el("button", "btn btn-danger btn-sm", "🗑️ Xoá"); del.onclick = () => { if (confirm("Xoá yêu cầu SOS này?")) sosAct(del, x, null); }; st.appendChild(del);
+      right.appendChild(st);
+      g.append(left, right); c.appendChild(g); box.appendChild(c);
+    });
+  }
+  async function sosAct(btn, x, upd, done) {
+    btn.disabled = true;
+    try {
+      if (upd === null) await fs("DELETE", "sos/" + x.id);
+      else await patch("sos/" + x.id, Object.assign({ updated: Date.now() }, upd));
+      done && done(); await load(false, true); toast(upd === null ? "Đã xoá" : "Đã cập nhật");
+    } catch (err) { toast(errMsg(err)); }
+    btn.disabled = false;
+  }
+
+  /* ---------- Tin nhắn với người dùng ---------- */
+  let openChatUid = null;
+  const threads = {}; // uid -> { msgs, lastT }
+  const mediaMem = new Map();
+  const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const fmtT = (ms) => new Date(ms).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+  const preview = (m) => m.kind === "image" ? "📷 Ảnh" : m.kind === "video" ? "🎥 Video" : m.kind === "sos" ? "🆘 SOS" + (m.text ? ": " + m.text : "") : (m.text || "");
+  $("cq").oninput = () => renderChatList();
+  function renderChatList() {
+    const q = $("cq").value.trim().toLowerCase(), box = $("chatList"); box.innerHTML = "";
+    const l = chats.filter((c) => !q || ((c.name || "") + " " + (c.email || "")).toLowerCase().includes(q)).sort((a, b) => (b.lastT || 0) - (a.lastT || 0));
+    if (!l.length) { box.appendChild(el("div", "empty", "Chưa có tin nhắn nào.")); return; }
+    l.forEach((c) => {
+      const n = (c.nUser || 0) - (c.seenAdmin || 0);
+      const r = el("div", "ci" + (c.id === openChatUid ? " on" : "") + (n > 0 ? " unread" : ""));
+      const tx = el("div", "tx"); tx.append(el("b", null, c.name || c.email || c.id), el("span", null, (c.lastFrom === "admin" ? "Bạn: " : "") + (c.lastText || "")));
+      const tm = el("div", "tm"); tm.append(el("div", null, ago(c.lastT))); if (n > 0) { const b = el("span", "badge", String(n)); tm.appendChild(b); }
+      r.append(el("div", "av", (c.name || c.email || "?").trim().charAt(0).toUpperCase()), tx, tm);
+      r.onclick = () => openThread(c.id);
+      box.appendChild(r);
+    });
+  }
+  async function loadThread(uid, full) {
+    const th = threads[uid] || (threads[uid] = { msgs: [], lastT: 0 });
+    const add = full || !th.msgs.length
+      ? (await listAllPath("chats/" + uid + "/msgs")).sort((a, b) => a.t - b.t)
+      : await runSub("chats/" + uid, "msgs", th.lastT);
+    add.forEach((m) => { if (!th.msgs.some((y) => y.id === m.id)) th.msgs.push(m); th.lastT = Math.max(th.lastT, m.t || 0); });
+    th.msgs = th.msgs.filter((m) => !(m.pending && add.some((a) => a.id === m.id))).sort((a, b) => a.t - b.t);
+    return th;
+  }
+  async function listAllPath(path) {
+    const j = await fs("GET", path, null, "pageSize=300&orderBy=t");
+    return ((j && j.documents) || []).map((d) => Object.assign({ id: d.name.split("/").pop() }, fromF(d.fields || {})));
+  }
+  async function runSub(parent, col, after) {
+    const r = await fetch(BASE() + parent + ":runQuery", { method: "POST", headers: { Authorization: "Bearer " + (await idToken()), "Content-Type": "application/json" },
+      body: JSON.stringify({ structuredQuery: { from: [{ collectionId: col }], where: { fieldFilter: { field: { fieldPath: "t" }, op: "GREATER_THAN", value: { integerValue: String(after) } } }, orderBy: [{ field: { fieldPath: "t" }, direction: "ASCENDING" }] } }) });
+    const j = await r.json().catch(() => []);
+    if (!r.ok) throw fbErr("QUERY", r.status);
+    return (Array.isArray(j) ? j : []).filter((x) => x.document).map((x) => Object.assign({ id: x.document.name.split("/").pop() }, fromF(x.document.fields || {})));
+  }
+  async function mediaOf(uid, m) {
+    if (m.media) return m.media;
+    if (mediaMem.has(m.id)) return mediaMem.get(m.id);
+    const parts = [];
+    for (let i = 0; i < (m.parts || 0); i++) { const d = await fs("GET", "chats/" + uid + "/msgs/" + m.id + "/parts/" + i); parts.push(d && d.fields ? fromF(d.fields).d : ""); }
+    const u = parts.join(""); mediaMem.set(m.id, u); return u;
+  }
+  function showImg(src) { const v = el("div", "imgview"); const im = el("img"); im.src = src; v.appendChild(im); v.onclick = () => v.remove(); document.body.appendChild(v); }
+  function msgEl(uid, m) {
+    const mine = m.from === "admin";
+    const b = el("div", "cb " + (mine ? "me" : "them") + (m.kind === "sos" ? " sosb" : ""));
+    if (m.kind === "sos") { b.append(el("b", null, "🆘 SOS · " + (HELP[m.helpType] || ""))); if (m.text) b.append(el("div", null, m.text)); const a = el("a", null, "Mở yêu cầu SOS →"); a.href = "#"; a.style.display = "block"; a.onclick = (e) => { e.preventDefault(); showTab("sos"); $("sf").value = "all"; renderSos(); setTimeout(() => { const c = $("sos-" + m.sosId); c && c.scrollIntoView({ behavior: "smooth" }); }, 120); }; b.appendChild(a); }
+    else if (m.kind === "image") { const im = el("img"); im.alt = ""; mediaOf(uid, m).then((u) => (im.src = u)).catch(() => {}); im.onclick = () => im.src && showImg(im.src); b.appendChild(im); if (m.text) b.append(el("div", null, m.text)); }
+    else if (m.kind === "video") {
+      if (m.media || mediaMem.has(m.id)) { const v = el("video"); v.controls = true; v.playsInline = true; v.preload = "metadata"; v.src = m.media || mediaMem.get(m.id); b.appendChild(v); }
+      else { const btn = el("button", "vload", "▶ Xem video" + (m.size ? " · " + (m.size / 1048576).toFixed(1) + " MB" : "")); btn.onclick = async () => { btn.disabled = true; btn.textContent = "Đang tải…"; try { const u = await mediaOf(uid, m); const v = el("video"); v.controls = true; v.playsInline = true; v.src = u; btn.replaceWith(v); v.play().catch(() => {}); } catch { btn.disabled = false; btn.textContent = "▶ Xem video"; } }; b.appendChild(btn); }
+    } else b.append(document.createTextNode(m.text || ""));
+    b.appendChild(el("small", null, m.pending ? "Đang gửi…" : m.failed ? "⚠️ Chưa gửi được" : fmtT(m.t)));
+    return b;
+  }
+  function fillMsgs(box, uid, msgs) {
+    if ([...box.querySelectorAll("video")].some((v) => !v.paused)) return;
+    const atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+    box.innerHTML = ""; let day = "";
+    if (!msgs.length) box.appendChild(el("div", "empty", "Chưa có tin nhắn."));
+    msgs.forEach((m) => { const d = fmtD(m.t); if (d !== day) { day = d; box.appendChild(el("div", "cday", d)); } box.appendChild(msgEl(uid, m)); });
+    if (atEnd || box.dataset.first !== "1") { box.scrollTop = box.scrollHeight; box.dataset.first = "1"; }
+  }
+  async function openThread(uid) {
+    openChatUid = uid; $("inbox").classList.add("open"); renderChatList();
+    const c = chats.find((x) => x.id === uid) || { id: uid }, u = users.find((x) => x.id === uid);
+    const v = $("chatView"); v.innerHTML = "";
+    const h = el("div", "vhead");
+    const back = el("button", "btn btn-ghost btn-sm", "←"); back.onclick = () => { openChatUid = null; $("inbox").classList.remove("open"); renderChatList(); };
+    const tx = el("div", "tx"); tx.append(el("b", null, c.name || (u && u.name) || c.email || uid), el("span", null, (c.email || (u && u.email) || "") + (u && u.loc && u.loc.lat != null ? " · 📍 " + ago(u.loc.t) : "")));
+    h.append(back, el("div", "av", (c.name || c.email || "?").trim().charAt(0).toUpperCase()), tx);
+    if (u) { const pb = el("button", "btn btn-ghost btn-sm", "👤 Hồ sơ"); pb.onclick = () => openUser(u.id); h.appendChild(pb); }
+    const msgs = el("div", "vmsgs"); msgs.id = "vmsgs";
+    const f = el("form", "vform");
+    const pic = el("input"); pic.type = "file"; pic.accept = "image/*"; pic.className = "hidden";
+    const pb2 = el("button", "btn btn-ghost", "📷"); pb2.type = "button"; pb2.onclick = () => pic.click();
+    const inp = el("input"); inp.type = "text"; inp.placeholder = "Nhắn cho người dùng…";
+    const sb = el("button", "btn btn-primary", "Gửi");
+    f.append(pb2, inp, sb, pic);
+    f.onsubmit = (e) => { e.preventDefault(); const t2 = inp.value.trim(); if (!t2) return; inp.value = ""; adminSend(uid, { kind: "text", text: t2 }); };
+    pic.onchange = async () => { const fl = pic.files[0]; pic.value = ""; if (!fl) return; try { const u2 = await shrinkImage(fl); adminSend(uid, { kind: "image", media: u2, mime: "image/jpeg" }); } catch { toast("Không đọc được ảnh"); } };
+    v.append(h, msgs, f);
+    msgs.appendChild(el("div", "empty", "Đang tải…"));
+    try { const th = await loadThread(uid, true); if (openChatUid === uid) fillMsgs(msgs, uid, th.msgs); markSeen(uid); } catch (err) { msgs.innerHTML = ""; msgs.appendChild(el("div", "empty", errMsg(err))); }
+    inp.focus();
+  }
+  async function refreshThread(uid) {
+    try {
+      const th = await loadThread(uid);
+      const box = $("vmsgs"); if (box && openChatUid === uid) fillMsgs(box, uid, th.msgs);
+      if (tab === "msg" && !document.hidden) markSeen(uid);
+      const sb = $("sth-" + uid); if (sb) fillMsgs(sb, uid, th.msgs.slice(-8));
+    } catch {}
+  }
+  async function markSeen(uid) {
+    const c = chats.find((x) => x.id === uid); if (!c || (c.seenAdmin || 0) >= (c.nUser || 0)) return;
+    try { await patch("chats/" + uid, { seenAdmin: c.nUser || 0 }); c.seenAdmin = c.nUser || 0; checkChats(); } catch {}
+  }
+  async function adminSend(uid, m) {
+    const th = threads[uid] || (threads[uid] = { msgs: [], lastT: 0 });
+    const id = rid(), now = Date.now();
+    const local = Object.assign({ id, from: "admin", t: now, pending: true }, m); th.msgs.push(local);
+    const redraw = () => { const box = $("vmsgs"); if (box && openChatUid === uid) fillMsgs(box, uid, th.msgs); const sb = $("sth-" + uid); if (sb) fillMsgs(sb, uid, th.msgs.slice(-8)); };
+    redraw();
+    try {
+      const doc = Object.assign({ from: "admin", t: now, kind: m.kind || "text", text: m.text || "" }, m.media ? { media: m.media, mime: m.mime || "" } : {});
+      await fs("PATCH", "chats/" + uid + "/msgs/" + id, { fields: toF(doc) });
+      const c = chats.find((x) => x.id === uid) || (chats.push({ id: uid }), chats[chats.length - 1]);
+      const u = users.find((x) => x.id === uid) || {};
+      const upd = { uid, name: c.name || u.name || "", email: c.email || u.email || "", lastT: now, lastFrom: "admin", lastText: preview(doc).slice(0, 120), nAdmin: (c.nAdmin || 0) + 1, seenAdmin: c.nUser || 0, updated: now };
+      await patch("chats/" + uid, upd); Object.assign(c, upd);
+      pushToUser(uid, doc);
+      local.pending = false; th.lastT = Math.max(th.lastT, now);
+    } catch (err) { local.pending = false; local.failed = true; toast(errMsg(err)); }
+    redraw(); renderChatList();
+  }
+  async function shrinkImage(file) {
+    const src = await new Promise((ok, no) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = no; fr.readAsDataURL(file); });
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+    for (const [max, q] of [[1280, 0.72], [1024, 0.62], [800, 0.55]]) {
+      const s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const out = c.toDataURL("image/jpeg", q); if (out.length < 650000) return out;
+    }
+    throw new Error("too big");
+  }
+
+  /* ---------- Quà tặng ---------- */
+  function allGifts() { const out = []; users.forEach((u) => (u.gifts || []).forEach((g) => out.push({ g, u, used: (u.usedCodes || {})[g.code] }))); return out.sort((a, b) => b.g.t - a.g.t); }
+  function renderGifts() {
+    const tb = $("gtb"); tb.innerHTML = ""; const l = allGifts();
+    $("gempty").classList.toggle("hidden", !!l.length);
+    l.forEach(({ g, u, used }) => {
+      const tr = el("tr");
+      [["Mã", g.code], ["Phần quà", REWARDS[g.id] ? REWARDS[g.id][0] : g.id], ["Người dùng", (u.name || "") + " · " + (u.email || "")], ["Ngày đổi", fmtD(g.t)]].forEach(([l2, v], i) => { const td = el("td", i === 0 ? "n" : null, v); td.dataset.l = l2; tr.appendChild(td); });
+      const td = el("td"); td.dataset.l = "Trạng thái"; td.appendChild(el("span", "pill " + (used ? "done" : "new"), used ? "Đã trao " + fmtD(used) : "Chưa trao")); tr.appendChild(td);
+      tr.onclick = () => { $("gCode").value = g.code; checkCode(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      tb.appendChild(tr);
+    });
+  }
+  $("gForm").onsubmit = (e) => { e.preventDefault(); checkCode(); };
+  function checkCode() {
+    const code = $("gCode").value.trim().toUpperCase(), box = $("gRes"); box.innerHTML = "";
+    if (!code) return;
+    const hit = allGifts().find((x) => x.g.code.toUpperCase() === code);
+    if (!hit) { box.appendChild(el("div", "pill bad", "❌ Mã không tồn tại")); return; }
+    const kv = el("div", "kv");
+    [["Phần quà", REWARDS[hit.g.id] ? REWARDS[hit.g.id][0] : hit.g.id], ["Người dùng", (hit.u.name || "") + " · " + (hit.u.email || "")], ["Ngày đổi", fmtDT(hit.g.t)], ["Trạng thái", hit.used ? "✅ Đã trao lúc " + fmtDT(hit.used) : "🟡 Chưa trao, mã hợp lệ"]]
+      .forEach(([k, v]) => kv.append(el("span", null, k), el("b", null, v)));
+    box.appendChild(kv);
+    if (!hit.used) {
+      const b = el("button", "btn btn-ok", "✅ Xác nhận đã trao quà"); b.style.marginTop = "10px";
+      b.onclick = () => act(b, async () => { await patch("users/" + hit.u.id, { usedCodes: Object.assign({}, hit.u.usedCodes || {}, { [hit.g.code]: Date.now() }) }); toast("Đã xác nhận trao quà"); checkCode(); });
+      box.appendChild(b);
+    }
+  }
+
+  /* ---------- Khởi động ---------- */
+  renderLogin(); fillCred();
+  const hash0 = location.hash.slice(1);
+  if (/^__/.test(FB.apiKey)) { $("lErr").textContent = "Trang chưa được gắn cấu hình Firebase."; $("lBtn").disabled = true; }
+  else if (tok) enter().then(() => { if (hash0 === "sos") showTab("sos"); else if (hash0.startsWith("msg-")) { showTab("msg"); openThread(hash0.slice(4)); } }).catch(() => logout());
+})();
+</script>
+</body>
+</html>
