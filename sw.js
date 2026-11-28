@@ -1,5 +1,5 @@
 // TravelAI – service worker: mở app nhanh, bản đồ tải nhanh, thông báo tin nhắn
-const CACHE = "travelai-v5.4";
+const CACHE = "travelai-v1.0";
 const TILES = "travelai-tiles-v2"; // ô bản đồ + thư viện bản đồ (giữ qua các phiên bản)
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"];
 const MAX_TILES = 900;
